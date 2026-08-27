@@ -1,0 +1,16 @@
+.claude/settings.local.json
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+env/
+data/jobs/
+data/models/
+*.egg-info/
+dist/
+build/
+.coverage
+htmlcov/
