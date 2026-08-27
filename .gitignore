@@ -14,3 +14,9 @@ dist/
 build/
 .coverage
 htmlcov/
+
+# Internal Development Lifecycle & Rules Scaffolding
+AI-DLC-Setup-Plan.md
+CONTEXT.md
+GEMINI.md
+GETTING-STARTED.md
