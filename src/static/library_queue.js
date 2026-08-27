@@ -1,11 +1,11 @@
 /**
- * Flexioke — Song Library & Playback Queue UI Controller
+ * Flexioke — Song Library & Playback Queue UI Controller (Dual-Page Sync)
  */
 class SongLibraryManager {
     constructor() {
-        this.searchInput = document.getElementById('library-search-input');
-        this.listContainer = document.getElementById('library-list-container');
-        this.countBadge = document.getElementById('library-count-badge');
+        this.searchInputs = document.querySelectorAll('.library-search-input');
+        this.listContainers = document.querySelectorAll('.library-list-container');
+        this.countBadges = document.querySelectorAll('.library-count-badge');
         this.debounceTimeout = null;
 
         // Lyrics modal elements
@@ -29,14 +29,19 @@ class SongLibraryManager {
     }
 
     init() {
-        if (this.searchInput) {
-            this.searchInput.addEventListener('input', () => {
+        this.searchInputs.forEach(input => {
+            input.addEventListener('input', (e) => {
+                const query = e.target.value;
+                // Sync all search inputs
+                this.searchInputs.forEach(other => {
+                    if (other !== e.target) other.value = query;
+                });
                 clearTimeout(this.debounceTimeout);
                 this.debounceTimeout = setTimeout(() => {
-                    this.fetchLibrary(this.searchInput.value.trim());
+                    this.fetchLibrary(query.trim());
                 }, 250);
             });
-        }
+        });
 
         // Lyrics modal handlers
         if (this.closeLyricsModalBtn) {
@@ -93,84 +98,85 @@ class SongLibraryManager {
     }
 
     render(jobs) {
-        if (!this.listContainer) return;
-        if (this.countBadge) {
-            this.countBadge.textContent = `${jobs.length} ${jobs.length === 1 ? 'song' : 'songs'}`;
-        }
+        this.countBadges.forEach(badge => {
+            badge.textContent = `${jobs.length} ${jobs.length === 1 ? 'song' : 'songs'}`;
+        });
 
-        if (jobs.length === 0) {
-            this.listContainer.innerHTML = `
-                <div class="text-center py-8 text-slate-500 text-xs">
-                    No songs found.<br>Upload or extract audio above!
-                </div>
-            `;
-            return;
-        }
+        this.listContainers.forEach(container => {
+            if (jobs.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-500 text-xs">
+                        No songs found.<br>Upload or extract audio in Stem Studio!
+                    </div>
+                `;
+                return;
+            }
 
-        this.listContainer.innerHTML = '';
-        jobs.forEach(job => {
-            const card = document.createElement('div');
-            card.className = "p-3 bg-surface-950/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-3 group";
+            container.innerHTML = '';
+            jobs.forEach(job => {
+                const card = document.createElement('div');
+                card.className = "p-3 bg-surface-950/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-3 group";
 
-            const sourceIcon = job.source_type === 'youtube' ? '▶️' : '📁';
-            const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
+                const sourceIcon = job.source_type === 'youtube' ? '▶️' : '📁';
+                const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
 
-            card.innerHTML = `
-                <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                    <span class="text-base">${sourceIcon}</span>
-                    <div class="truncate">
-                        <h4 class="text-xs font-semibold text-slate-200 truncate group-hover:text-brand-300 transition">${escapeHtml(job.title)}</h4>
-                        <div class="flex items-center gap-2 text-[10px] text-slate-500">
-                            <span>${durationFmt || 'Stems ready'}</span>
-                            <span>•</span>
-                            <span class="truncate">${escapeHtml(job.source_name)}</span>
+                card.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        <span class="text-base">${sourceIcon}</span>
+                        <div class="truncate">
+                            <h4 class="text-xs font-semibold text-slate-200 truncate group-hover:text-brand-300 transition">${escapeHtml(job.title)}</h4>
+                            <div class="flex items-center gap-2 text-[10px] text-slate-500">
+                                <span>${durationFmt || 'Stems ready'}</span>
+                                <span>•</span>
+                                <span class="truncate">${escapeHtml(job.source_name)}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="flex items-center gap-1.5 shrink-0">
-                    <button class="play-now-btn px-2.5 py-1 rounded-lg bg-brand-600/90 hover:bg-brand-500 text-white text-[10px] font-semibold transition flex items-center gap-1 shadow-sm" data-job-id="${job.job_id}">
-                        <span>▶</span> Play
-                    </button>
-                    <button class="add-queue-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" data-job-id="${job.job_id}">
-                        + Queue
-                    </button>
-                    <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Add / Edit Lyrics" data-job-id="${job.job_id}">
-                        📝
-                    </button>
-                </div>
-            `;
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button class="play-now-btn px-2.5 py-1 rounded-lg bg-brand-600/90 hover:bg-brand-500 text-white text-[10px] font-semibold transition flex items-center gap-1 shadow-sm" data-job-id="${job.job_id}">
+                            <span>▶</span> Play
+                        </button>
+                        <button class="add-queue-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" data-job-id="${job.job_id}">
+                            + Queue
+                        </button>
+                        <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Add / Edit Lyrics" data-job-id="${job.job_id}">
+                            📝
+                        </button>
+                    </div>
+                `;
 
-            // Bind card actions
-            const playBtn = card.querySelector('.play-now-btn');
-            playBtn.addEventListener('click', () => {
-                // Check for active playback interruption
-                if (window.flexiokePlayer && window.flexiokePlayer.isPlaying && window.flexiokePlayer.currentJob && window.flexiokePlayer.currentJob.job_id !== job.job_id) {
-                    window.flexiokePlayer.pause();
-                    this.pendingPlayJob = job;
-                    if (this.confirmSongTitle) this.confirmSongTitle.textContent = `"${job.title}"`;
-                    if (this.playConfirmModal) this.playConfirmModal.classList.remove('hidden');
-                } else {
-                    if (window.flexiokeQueue) {
-                        window.flexiokeQueue.playNow(job.job_id);
-                    } else if (window.flexiokePlayer) {
-                        window.flexiokePlayer.loadSong(job, true);
+                // Bind card actions
+                const playBtn = card.querySelector('.play-now-btn');
+                playBtn.addEventListener('click', () => {
+                    // Check for active playback interruption
+                    if (window.flexiokePlayer && window.flexiokePlayer.isPlaying && window.flexiokePlayer.currentJob && window.flexiokePlayer.currentJob.job_id !== job.job_id) {
+                        window.flexiokePlayer.pause();
+                        this.pendingPlayJob = job;
+                        if (this.confirmSongTitle) this.confirmSongTitle.textContent = `"${job.title}"`;
+                        if (this.playConfirmModal) this.playConfirmModal.classList.remove('hidden');
+                    } else {
+                        if (window.flexiokeQueue) {
+                            window.flexiokeQueue.playNow(job.job_id);
+                        } else if (window.flexiokePlayer) {
+                            window.flexiokePlayer.loadSong(job, true);
+                        }
                     }
-                }
-            });
+                });
 
-            const queueBtn = card.querySelector('.add-queue-btn');
-            queueBtn.addEventListener('click', () => {
-                if (window.flexiokeQueue) {
-                    window.flexiokeQueue.addToQueue(job.job_id);
-                }
-            });
+                const queueBtn = card.querySelector('.add-queue-btn');
+                queueBtn.addEventListener('click', () => {
+                    if (window.flexiokeQueue) {
+                        window.flexiokeQueue.addToQueue(job.job_id);
+                    }
+                });
 
-            const lyricsBtn = card.querySelector('.lyrics-btn');
-            lyricsBtn.addEventListener('click', () => {
-                this.openLyricsModal(job);
-            });
+                const lyricsBtn = card.querySelector('.lyrics-btn');
+                lyricsBtn.addEventListener('click', () => {
+                    this.openLyricsModal(job);
+                });
 
-            this.listContainer.appendChild(card);
+                container.appendChild(card);
+            });
         });
     }
 
@@ -247,21 +253,22 @@ class SongLibraryManager {
 
 class PlaybackQueueManager {
     constructor() {
-        this.queueContainer = document.getElementById('queue-list-container');
-        this.clearBtn = document.getElementById('clear-queue-btn');
-        this.playNextBtn = document.getElementById('play-next-queue-btn');
+        this.queueContainers = document.querySelectorAll('.queue-list-container');
+        this.clearBtns = document.querySelectorAll('.clear-queue-btn');
+        this.playNextBtns = document.querySelectorAll('.play-next-queue-btn');
         this.isAdvancing = false;
 
         this.init();
     }
 
     init() {
-        if (this.clearBtn) {
-            this.clearBtn.addEventListener('click', () => this.clearQueue());
-        }
-        if (this.playNextBtn) {
-            this.playNextBtn.addEventListener('click', () => this.advanceNext());
-        }
+        this.clearBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.clearQueue());
+        });
+
+        this.playNextBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.advanceNext());
+        });
 
         // Handle auto-advance when a track finishes
         window.addEventListener('flexioke:track-ended', () => {
@@ -368,39 +375,40 @@ class PlaybackQueueManager {
     }
 
     render(state) {
-        if (!this.queueContainer) return;
         const queue = state.queue || [];
 
-        if (queue.length === 0) {
-            this.queueContainer.innerHTML = `
-                <div class="text-center py-6 text-slate-500 text-xs">
-                    Playback queue is empty.<br>Add songs from the library on the left!
-                </div>
-            `;
-            return;
-        }
+        this.queueContainers.forEach(container => {
+            if (queue.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-slate-500 text-xs">
+                        Playback queue is empty.<br>Add songs from the library!
+                    </div>
+                `;
+                return;
+            }
 
-        this.queueContainer.innerHTML = '';
-        queue.forEach((item, index) => {
-            const row = document.createElement('div');
-            row.className = "p-2.5 bg-surface-950/70 border border-slate-800/80 rounded-xl flex items-center justify-between gap-3 text-xs";
+            container.innerHTML = '';
+            queue.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = "p-2.5 bg-surface-950/70 border border-slate-800/80 rounded-xl flex items-center justify-between gap-3 text-xs";
 
-            row.innerHTML = `
-                <div class="flex items-center gap-2.5 truncate min-w-0">
-                    <span class="w-5 h-5 rounded-full bg-slate-800 text-[10px] text-slate-400 font-bold flex items-center justify-center shrink-0">
-                        ${index + 1}
-                    </span>
-                    <span class="font-medium text-slate-200 truncate">${escapeHtml(item.title)}</span>
-                </div>
-                <button class="remove-queue-btn text-slate-500 hover:text-rose-400 p-1 text-xs shrink-0 transition" data-queue-id="${item.queue_id}">
-                    ✕
-                </button>
-            `;
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5 truncate min-w-0">
+                        <span class="w-5 h-5 rounded-full bg-slate-800 text-[10px] text-slate-400 font-bold flex items-center justify-center shrink-0">
+                            ${index + 1}
+                        </span>
+                        <span class="font-medium text-slate-200 truncate">${escapeHtml(item.title)}</span>
+                    </div>
+                    <button class="remove-queue-btn text-slate-500 hover:text-rose-400 p-1 text-xs shrink-0 transition" data-queue-id="${item.queue_id}">
+                        ✕
+                    </button>
+                `;
 
-            const removeBtn = row.querySelector('.remove-queue-btn');
-            removeBtn.addEventListener('click', () => this.removeFromQueue(item.queue_id));
+                const removeBtn = row.querySelector('.remove-queue-btn');
+                removeBtn.addEventListener('click', () => this.removeFromQueue(item.queue_id));
 
-            this.queueContainer.appendChild(row);
+                container.appendChild(row);
+            });
         });
     }
 }

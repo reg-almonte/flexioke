@@ -44,7 +44,7 @@
             <div>
                 <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
                     Flexioke
-                    <span class="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">
+                    <span id="header-mode-badge" class="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">
                         Stem Studio
                     </span>
                 </h1>
@@ -73,10 +73,10 @@
     <!-- Main Content Area -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
         
-        <!-- VIEW 1: Stem Studio (Default) -->
+        <!-- PAGE 1: STEM STUDIO SYSTEM (Default) -->
         <div id="view-stem-studio" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Left Sidebar: Ingestion & Library (4 cols) -->
+            <!-- Left Column: Ingestion + Studio Library + Studio Queue (4 cols) -->
             <aside class="lg:col-span-4 space-y-6 flex flex-col">
                 
                 <!-- Ingestion Card -->
@@ -175,31 +175,51 @@
                     </div>
                 </section>
 
-                <!-- Song Library Card -->
-                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex-1 flex flex-col min-h-[320px]">
+                <!-- Studio Song Library Card -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex flex-col">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <span>📚</span> Song Library
+                            <span>📚</span> Studio Song Library
                         </h2>
-                        <span id="library-count-badge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
+                        <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
                     </div>
 
                     <!-- Search Input -->
                     <div class="relative">
-                        <input type="text" id="library-search-input" placeholder="Search by song title..." class="w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
+                        <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title...">
                         <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
                     </div>
 
                     <!-- Library List Container -->
-                    <div id="library-list-container" class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[380px]">
-                        <div id="library-empty-state" class="text-center py-8 text-slate-500 text-xs">
+                    <div class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[300px]">
+                        <div class="library-empty-state text-center py-6 text-slate-500 text-xs">
                             No songs in library yet.<br>Upload or extract a track above!
                         </div>
                     </div>
                 </section>
+
+                <!-- Studio Playback Queue Card -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                            <span>📋</span> Studio Queue
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
+                            <button class="play-next-queue-btn text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded font-medium transition">Skip Next ⏭</button>
+                        </div>
+                    </div>
+
+                    <div class="queue-list-container space-y-2 max-h-[180px] overflow-y-auto pr-1 custom-scrollbar">
+                        <div class="queue-empty-state text-center py-4 text-slate-500 text-xs">
+                            Playback queue is empty.
+                        </div>
+                    </div>
+                </section>
+
             </aside>
 
-            <!-- Right Column: Multitrack Player & Queue (8 cols) -->
+            <!-- Right Column: Multitrack Waveform Player (8 cols) -->
             <div class="lg:col-span-8 space-y-6">
                 
                 <!-- Multitrack Player Card -->
@@ -308,64 +328,68 @@
                     </div>
                 </section>
 
-                <!-- Playback Queue Card -->
-                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <span>📋</span> Playback Queue
-                        </h2>
-                        <div class="flex items-center gap-2">
-                            <button id="clear-queue-btn" class="text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
-                            <button id="play-next-queue-btn" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded font-medium transition">Skip Next ⏭</button>
-                        </div>
-                    </div>
-
-                    <div id="queue-list-container" class="space-y-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-                        <div id="queue-empty-state" class="text-center py-6 text-slate-500 text-xs">
-                            Playback queue is empty.<br>Add songs from the library on the left!
-                        </div>
-                    </div>
-                </section>
-
             </div>
 
         </div>
 
-        <!-- VIEW 2: Karaoke Mode (Dedicated Lyrics Stage) -->
+        <!-- PAGE 2: KARAOKE MODE SYSTEM (Independent Page) -->
         <div id="view-karaoke" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Left Sidebar (Shared Library & Ingestion Shortcut) (4 cols) -->
-            <aside class="lg:col-span-4 space-y-6">
-                <!-- Karaoke Shared Library / Queue info -->
-                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <!-- Left Column: Karaoke Library + Karaoke Queue (4 cols) -->
+            <aside class="lg:col-span-4 space-y-6 flex flex-col">
+                
+                <!-- Karaoke Song Library Card -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex flex-col">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <span>🎤</span> Karaoke Session
+                            <span>🎤</span> Karaoke Song Library
                         </h2>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 font-semibold">Live Stage</span>
+                        <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
                     </div>
 
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        Sing along with synchronized timestamped lyrics. Use the vocal strip below the stage to mute the original artist's lead vocals for solo singing!
-                    </p>
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search karaoke catalog...">
+                        <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
+                    </div>
 
-                    <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                        <span class="text-slate-400">Want to add stems/files?</span>
-                        <button id="karaoke-switch-to-studio-btn" class="text-brand-400 hover:underline font-semibold">
-                            Open Stem Studio →
-                        </button>
+                    <!-- Library List Container -->
+                    <div class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[340px]">
+                        <div class="library-empty-state text-center py-6 text-slate-500 text-xs">
+                            No songs available.<br>Process songs in Stem Studio!
+                        </div>
                     </div>
                 </section>
+
+                <!-- Karaoke Playback Queue Card -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                            <span>📋</span> Karaoke Queue
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
+                            <button class="play-next-queue-btn text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded font-medium transition">Skip Next ⏭</button>
+                        </div>
+                    </div>
+
+                    <div class="queue-list-container space-y-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+                        <div class="queue-empty-state text-center py-4 text-slate-500 text-xs">
+                            Karaoke queue is empty.
+                        </div>
+                    </div>
+                </section>
+
             </aside>
 
             <!-- Right Column: Big Center Stage Lyrics & Karaoke Controls (8 cols) -->
             <div class="lg:col-span-8 space-y-6">
                 
                 <!-- Center Stage Lyrics Card -->
-                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-6 shadow-2xl space-y-6 min-h-[460px] flex flex-col justify-between relative overflow-hidden">
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-6 shadow-2xl space-y-4 min-h-[560px] flex flex-col justify-between relative overflow-hidden">
                     
                     <!-- Karaoke Track Info Header -->
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 z-10">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                         <div class="truncate">
                             <span class="text-[10px] uppercase font-bold tracking-widest text-brand-400">Now Singing</span>
                             <h2 id="karaoke-song-title" class="text-xl font-extrabold text-white tracking-tight truncate">No Track Selected</h2>
@@ -376,14 +400,14 @@
                     </div>
 
                     <!-- Center Stage Scrolling Lyrics Container -->
-                    <div id="karaoke-lyrics-stage" class="flex-1 overflow-y-auto py-12 px-4 space-y-5 text-center custom-scrollbar max-h-[360px] flex flex-col items-center justify-center">
-                        <div id="karaoke-empty-state" class="text-slate-500 text-sm italic">
+                    <div id="karaoke-lyrics-stage" class="flex-1 overflow-y-auto px-4 py-8 custom-scrollbar max-h-[420px] rounded-xl bg-surface-950/60 border border-slate-800/50">
+                        <div id="karaoke-empty-state" class="text-center py-20 text-slate-500 text-sm italic">
                             Select a song from the library to start karaoke!
                         </div>
                     </div>
 
                     <!-- Karaoke Quick Vocal Toggles & Transport Bar -->
-                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-4 z-10">
+                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-4">
                         
                         <!-- Play / Pause & Skip -->
                         <div class="flex items-center gap-2">
@@ -397,11 +421,11 @@
 
                         <!-- Quick Vocal Toggles for Singers -->
                         <div class="flex items-center gap-2">
-                            <button id="karaoke-toggle-lead-btn" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700">
+                            <button id="karaoke-toggle-lead-btn" class="px-3.5 py-1.5 rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-xs font-semibold transition flex items-center gap-1.5">
                                 <span>🎤</span>
                                 <span id="karaoke-lead-status-text">Lead Vocals: ON</span>
                             </button>
-                            <button id="karaoke-toggle-backing-btn" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700">
+                            <button id="karaoke-toggle-backing-btn" class="px-3.5 py-1.5 rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-xs font-semibold transition flex items-center gap-1.5">
                                 <span>👥</span>
                                 <span id="karaoke-backing-status-text">Backing: ON</span>
                             </button>

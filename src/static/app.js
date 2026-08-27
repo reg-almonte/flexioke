@@ -7,12 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const navTabKaraoke = document.getElementById('nav-tab-karaoke');
     const viewStemStudio = document.getElementById('view-stem-studio');
     const viewKaraoke = document.getElementById('view-karaoke');
-    const karaokeSwitchToStudioBtn = document.getElementById('karaoke-switch-to-studio-btn');
+    const headerModeBadge = document.getElementById('header-mode-badge');
 
     if (navTabStudio && navTabKaraoke) {
         navTabStudio.addEventListener('click', () => {
             navTabStudio.className = "px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5";
             navTabKaraoke.className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
+            if (headerModeBadge) headerModeBadge.textContent = "Stem Studio";
             if (viewStemStudio) viewStemStudio.classList.remove('hidden');
             if (viewKaraoke) viewKaraoke.classList.add('hidden');
         });
@@ -20,14 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
         navTabKaraoke.addEventListener('click', () => {
             navTabKaraoke.className = "px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5";
             navTabStudio.className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
+            if (headerModeBadge) headerModeBadge.textContent = "Karaoke Mode";
             if (viewKaraoke) viewKaraoke.classList.remove('hidden');
             if (viewStemStudio) viewStemStudio.classList.add('hidden');
-        });
-    }
-
-    if (karaokeSwitchToStudioBtn && navTabStudio) {
-        karaokeSwitchToStudioBtn.addEventListener('click', () => {
-            navTabStudio.click();
         });
     }
 

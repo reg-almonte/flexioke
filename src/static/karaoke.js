@@ -1,5 +1,5 @@
 /**
- * Flexioke — Karaoke Synchronized Stage & LRC Engine
+ * Flexioke — Karaoke Synchronized Stage & LRC Engine (Overhauled)
  */
 class LrcParser {
     static parse(lrcText) {
@@ -9,16 +9,27 @@ class LrcParser {
 
         const rawLines = lrcText.split(/\r?\n/);
         const parsedLines = [];
-        const timestampRegex = /\[(\d{1,2}):(\d{1,2}(?:\.\d{1,3})?)\](.*)/;
+        const timestampRegex = /\[(\d{1,2}):(\d{1,2}(?:\.\d{1,3})?)\]/g;
 
         rawLines.forEach(line => {
-            const match = line.match(timestampRegex);
-            if (match) {
-                const mins = parseInt(match[1], 10);
-                const secs = parseFloat(match[2]);
-                const time = mins * 60 + secs;
-                const text = match[3].trim();
-                parsedLines.push({ time, text });
+            const trimmed = line.trim();
+            if (!trimmed) return;
+
+            // Find all timestamp tags on this line
+            const matches = [...trimmed.matchAll(timestampRegex)];
+            if (matches.length > 0) {
+                // Extract lyric text after removing all [mm:ss.xx] tags
+                let text = trimmed.replace(timestampRegex, '').trim();
+                if (!text) {
+                    text = "♪ ♪ ♪ (Instrumental)";
+                }
+
+                matches.forEach(m => {
+                    const mins = parseInt(m[1], 10);
+                    const secs = parseFloat(m[2]);
+                    const time = mins * 60 + secs;
+                    parsedLines.push({ time, text });
+                });
             }
         });
 
@@ -208,9 +219,10 @@ class KaraokeStageManager {
         // If plain text (no timestamps)
         if (!this.lyricsData.hasTimestamps) {
             const wrapper = document.createElement('div');
-            wrapper.className = "space-y-3 py-6 text-slate-300 text-sm leading-relaxed max-w-md mx-auto";
+            wrapper.className = "space-y-3 py-6 text-slate-200 text-base leading-relaxed max-w-lg mx-auto text-center";
             this.lyricsData.lines.forEach(line => {
                 const p = document.createElement('p');
+                p.className = "py-1";
                 p.textContent = line.text;
                 wrapper.appendChild(p);
             });
@@ -220,12 +232,12 @@ class KaraokeStageManager {
 
         // Timestamped LRC mode
         const wrapper = document.createElement('div');
-        wrapper.className = "space-y-5 py-24 max-w-xl mx-auto w-full transition-all";
+        wrapper.className = "space-y-4 py-32 max-w-2xl mx-auto w-full text-center";
 
         this.lyricsData.lines.forEach((line, index) => {
             const lineEl = document.createElement('div');
-            lineEl.className = "karaoke-line text-slate-500 font-semibold text-base sm:text-lg transition-all duration-300 py-1.5 cursor-pointer hover:text-slate-300";
-            lineEl.textContent = line.text || "♪ ♪ ♪";
+            lineEl.className = "karaoke-line text-slate-400 font-semibold text-base sm:text-lg transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
+            lineEl.textContent = line.text;
             lineEl.dataset.index = index;
 
             // Click to seek to line
@@ -249,9 +261,9 @@ class KaraokeStageManager {
     renderEmptyState() {
         if (!this.stageContainer) return;
         this.stageContainer.innerHTML = `
-            <div class="text-center py-16 space-y-2">
+            <div class="text-center py-20 space-y-2">
                 <span class="text-3xl">🎤</span>
-                <p class="text-slate-400 text-sm font-medium">No lyrics added yet for this song</p>
+                <p class="text-slate-300 text-base font-semibold">No lyrics added yet for this song</p>
                 <p class="text-slate-500 text-xs">Click the "📝" button on the song card in the library to add timestamped lyrics!</p>
             </div>
         `;
@@ -299,13 +311,13 @@ class KaraokeStageManager {
 
     highlightLine(index) {
         if (this.activeLineIndex >= 0 && this.lineElements[this.activeLineIndex]) {
-            this.lineElements[this.activeLineIndex].className = "karaoke-line text-slate-500 font-semibold text-base sm:text-lg transition-all duration-300 py-1.5 cursor-pointer hover:text-slate-300";
+            this.lineElements[this.activeLineIndex].className = "karaoke-line text-slate-400 font-semibold text-base sm:text-lg transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
         }
 
         this.activeLineIndex = index;
         const activeEl = this.lineElements[index];
         if (activeEl) {
-            activeEl.className = "karaoke-line text-xl sm:text-2xl font-black text-white scale-110 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)] py-2 transition-all duration-300 cursor-pointer bg-gradient-to-r from-brand-400 to-violet-400 bg-clip-text text-transparent";
+            activeEl.className = "karaoke-line text-white font-extrabold text-xl sm:text-2xl bg-brand-600/30 border border-brand-500/60 rounded-2xl py-3.5 px-6 shadow-xl shadow-brand-500/25 scale-105 transition-all duration-300 cursor-pointer";
             activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
