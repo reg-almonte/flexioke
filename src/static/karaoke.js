@@ -61,6 +61,7 @@ class KaraokeStageManager {
         // Karaoke Transport Elements
         this.playBtn = document.getElementById('karaoke-play-btn');
         this.skipBtn = document.getElementById('karaoke-skip-btn');
+        this.stopBtn = document.getElementById('karaoke-stop-btn');
         this.toggleLeadBtn = document.getElementById('karaoke-toggle-lead-btn');
         this.leadStatusText = document.getElementById('karaoke-lead-status-text');
         this.toggleBackingBtn = document.getElementById('karaoke-toggle-backing-btn');
@@ -89,7 +90,17 @@ class KaraokeStageManager {
         if (this.skipBtn) {
             this.skipBtn.addEventListener('click', () => {
                 if (window.flexiokeQueue) {
-                    window.flexiokeQueue.advanceNext();
+                    window.flexiokeQueue.advanceNext(true);
+                }
+            });
+        }
+
+        if (this.stopBtn) {
+            this.stopBtn.addEventListener('click', () => {
+                if (window.flexiokeQueue) {
+                    window.flexiokeQueue.stopAndCueNext();
+                } else if (window.flexiokePlayer) {
+                    window.flexiokePlayer.resetToDefault();
                 }
             });
         }
@@ -130,6 +141,21 @@ class KaraokeStageManager {
             if (e.detail && e.detail.job_id === this.currentJobId) {
                 this.loadLyricsForJob(this.currentJobId);
             }
+        });
+
+        // Listen for player reset (when queue finishes or stop clicked without queue)
+        window.addEventListener('flexioke:player-reset', () => {
+            this.currentJobId = null;
+            this.lyricsData = null;
+            this.activeLineIndex = -1;
+            if (this.songTitleEl) {
+                this.songTitleEl.textContent = "No Track Selected";
+            }
+            if (this.timecodeEl) {
+                this.timecodeEl.textContent = "00:00 / 00:00";
+            }
+            this.renderEmptyState();
+            this.updatePlayBtnUI();
         });
 
         // Hook into FlexiokePlayer loadSong

@@ -267,13 +267,13 @@ class PlaybackQueueManager {
         });
 
         this.playNextBtns.forEach(btn => {
-            btn.addEventListener('click', () => this.advanceNext());
+            btn.addEventListener('click', () => this.advanceNext(true));
         });
 
         // Handle auto-advance when a track finishes
         window.addEventListener('flexioke:track-ended', () => {
-            console.log("Track ended event received, triggering advanceNext...");
-            this.advanceNext();
+            console.log("Track ended event received, triggering auto-advance...");
+            this.advanceNext(true);
         });
 
         // Initial queue fetch
@@ -327,7 +327,15 @@ class PlaybackQueueManager {
         }
     }
 
-    async advanceNext() {
+    async stopAndCueNext() {
+        if (window.flexiokePlayer) {
+            window.flexiokePlayer.pause();
+        }
+        // Advance queue with autoPlay = false
+        await this.advanceNext(false);
+    }
+
+    async advanceNext(autoPlay = true) {
         if (this.isAdvancing) return;
         this.isAdvancing = true;
 
@@ -337,8 +345,10 @@ class PlaybackQueueManager {
                 const state = await resp.json();
                 this.render(state);
                 if (state.current_track && window.flexiokePlayer) {
-                    // Autoplay set to true on load
-                    window.flexiokePlayer.loadSong(state.current_track, true);
+                    window.flexiokePlayer.loadSong(state.current_track, autoPlay);
+                } else if (!state.current_track && window.flexiokePlayer) {
+                    // No more queued songs: display No Track Selected / default view
+                    window.flexiokePlayer.resetToDefault();
                 }
             }
         } catch (err) {

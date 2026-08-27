@@ -244,7 +244,7 @@
                             <button id="transport-play-btn" class="w-10 h-10 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-bold flex items-center justify-center transition shadow-lg shadow-brand-500/30 disabled:opacity-40 disabled:cursor-not-allowed">
                                 ▶
                             </button>
-                            <button id="transport-stop-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition disabled:opacity-40">
+                            <button id="transport-stop-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition disabled:opacity-40" title="Stop & Cue Next">
                                 ⏹
                             </button>
                         </div>
@@ -414,7 +414,7 @@
                             <button id="karaoke-play-btn" class="w-10 h-10 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-bold flex items-center justify-center transition shadow-lg shadow-brand-500/30">
                                 ▶
                             </button>
-                            <button id="karaoke-skip-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition font-semibold">
+                            <button id="karaoke-skip-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition font-semibold" title="Skip to Next Track">
                                 ⏭
                             </button>
                         </div>
@@ -431,10 +431,15 @@
                             </button>
                         </div>
 
-                        <!-- Master Volume -->
-                        <div class="flex items-center gap-2 text-xs text-slate-400">
-                            <span>🔊</span>
-                            <input type="range" id="karaoke-volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-20 accent-brand-500 cursor-pointer">
+                        <!-- Stop Button & Master Volume -->
+                        <div class="flex items-center gap-3 text-xs text-slate-400">
+                            <button id="karaoke-stop-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Stop & Cue Next">
+                                ⏹
+                            </button>
+                            <div class="flex items-center gap-1.5">
+                                <span>🔊</span>
+                                <input type="range" id="karaoke-volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-20 accent-brand-500 cursor-pointer">
+                            </div>
                         </div>
 
                     </div>

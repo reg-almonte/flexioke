@@ -61,12 +61,20 @@ class FlexiokePlayer {
             this.playBtn.addEventListener('click', () => this.togglePlay());
         }
         if (this.stopBtn) {
-            this.stopBtn.addEventListener('click', () => this.stop());
+            this.stopBtn.addEventListener('click', () => {
+                if (window.flexiokeQueue) {
+                    window.flexiokeQueue.stopAndCueNext();
+                } else {
+                    this.stop();
+                }
+            });
         }
         if (this.masterVolSlider) {
             this.masterVolSlider.addEventListener('input', (e) => {
                 this.masterVolume = parseFloat(e.target.value);
                 this.applyGainMatrix();
+                const karaokeVol = document.getElementById('karaoke-volume-slider');
+                if (karaokeVol) karaokeVol.value = this.masterVolume;
             });
         }
 
@@ -99,11 +107,16 @@ class FlexiokePlayer {
     }
 
     loadSong(job, autoPlay = false) {
-        if (!job || !job.stems) return;
+        if (!job || !job.stems) {
+            this.resetToDefault();
+            return;
+        }
         this.currentJob = job;
         this.autoPlayPending = autoPlay;
         this.finishedFired = false;
-        this.songTitleEl.textContent = job.title || "Untitled Song";
+        if (this.songTitleEl) {
+            this.songTitleEl.textContent = job.title || "Untitled Song";
+        }
         this.isPlaying = false;
         this.updatePlayBtnUI();
 
@@ -198,6 +211,42 @@ class FlexiokePlayer {
                 }
             });
         });
+    }
+
+    resetToDefault() {
+        this.pause();
+        this.currentJob = null;
+        this.duration = 0;
+        this.autoPlayPending = false;
+        this.finishedFired = false;
+
+        // Destroy prior wavesurfer instances
+        Object.keys(this.tracks).forEach((trackKey) => {
+            const track = this.tracks[trackKey];
+            if (track.ws) {
+                try {
+                    track.ws.unAll();
+                    track.ws.destroy();
+                } catch (err) {
+                    console.error("Error destroying wavesurfer:", err);
+                }
+                track.ws = null;
+            }
+            track.isReady = false;
+            const container = document.querySelector(track.container);
+            if (container) {
+                container.innerHTML = '<div class="waveform-placeholder absolute inset-0 flex items-center justify-center text-slate-600 text-[11px]">No audio loaded</div>';
+            }
+        });
+
+        if (this.songTitleEl) {
+            this.songTitleEl.textContent = "No Track Loaded";
+        }
+        this.updateTimecode(0, 0);
+        this.updatePlayBtnUI();
+
+        // Dispatch reset event so Karaoke and other components reset too
+        window.dispatchEvent(new CustomEvent('flexioke:player-reset'));
     }
 
     syncSeek(time, sourceTrackKey) {
@@ -334,4 +383,6 @@ class FlexiokePlayer {
 }
 
 // Instantiate global player
-window.flexiokePlayer = new FlexiokePlayer();
+document.addEventListener('DOMContentLoaded', () => {
+    window.flexiokePlayer = new FlexiokePlayer();
+});
