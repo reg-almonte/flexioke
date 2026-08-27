@@ -32,3 +32,7 @@ made while building the template itself.
 - artifact: docs/tickets/EPIC-0001-stem-separation-player.md
 - approved_by: user
 - notes: Approved EPIC-0001 work breakdown comprising STORY-0001 to STORY-0004 and TASK-0001 to TASK-0012 covering backend foundation, 2-stage separation pipeline, song library & queue services, and Wavesurfer multitrack web player.
+## 2026-08-27 — Approved Release: Release Manifest v0.1.0 (Flexioke MVP)
+- artifact: docs/releases/v0.1.0.md
+- approved_by: user
+- notes: Approved Release Manifest v0.1.0 covering full EPIC-0001 implementation (Stories 1 through 4), all 12 tasks, and verification of bugfixes with clean 33/33 test suite.
