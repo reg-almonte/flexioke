@@ -44,3 +44,7 @@ made while building the template itself.
 - artifact: docs/design/ADR-0002-karaoke-lyrics-synchronization.md
 - approved_by: user
 - notes: Approved Option 1 (Client-side LRC parsing, DOM synchronizer bound to Wavesurfer timecode, atomic backend lyrics storage, top-level tab switcher, and smart play interruption guard).
+## 2026-08-27 — Approved Ticket Breakdown: EPIC-0002 Synchronized Lyrics & Dedicated Karaoke Mode
+- artifact: docs/tickets/EPIC-0002-karaoke-lyrics-mode.md
+- approved_by: reg
+- notes: Approved EPIC-0002 work breakdown comprising STORY-0005 to STORY-0007 and TASK-0013 to TASK-0018 covering backend lyrics persistence, song library lyrics editor modal, top navigation tab switcher, real-time synchronized karaoke display, and smart play interruption guard.
