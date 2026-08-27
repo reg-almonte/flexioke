@@ -1,9 +1,12 @@
 from pathlib import Path
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
+from fastapi.responses import FileResponse
+
 from src.services.job_manager import job_manager
 from src.services.audio_validator import validate_audio_file, clean_song_title
 from src.services.youtube_downloader import validate_youtube_url, download_youtube_audio
+from src.services.pipeline import run_separation_pipeline, VALID_STEM_TYPES
 from src.models import JobRecord, SourceType, JobStatus
 
 router = APIRouter(prefix="/api", tags=["api"])
@@ -11,8 +14,8 @@ router = APIRouter(prefix="/api", tags=["api"])
 class YouTubeRequest(BaseModel):
     url: str = Field(..., description="YouTube video or music link")
 
-def _handle_youtube_download(job_id: str, url: str):
-    """Background task handler for downloading YouTube audio."""
+def _handle_youtube_download_and_pipeline(job_id: str, url: str):
+    """Background task handler for downloading YouTube audio and triggering separation."""
     job_dir = job_manager.get_job_dir(job_id)
     output_path = job_dir / "input.mp3"
     try:
@@ -29,8 +32,10 @@ def _handle_youtube_download(job_id: str, url: str):
             duration_seconds=info["duration"],
             status=JobStatus.QUEUED,
             progress=15,
-            current_stage="Audio downloaded, queued for separation"
+            current_stage="Audio downloaded, starting separation..."
         )
+        # Proceed straight to 2-stage separation pipeline
+        run_separation_pipeline(job_id)
     except Exception as e:
         job_manager.update_job(
             job_id,
@@ -77,6 +82,9 @@ async def upload_audio(file: UploadFile = File(...)):
     input_path = job_dir / f"input{ext}"
     input_path.write_bytes(content)
 
+    # Enqueue separation pipeline in worker pool
+    job_manager.submit_task(run_separation_pipeline, job.job_id)
+
     return job
 
 @router.post("/jobs/youtube", status_code=status.HTTP_202_ACCEPTED, response_model=JobRecord)
@@ -95,8 +103,8 @@ def submit_youtube(req: YouTubeRequest):
         title="YouTube Audio Track"
     )
 
-    # Dispatch background download
-    job_manager.submit_task(_handle_youtube_download, job.job_id, req.url.strip())
+    # Dispatch background download and separation pipeline
+    job_manager.submit_task(_handle_youtube_download_and_pipeline, job.job_id, req.url.strip())
 
     return job
 
@@ -110,3 +118,34 @@ def get_job_status(job_id: str):
             detail=f"Job '{job_id}' not found."
         )
     return job
+
+@router.get("/jobs/{job_id}/stems/{stem_type}")
+def get_stem_audio(job_id: str, stem_type: str):
+    """Streams an isolated MP3 stem track (instrumental, lead_vocals, backing_vocals)."""
+    stem_type_clean = stem_type.lower().strip()
+    if stem_type_clean not in VALID_STEM_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid stem type '{stem_type}'. Allowed: {', '.join(sorted(VALID_STEM_TYPES))}."
+        )
+
+    job = job_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found."
+        )
+
+    job_dir = job_manager.get_job_dir(job_id)
+    stem_file = job_dir / f"{stem_type_clean}.mp3"
+    if not stem_file.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Stem '{stem_type_clean}' is not yet available for job '{job_id}'."
+        )
+
+    return FileResponse(
+        path=str(stem_file),
+        media_type="audio/mpeg",
+        filename=f"{stem_type_clean}.mp3"
+    )
