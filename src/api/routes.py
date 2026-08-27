@@ -14,6 +14,8 @@ from src.models import (
     JobListResponse,
     QueueItem,
     QueueResponse,
+    LyricsResponse,
+    LyricsUpdateRequest,
     SourceType,
     JobStatus,
 )
@@ -170,6 +172,30 @@ def get_stem_audio(job_id: str, stem_type: str):
         media_type="audio/mpeg",
         filename=f"{stem_type_clean}.mp3"
     )
+
+# --- Lyrics Endpoints ---
+
+@router.get("/jobs/{job_id}/lyrics", response_model=LyricsResponse)
+def get_song_lyrics(job_id: str):
+    """Retrieve lyrics text and timestamp metadata for a song."""
+    job = job_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found."
+        )
+    return job_manager.get_lyrics(job_id)
+
+@router.post("/jobs/{job_id}/lyrics", response_model=LyricsResponse)
+def save_song_lyrics(job_id: str, req: LyricsUpdateRequest):
+    """Save or update lyrics (.lrc or plain text) for a song."""
+    job = job_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found."
+        )
+    return job_manager.save_lyrics(job_id, req.lyrics)
 
 # --- Playback Queue Endpoints ---
 
