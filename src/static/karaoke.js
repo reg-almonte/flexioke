@@ -154,7 +154,7 @@ class KaraokeStageManager {
             if (this.timecodeEl) {
                 this.timecodeEl.textContent = "00:00 / 00:00";
             }
-            this.renderEmptyState();
+            this.renderDefaultState();
             this.updatePlayBtnUI();
         });
 
@@ -214,7 +214,10 @@ class KaraokeStageManager {
     }
 
     async loadLyricsForJob(jobId) {
-        if (!jobId) return;
+        if (!jobId) {
+            this.renderDefaultState();
+            return;
+        }
         this.activeLineIndex = -1;
 
         try {
@@ -236,6 +239,11 @@ class KaraokeStageManager {
         if (!this.stageContainer) return;
         this.stageContainer.innerHTML = '';
         this.lineElements = [];
+
+        if (!this.currentJobId) {
+            this.renderDefaultState();
+            return;
+        }
 
         if (!this.lyricsData || this.lyricsData.lines.length === 0) {
             this.renderEmptyState();
@@ -284,6 +292,15 @@ class KaraokeStageManager {
         this.stageContainer.appendChild(wrapper);
     }
 
+    renderDefaultState() {
+        if (!this.stageContainer) return;
+        this.stageContainer.innerHTML = `
+            <div id="karaoke-empty-state" class="text-center py-20 text-slate-500 text-sm italic">
+                Select a song from the library to start karaoke!
+            </div>
+        `;
+    }
+
     renderEmptyState() {
         if (!this.stageContainer) return;
         this.stageContainer.innerHTML = `
@@ -300,7 +317,7 @@ class KaraokeStageManager {
 
         this.updatePlayBtnUI();
 
-        if (!this.lyricsData || !this.lyricsData.hasTimestamps) {
+        if (!this.currentJobId || !this.lyricsData || !this.lyricsData.hasTimestamps) {
             return;
         }
 
