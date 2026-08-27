@@ -18,6 +18,13 @@ class SongLibraryManager {
         this.saveLyricsBtn = document.getElementById('save-lyrics-btn');
         this.activeLyricsJobId = null;
 
+        // Play interruption confirmation modal
+        this.playConfirmModal = document.getElementById('play-confirm-modal');
+        this.confirmSongTitle = document.getElementById('confirm-song-title');
+        this.confirmPlayBtn = document.getElementById('confirm-play-btn');
+        this.confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+        this.pendingPlayJob = null;
+
         this.init();
     }
 
@@ -40,6 +47,28 @@ class SongLibraryManager {
         }
         if (this.saveLyricsBtn) {
             this.saveLyricsBtn.addEventListener('click', () => this.saveLyrics());
+        }
+
+        // Play confirmation modal handlers
+        if (this.confirmPlayBtn) {
+            this.confirmPlayBtn.addEventListener('click', () => {
+                if (this.playConfirmModal) this.playConfirmModal.classList.add('hidden');
+                if (this.pendingPlayJob && window.flexiokeQueue) {
+                    window.flexiokeQueue.playNow(this.pendingPlayJob.job_id);
+                }
+                this.pendingPlayJob = null;
+            });
+        }
+
+        if (this.confirmCancelBtn) {
+            this.confirmCancelBtn.addEventListener('click', () => {
+                if (this.playConfirmModal) this.playConfirmModal.classList.add('hidden');
+                this.pendingPlayJob = null;
+                // Resume previous music
+                if (window.flexiokePlayer) {
+                    window.flexiokePlayer.play();
+                }
+            });
         }
 
         // Auto-refresh when a job completes
@@ -114,10 +143,18 @@ class SongLibraryManager {
             // Bind card actions
             const playBtn = card.querySelector('.play-now-btn');
             playBtn.addEventListener('click', () => {
-                if (window.flexiokeQueue) {
-                    window.flexiokeQueue.playNow(job.job_id);
-                } else if (window.flexiokePlayer) {
-                    window.flexiokePlayer.loadSong(job, true);
+                // Check for active playback interruption
+                if (window.flexiokePlayer && window.flexiokePlayer.isPlaying && window.flexiokePlayer.currentJob && window.flexiokePlayer.currentJob.job_id !== job.job_id) {
+                    window.flexiokePlayer.pause();
+                    this.pendingPlayJob = job;
+                    if (this.confirmSongTitle) this.confirmSongTitle.textContent = `"${job.title}"`;
+                    if (this.playConfirmModal) this.playConfirmModal.classList.remove('hidden');
+                } else {
+                    if (window.flexiokeQueue) {
+                        window.flexiokeQueue.playNow(job.job_id);
+                    } else if (window.flexiokePlayer) {
+                        window.flexiokePlayer.loadSong(job, true);
+                    }
                 }
             });
 

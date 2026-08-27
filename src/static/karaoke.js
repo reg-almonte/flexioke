@@ -47,6 +47,15 @@ class KaraokeStageManager {
         this.songTitleEl = document.getElementById('karaoke-song-title');
         this.timecodeEl = document.getElementById('karaoke-timecode');
 
+        // Karaoke Transport Elements
+        this.playBtn = document.getElementById('karaoke-play-btn');
+        this.skipBtn = document.getElementById('karaoke-skip-btn');
+        this.toggleLeadBtn = document.getElementById('karaoke-toggle-lead-btn');
+        this.leadStatusText = document.getElementById('karaoke-lead-status-text');
+        this.toggleBackingBtn = document.getElementById('karaoke-toggle-backing-btn');
+        this.backingStatusText = document.getElementById('karaoke-backing-status-text');
+        this.volumeSlider = document.getElementById('karaoke-volume-slider');
+
         this.currentJobId = null;
         this.lyricsData = null;
         this.activeLineIndex = -1;
@@ -56,6 +65,55 @@ class KaraokeStageManager {
     }
 
     init() {
+        // Bind Karaoke Transport Controls
+        if (this.playBtn) {
+            this.playBtn.addEventListener('click', () => {
+                if (window.flexiokePlayer) {
+                    window.flexiokePlayer.togglePlay();
+                    this.updatePlayBtnUI();
+                }
+            });
+        }
+
+        if (this.skipBtn) {
+            this.skipBtn.addEventListener('click', () => {
+                if (window.flexiokeQueue) {
+                    window.flexiokeQueue.advanceNext();
+                }
+            });
+        }
+
+        if (this.volumeSlider) {
+            this.volumeSlider.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (window.flexiokePlayer) {
+                    window.flexiokePlayer.masterVolume = val;
+                    window.flexiokePlayer.applyGainMatrix();
+                }
+                const masterSlider = document.getElementById('master-volume-slider');
+                if (masterSlider) masterSlider.value = val;
+            });
+        }
+
+        // Quick Vocal Toggles
+        if (this.toggleLeadBtn) {
+            this.toggleLeadBtn.addEventListener('click', () => {
+                if (window.flexiokePlayer) {
+                    window.flexiokePlayer.toggleMute('lead_vocals');
+                    this.syncVocalButtons();
+                }
+            });
+        }
+
+        if (this.toggleBackingBtn) {
+            this.toggleBackingBtn.addEventListener('click', () => {
+                if (window.flexiokePlayer) {
+                    window.flexiokePlayer.toggleMute('backing_vocals');
+                    this.syncVocalButtons();
+                }
+            });
+        }
+
         // Listen for lyrics updates from editor
         window.addEventListener('flexioke:lyrics-updated', (e) => {
             if (e.detail && e.detail.job_id === this.currentJobId) {
@@ -74,7 +132,7 @@ class KaraokeStageManager {
             };
         }
 
-        // Time updates from player
+        // Time & Transport state check
         setInterval(() => this.onTimeCheck(), 100);
     }
 
@@ -83,7 +141,39 @@ class KaraokeStageManager {
         if (this.songTitleEl) {
             this.songTitleEl.textContent = job.title || "Untitled Song";
         }
+        this.syncVocalButtons();
         this.loadLyricsForJob(job.job_id);
+    }
+
+    syncVocalButtons() {
+        if (!window.flexiokePlayer) return;
+        const leadTrack = window.flexiokePlayer.tracks.lead_vocals;
+        const backingTrack = window.flexiokePlayer.tracks.backing_vocals;
+
+        if (this.toggleLeadBtn && this.leadStatusText && leadTrack) {
+            if (leadTrack.muted) {
+                this.toggleLeadBtn.className = "px-3.5 py-1.5 rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.leadStatusText.textContent = "Lead Vocals: MUTED";
+            } else {
+                this.toggleLeadBtn.className = "px-3.5 py-1.5 rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.leadStatusText.textContent = "Lead Vocals: ON";
+            }
+        }
+
+        if (this.toggleBackingBtn && this.backingStatusText && backingTrack) {
+            if (backingTrack.muted) {
+                this.toggleBackingBtn.className = "px-3.5 py-1.5 rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.backingStatusText.textContent = "Backing: MUTED";
+            } else {
+                this.toggleBackingBtn.className = "px-3.5 py-1.5 rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.backingStatusText.textContent = "Backing: ON";
+            }
+        }
+    }
+
+    updatePlayBtnUI() {
+        if (!this.playBtn || !window.flexiokePlayer) return;
+        this.playBtn.innerHTML = window.flexiokePlayer.isPlaying ? '⏸' : '▶';
     }
 
     async loadLyricsForJob(jobId) {
@@ -168,7 +258,11 @@ class KaraokeStageManager {
     }
 
     onTimeCheck() {
-        if (!window.flexiokePlayer || !this.lyricsData || !this.lyricsData.hasTimestamps) {
+        if (!window.flexiokePlayer) return;
+
+        this.updatePlayBtnUI();
+
+        if (!this.lyricsData || !this.lyricsData.hasTimestamps) {
             return;
         }
 
