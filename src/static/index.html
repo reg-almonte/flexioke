@@ -51,6 +51,7 @@
                 <p class="text-[11px] text-slate-400">2-Stage AI Vocal & Instrumental Isolator</p>
             </div>
         </div>
+
         <div class="flex items-center gap-3">
             <div id="system-status" class="text-xs text-slate-400 flex items-center gap-2 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700/50">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -316,6 +317,39 @@
         </div>
 
     </main>
+
+    <!-- Lyrics Editor Modal -->
+    <div id="lyrics-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="truncate">
+                    <span class="text-[10px] uppercase font-bold text-brand-400 tracking-wider">Lyrics Editor</span>
+                    <h3 id="lyrics-modal-title" class="text-sm font-semibold text-white truncate">Song Title</h3>
+                </div>
+                <button id="close-lyrics-modal-btn" class="text-slate-400 hover:text-slate-200 p-1">✕</button>
+            </div>
+
+            <div class="space-y-2">
+                <label for="lyrics-textarea" class="text-xs text-slate-300 flex items-center justify-between">
+                    <span>Paste Timestamped (.lrc) or Plain Text Lyrics</span>
+                    <span class="text-[10px] text-slate-500">e.g. [00:05.12] Lyric line</span>
+                </label>
+                <textarea id="lyrics-textarea" rows="10" placeholder="[00:00.00] Song starts&#10;[00:05.20] First line of lyrics&#10;[00:10.50] Second line of lyrics" class="w-full bg-surface-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-brand-500 transition resize-none custom-scrollbar"></textarea>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+                <span id="lyrics-save-status" class="text-xs text-slate-400"></span>
+                <div class="flex items-center gap-2">
+                    <button id="cancel-lyrics-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                        Cancel
+                    </button>
+                    <button id="save-lyrics-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition shadow-md shadow-brand-500/20 flex items-center gap-1.5">
+                        <span>💾</span> Save Lyrics
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="border-t border-slate-900 bg-surface-950 px-6 py-3.5 text-center text-xs text-slate-500">

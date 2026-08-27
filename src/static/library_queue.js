@@ -8,6 +8,16 @@ class SongLibraryManager {
         this.countBadge = document.getElementById('library-count-badge');
         this.debounceTimeout = null;
 
+        // Lyrics modal elements
+        this.lyricsModal = document.getElementById('lyrics-modal');
+        this.lyricsModalTitle = document.getElementById('lyrics-modal-title');
+        this.lyricsTextarea = document.getElementById('lyrics-textarea');
+        this.lyricsSaveStatus = document.getElementById('lyrics-save-status');
+        this.closeLyricsModalBtn = document.getElementById('close-lyrics-modal-btn');
+        this.cancelLyricsBtn = document.getElementById('cancel-lyrics-btn');
+        this.saveLyricsBtn = document.getElementById('save-lyrics-btn');
+        this.activeLyricsJobId = null;
+
         this.init();
     }
 
@@ -19,6 +29,17 @@ class SongLibraryManager {
                     this.fetchLibrary(this.searchInput.value.trim());
                 }, 250);
             });
+        }
+
+        // Lyrics modal handlers
+        if (this.closeLyricsModalBtn) {
+            this.closeLyricsModalBtn.addEventListener('click', () => this.closeLyricsModal());
+        }
+        if (this.cancelLyricsBtn) {
+            this.cancelLyricsBtn.addEventListener('click', () => this.closeLyricsModal());
+        }
+        if (this.saveLyricsBtn) {
+            this.saveLyricsBtn.addEventListener('click', () => this.saveLyrics());
         }
 
         // Auto-refresh when a job completes
@@ -84,6 +105,9 @@ class SongLibraryManager {
                     <button class="add-queue-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" data-job-id="${job.job_id}">
                         + Queue
                     </button>
+                    <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Add / Edit Lyrics" data-job-id="${job.job_id}">
+                        📝
+                    </button>
                 </div>
             `;
 
@@ -104,8 +128,83 @@ class SongLibraryManager {
                 }
             });
 
+            const lyricsBtn = card.querySelector('.lyrics-btn');
+            lyricsBtn.addEventListener('click', () => {
+                this.openLyricsModal(job);
+            });
+
             this.listContainer.appendChild(card);
         });
+    }
+
+    async openLyricsModal(job) {
+        this.activeLyricsJobId = job.job_id;
+        if (this.lyricsModalTitle) {
+            this.lyricsModalTitle.textContent = job.title || "Untitled Song";
+        }
+        if (this.lyricsTextarea) {
+            this.lyricsTextarea.value = "Loading lyrics...";
+        }
+        if (this.lyricsSaveStatus) {
+            this.lyricsSaveStatus.textContent = "";
+        }
+        if (this.lyricsModal) {
+            this.lyricsModal.classList.remove('hidden');
+        }
+
+        try {
+            const resp = await fetch(`/api/jobs/${job.job_id}/lyrics`);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (this.lyricsTextarea) {
+                    this.lyricsTextarea.value = data.lyrics || "";
+                }
+            }
+        } catch (err) {
+            console.error("Error loading lyrics:", err);
+            if (this.lyricsTextarea) {
+                this.lyricsTextarea.value = "";
+            }
+        }
+    }
+
+    closeLyricsModal() {
+        this.activeLyricsJobId = null;
+        if (this.lyricsModal) {
+            this.lyricsModal.classList.add('hidden');
+        }
+    }
+
+    async saveLyrics() {
+        if (!this.activeLyricsJobId || !this.lyricsTextarea) return;
+        const text = this.lyricsTextarea.value;
+
+        if (this.saveLyricsBtn) this.saveLyricsBtn.disabled = true;
+        if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saving...";
+
+        try {
+            const resp = await fetch(`/api/jobs/${this.activeLyricsJobId}/lyrics`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lyrics: text })
+            });
+
+            if (resp.ok) {
+                const data = await resp.json();
+                if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saved!";
+                window.dispatchEvent(new CustomEvent('flexioke:lyrics-updated', {
+                    detail: { job_id: this.activeLyricsJobId, lyrics: text, has_timestamps: data.has_timestamps }
+                }));
+                setTimeout(() => this.closeLyricsModal(), 600);
+            } else {
+                if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Save failed";
+            }
+        } catch (err) {
+            console.error("Error saving lyrics:", err);
+            if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Error saving";
+        } finally {
+            if (this.saveLyricsBtn) this.saveLyricsBtn.disabled = false;
+        }
     }
 }
 
