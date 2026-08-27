@@ -1,5 +1,5 @@
 /**
- * Flexioke — Karaoke Synchronized Stage & LRC Engine (Overhauled with Fullscreen)
+ * Flexioke — Karaoke Synchronized Stage & LRC Engine (Overhauled with Fullscreen & Auto-Scroll Reset)
  */
 class LrcParser {
     static parse(lrcText) {
@@ -224,6 +224,9 @@ class KaraokeStageManager {
         if (this.songTitleEl) {
             this.songTitleEl.textContent = job.title || "Untitled Song";
         }
+        if (this.stageContainer) {
+            this.stageContainer.scrollTop = 0;
+        }
         this.syncVocalButtons();
         this.loadLyricsForJob(job.job_id);
     }
@@ -284,6 +287,7 @@ class KaraokeStageManager {
     renderStage() {
         if (!this.stageContainer) return;
         this.stageContainer.innerHTML = '';
+        this.stageContainer.scrollTop = 0;
         this.lineElements = [];
 
         if (!this.currentJobId) {
@@ -336,6 +340,7 @@ class KaraokeStageManager {
         });
 
         this.stageContainer.appendChild(wrapper);
+        this.stageContainer.scrollTop = 0;
     }
 
     renderDefaultState() {
@@ -345,6 +350,7 @@ class KaraokeStageManager {
                 Select a song from the library to start karaoke!
             </div>
         `;
+        this.stageContainer.scrollTop = 0;
     }
 
     renderEmptyState() {
@@ -356,6 +362,7 @@ class KaraokeStageManager {
                 <p class="text-slate-500 text-xs">Click the "📝" button on the song card in the library to add timestamped lyrics!</p>
             </div>
         `;
+        this.stageContainer.scrollTop = 0;
     }
 
     onTimeCheck() {
