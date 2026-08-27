@@ -1,7 +1,7 @@
 ---
 status: approved
-approved_by: user
-approved_at: 2026-08-27
+approved_by: reg user
+approved_at: 2026-08-27 2026-08-27
 implementation: in-review
 ---
 

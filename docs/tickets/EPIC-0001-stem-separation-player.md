@@ -1,6 +1,6 @@
 ---
 status: approved
-approved_by: user
+approved_by: reg
 approved_at: 2026-08-27
 ---
 

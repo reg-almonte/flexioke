@@ -45,3 +45,12 @@ class QueueResponse(BaseModel):
     current_track: Optional[QueueItem] = None
     queue: List[QueueItem]
     total_queued: int
+
+class LyricsUpdateRequest(BaseModel):
+    lyrics: str
+
+class LyricsResponse(BaseModel):
+    job_id: str
+    lyrics: str = ""
+    has_lyrics: bool = False
+    has_timestamps: bool = False

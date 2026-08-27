@@ -1,3 +1,4 @@
+import re
 import json
 import uuid
 import threading
@@ -6,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Callable, Any
 
-from src.models import JobRecord, JobStatus, SourceType
+from src.models import JobRecord, JobStatus, SourceType, LyricsResponse
 
 class JobManager:
     def __init__(self, data_dir: Optional[Path] = None, max_workers: int = 1):
@@ -29,27 +30,40 @@ class JobManager:
                 return
             for job_dir in self.data_dir.iterdir():
                 if job_dir.is_dir():
-                    json_path = job_dir / "job.json"
-                    if json_path.exists():
+                    meta_file = job_dir / "job.json"
+                    if meta_file.exists():
                         try:
-                            with open(json_path, "r", encoding="utf-8") as f:
-                                data = json.load(f)
-                                record = JobRecord.model_validate(data)
-                                self._cache[record.job_id] = record
-                        except Exception:
-                            # Skip corrupted job folders
-                            pass
+                            data = json.loads(meta_file.read_text(encoding="utf-8"))
+                            record = JobRecord.model_validate(data)
+                            self._cache[record.job_id] = record
+                        except Exception as e:
+                            # Log and skip corrupted job files
+                            print(f"[JobManager] Failed to load job metadata from {meta_file}: {e}")
+
+    def _save_job(self, record: JobRecord):
+        """Persists a job record to disk and updates in-memory cache."""
+        job_dir = self.data_dir / record.job_id
+        job_dir.mkdir(parents=True, exist_ok=True)
+        meta_file = job_dir / "job.json"
+        
+        # Atomic write via temporary file
+        tmp_file = job_dir / f"job.json.tmp.{uuid.uuid4().hex}"
+        record.updated_at = datetime.now(timezone.utc).isoformat()
+        tmp_file.write_text(record.model_dump_json(indent=2), encoding="utf-8")
+        tmp_file.replace(meta_file)
+
+        with self._lock:
+            self._cache[record.job_id] = record
 
     def get_job_dir(self, job_id: str) -> Path:
-        """Returns the isolated directory for a specific job."""
-        return self.data_dir / job_id
+        """Returns the base directory Path for a specific job."""
+        job_dir = self.data_dir / job_id
+        job_dir.mkdir(parents=True, exist_ok=True)
+        return job_dir
 
     def create_job(self, source_type: SourceType, source_name: str, title: str) -> JobRecord:
-        """Creates a new job directory and saves the initial JobRecord."""
+        """Creates a new job record, persists it to disk, and tracks it in cache."""
         job_id = str(uuid.uuid4())
-        job_dir = self.get_job_dir(job_id)
-        job_dir.mkdir(parents=True, exist_ok=True)
-
         record = JobRecord(
             job_id=job_id,
             source_type=source_type,
@@ -57,44 +71,27 @@ class JobManager:
             title=title,
             status=JobStatus.QUEUED,
             progress=0,
-            current_stage="Queued",
+            current_stage="Job created, queued for processing"
         )
-
         self._save_job(record)
         return record
 
-    def _save_job(self, record: JobRecord):
-        """Serializes the JobRecord to disk and updates in-memory cache."""
-        with self._lock:
-            record.updated_at = datetime.now(timezone.utc).isoformat()
-            self._cache[record.job_id] = record
-
-            job_dir = self.get_job_dir(record.job_id)
-            job_dir.mkdir(parents=True, exist_ok=True)
-            json_path = job_dir / "job.json"
-            temp_path = job_dir / "job.json.tmp"
-
-            with open(temp_path, "w", encoding="utf-8") as f:
-                json.dump(record.model_dump(), f, indent=2)
-            temp_path.replace(json_path)
-
     def get_job(self, job_id: str) -> Optional[JobRecord]:
-        """Retrieves a job by ID from memory cache or disk."""
+        """Retrieves a job record from cache, falling back to disk read if necessary."""
         with self._lock:
             if job_id in self._cache:
                 return self._cache[job_id]
 
-        # Check disk if not in cache
-        json_path = self.get_job_dir(job_id) / "job.json"
-        if json_path.exists():
+        meta_file = self.data_dir / job_id / "job.json"
+        if meta_file.exists():
             try:
-                with open(json_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    record = JobRecord.model_validate(data)
-                    with self._lock:
-                        self._cache[job_id] = record
-                    return record
-            except Exception:
+                data = json.loads(meta_file.read_text(encoding="utf-8"))
+                record = JobRecord.model_validate(data)
+                with self._lock:
+                    self._cache[job_id] = record
+                return record
+            except Exception as e:
+                print(f"[JobManager] Failed to read job {job_id}: {e}")
                 return None
         return None
 
@@ -127,6 +124,53 @@ class JobManager:
 
         jobs.sort(key=lambda j: j.created_at, reverse=True)
         return jobs
+
+    def get_lyrics(self, job_id: str) -> LyricsResponse:
+        """Retrieves the lyrics for a specific job."""
+        job_dir = self.get_job_dir(job_id)
+        lyrics_file = job_dir / "lyrics.lrc"
+        if not lyrics_file.exists():
+            return LyricsResponse(
+                job_id=job_id,
+                lyrics="",
+                has_lyrics=False,
+                has_timestamps=False
+            )
+
+        try:
+            content = lyrics_file.read_text(encoding="utf-8")
+            has_timestamps = bool(re.search(r"\[\d{2}:\d{2}", content))
+            return LyricsResponse(
+                job_id=job_id,
+                lyrics=content,
+                has_lyrics=bool(content.strip()),
+                has_timestamps=has_timestamps
+            )
+        except Exception as e:
+            print(f"[JobManager] Error reading lyrics for job {job_id}: {e}")
+            return LyricsResponse(
+                job_id=job_id,
+                lyrics="",
+                has_lyrics=False,
+                has_timestamps=False
+            )
+
+    def save_lyrics(self, job_id: str, lyrics_text: str) -> LyricsResponse:
+        """Atomically saves lyrics content to lyrics.lrc for a job."""
+        job_dir = self.get_job_dir(job_id)
+        lyrics_file = job_dir / "lyrics.lrc"
+        tmp_file = job_dir / f"lyrics.lrc.tmp.{uuid.uuid4().hex}"
+
+        tmp_file.write_text(lyrics_text, encoding="utf-8")
+        tmp_file.replace(lyrics_file)
+
+        has_timestamps = bool(re.search(r"\[\d{2}:\d{2}", lyrics_text))
+        return LyricsResponse(
+            job_id=job_id,
+            lyrics=lyrics_text,
+            has_lyrics=bool(lyrics_text.strip()),
+            has_timestamps=has_timestamps
+        )
 
     def submit_task(self, fn: Callable, *args: Any, **kwargs: Any) -> Future:
         """Submits a background job to the bounded executor."""
