@@ -13,7 +13,7 @@ Build the complete Flexioke application with dual ingestion (file upload & YouTu
 - `docs/design/ADR-0001-stem-separation-player-architecture.md`
 
 ## Stories
-- [ ] STORY-0001: Backend Foundation, Job Manager & Ingestion APIs
-- [ ] STORY-0002: 2-Stage Audio Stem Separation Pipeline
-- [ ] STORY-0003: Song Library & Playback Queue Services
-- [ ] STORY-0004: Interactive Multitrack Web Player & UI
+- [x] STORY-0001: Backend Foundation, Job Manager & Ingestion APIs
+- [x] STORY-0002: 2-Stage Audio Stem Separation Pipeline
+- [x] STORY-0003: Song Library & Playback Queue Services
+- [x] STORY-0004: Interactive Multitrack Web Player & UI
