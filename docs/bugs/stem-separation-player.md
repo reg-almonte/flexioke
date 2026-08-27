@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: fixed
 filed_at: 2026-08-27
 ---
 
