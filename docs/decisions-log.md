@@ -48,3 +48,7 @@ made while building the template itself.
 - artifact: docs/tickets/EPIC-0002-karaoke-lyrics-mode.md
 - approved_by: reg
 - notes: Approved EPIC-0002 work breakdown comprising STORY-0005 to STORY-0007 and TASK-0013 to TASK-0018 covering backend lyrics persistence, song library lyrics editor modal, top navigation tab switcher, real-time synchronized karaoke display, and smart play interruption guard.
+## 2026-08-27 — Approved ADR-0003: Independent Page System for Stem Studio & Karaoke Mode with Lyrics Engine Overhaul
+- artifact: docs/design/ADR-0003-independent-karaoke-page-and-lyrics-overhaul.md
+- approved_by: reg
+- notes: Approved independent page systems with dedicated Song Library & Playback Queue per mode, mutual exclusion playback coordinator, and high-contrast, robust lyrics rendering engine.
