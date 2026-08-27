@@ -1,7 +1,7 @@
 ---
 status: approved
 approved_by: reg
-approved_at: 2026-08-27 2026-08-27
+approved_at: 2026-08-27
 ---
 
 # EPIC-0002: Synchronized Lyrics & Dedicated Karaoke Player Mode
@@ -13,6 +13,6 @@ Deliver the complete Version 2 feature set enabling users to manage timestamped 
 - `docs/design/ADR-0002-karaoke-lyrics-synchronization.md`
 
 ## Stories
-- [ ] STORY-0005: Lyrics Storage Service & API Endpoints
-- [ ] STORY-0006: Frontend Lyrics Management & Editor UI
-- [ ] STORY-0007: Dedicated Karaoke Player Page & Synchronized Stage
+- [x] STORY-0005: Lyrics Storage Service & API Endpoints
+- [x] STORY-0006: Frontend Lyrics Management & Editor UI
+- [x] STORY-0007: Dedicated Karaoke Player Page & Synchronized Stage
