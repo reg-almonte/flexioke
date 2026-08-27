@@ -44,6 +44,8 @@ class FlexiokePlayer {
         this.currentJob = null;
         this.duration = 0;
         this.isSyncingSeek = false;
+        this.autoPlayPending = false;
+        this.finishedFired = false;
 
         this.initDOM();
     }
@@ -91,23 +93,30 @@ class FlexiokePlayer {
         // Listen for completed job events
         window.addEventListener('flexioke:job-completed', (e) => {
             if (e.detail && e.detail.stems) {
-                this.loadSong(e.detail);
+                this.loadSong(e.detail, true);
             }
         });
     }
 
-    loadSong(job) {
+    loadSong(job, autoPlay = false) {
         if (!job || !job.stems) return;
         this.currentJob = job;
+        this.autoPlayPending = autoPlay;
+        this.finishedFired = false;
         this.songTitleEl.textContent = job.title || "Untitled Song";
         this.isPlaying = false;
         this.updatePlayBtnUI();
+
+        // Track how many stems need to load
+        const expectedStems = Object.keys(this.tracks).filter(key => !!job.stems[key]);
+        let readyCount = 0;
 
         // Destroy prior wavesurfer instances
         Object.keys(this.tracks).forEach((trackKey) => {
             const track = this.tracks[trackKey];
             if (track.ws) {
                 try {
+                    track.ws.unAll();
                     track.ws.destroy();
                 } catch (err) {
                     console.error("Error destroying wavesurfer:", err);
@@ -157,9 +166,16 @@ class FlexiokePlayer {
 
             ws.on('ready', () => {
                 track.isReady = true;
+                readyCount++;
                 this.duration = ws.getDuration();
                 this.updateTimecode(0, this.duration);
                 this.applyGainMatrix();
+
+                // If all stems are decoded and ready, trigger autoplay if requested
+                if (readyCount >= expectedStems.length && this.autoPlayPending) {
+                    this.autoPlayPending = false;
+                    this.play();
+                }
             });
 
             ws.on('timeupdate', (currentTime) => {
@@ -176,6 +192,7 @@ class FlexiokePlayer {
             });
 
             ws.on('finish', () => {
+                // Only trigger finish once per song from the primary track
                 if (trackKey === 'instrumental' || !this.tracks.instrumental.ws) {
                     this.onSongFinished();
                 }
@@ -215,7 +232,7 @@ class FlexiokePlayer {
         Object.values(this.tracks).forEach(track => {
             if (track.ws && track.isReady) {
                 track.ws.setTime(primaryTime);
-                track.ws.play();
+                track.ws.play().catch(err => console.warn(`Autoplay restriction or error on ${track.id}:`, err));
             }
         });
     }
@@ -233,6 +250,7 @@ class FlexiokePlayer {
 
     stop() {
         this.pause();
+        this.finishedFired = false;
         Object.values(this.tracks).forEach(track => {
             if (track.ws && track.isReady) {
                 track.ws.setTime(0);
@@ -290,8 +308,12 @@ class FlexiokePlayer {
     }
 
     onSongFinished() {
+        if (this.finishedFired) return;
+        this.finishedFired = true;
+
         this.isPlaying = false;
         this.updatePlayBtnUI();
+        console.log("Song finished, dispatching flexioke:track-ended");
         window.dispatchEvent(new CustomEvent('flexioke:track-ended', { detail: this.currentJob }));
     }
 

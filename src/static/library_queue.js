@@ -93,8 +93,7 @@ class SongLibraryManager {
                 if (window.flexiokeQueue) {
                     window.flexiokeQueue.playNow(job.job_id);
                 } else if (window.flexiokePlayer) {
-                    window.flexiokePlayer.loadSong(job);
-                    setTimeout(() => window.flexiokePlayer.play(), 200);
+                    window.flexiokePlayer.loadSong(job, true);
                 }
             });
 
@@ -115,6 +114,7 @@ class PlaybackQueueManager {
         this.queueContainer = document.getElementById('queue-list-container');
         this.clearBtn = document.getElementById('clear-queue-btn');
         this.playNextBtn = document.getElementById('play-next-queue-btn');
+        this.isAdvancing = false;
 
         this.init();
     }
@@ -129,7 +129,7 @@ class PlaybackQueueManager {
 
         // Handle auto-advance when a track finishes
         window.addEventListener('flexioke:track-ended', () => {
-            console.log("Track ended, advancing queue...");
+            console.log("Track ended event received, triggering advanceNext...");
             this.advanceNext();
         });
 
@@ -175,8 +175,8 @@ class PlaybackQueueManager {
                 const state = await resp.json();
                 this.render(state);
                 if (state.current_track && window.flexiokePlayer) {
-                    window.flexiokePlayer.loadSong(state.current_track);
-                    setTimeout(() => window.flexiokePlayer.play(), 250);
+                    // Autoplay set to true on load
+                    window.flexiokePlayer.loadSong(state.current_track, true);
                 }
             }
         } catch (err) {
@@ -185,18 +185,25 @@ class PlaybackQueueManager {
     }
 
     async advanceNext() {
+        if (this.isAdvancing) return;
+        this.isAdvancing = true;
+
         try {
             const resp = await fetch('/api/queue/next', { method: 'POST' });
             if (resp.ok) {
                 const state = await resp.json();
                 this.render(state);
                 if (state.current_track && window.flexiokePlayer) {
-                    window.flexiokePlayer.loadSong(state.current_track);
-                    setTimeout(() => window.flexiokePlayer.play(), 250);
+                    // Autoplay set to true on load
+                    window.flexiokePlayer.loadSong(state.current_track, true);
                 }
             }
         } catch (err) {
             console.error("Error advancing queue:", err);
+        } finally {
+            setTimeout(() => {
+                this.isAdvancing = false;
+            }, 500);
         }
     }
 
