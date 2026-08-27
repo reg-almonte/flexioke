@@ -40,3 +40,7 @@ made while building the template itself.
 - artifact: docs/requirements/karaoke-lyrics-mode.md, docs/specs/karaoke-lyrics-mode.md
 - approved_by: user
 - notes: Approved Version 2 requirements and functional spec covering timestamped .lrc lyrics management, dedicated Karaoke Mode tab, real-time synchronized active line display, smart playback interruption guard, and quick vocal mute toggles.
+## 2026-08-27 — Approved ADR-0002: Client-Side LRC Lyrics Synchronization & Dedicated Karaoke Mode Architecture
+- artifact: docs/design/ADR-0002-karaoke-lyrics-synchronization.md
+- approved_by: user
+- notes: Approved Option 1 (Client-side LRC parsing, DOM synchronizer bound to Wavesurfer timecode, atomic backend lyrics storage, top-level tab switcher, and smart play interruption guard).
