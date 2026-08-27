@@ -1,7 +1,36 @@
 /**
- * Flexioke — Core SPA Ingestion & Progress Manager
+ * Flexioke — Core SPA Ingestion & View Switcher
  */
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Navigation Views ---
+    const navTabStudio = document.getElementById('nav-tab-studio');
+    const navTabKaraoke = document.getElementById('nav-tab-karaoke');
+    const viewStemStudio = document.getElementById('view-stem-studio');
+    const viewKaraoke = document.getElementById('view-karaoke');
+    const karaokeSwitchToStudioBtn = document.getElementById('karaoke-switch-to-studio-btn');
+
+    if (navTabStudio && navTabKaraoke) {
+        navTabStudio.addEventListener('click', () => {
+            navTabStudio.className = "px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5";
+            navTabKaraoke.className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
+            if (viewStemStudio) viewStemStudio.classList.remove('hidden');
+            if (viewKaraoke) viewKaraoke.classList.add('hidden');
+        });
+
+        navTabKaraoke.addEventListener('click', () => {
+            navTabKaraoke.className = "px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5";
+            navTabStudio.className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
+            if (viewKaraoke) viewKaraoke.classList.remove('hidden');
+            if (viewStemStudio) viewStemStudio.classList.add('hidden');
+        });
+    }
+
+    if (karaokeSwitchToStudioBtn && navTabStudio) {
+        karaokeSwitchToStudioBtn.addEventListener('click', () => {
+            navTabStudio.click();
+        });
+    }
+
     // --- Elements ---
     const tabUploadBtn = document.getElementById('tab-upload-btn');
     const tabYoutubeBtn = document.getElementById('tab-youtube-btn');

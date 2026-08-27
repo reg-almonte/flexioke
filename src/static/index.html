@@ -36,7 +36,7 @@
 </head>
 <body class="bg-surface-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
     <!-- Header -->
-    <header class="border-b border-slate-800/80 bg-surface-900/90 backdrop-blur sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between shadow-sm">
+    <header class="border-b border-slate-800/80 bg-surface-900/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-violet-500 flex items-center justify-center shadow-md shadow-brand-500/20 text-lg">
                 🎤
@@ -52,6 +52,16 @@
             </div>
         </div>
 
+        <!-- Top Navigation View Switcher -->
+        <nav class="flex p-1 bg-surface-950 rounded-xl border border-slate-800/80 text-xs font-semibold">
+            <button id="nav-tab-studio" class="px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5">
+                <span>🎛️</span> Stem Studio
+            </button>
+            <button id="nav-tab-karaoke" class="px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5">
+                <span>🎤</span> Karaoke Mode
+            </button>
+        </nav>
+
         <div class="flex items-center gap-3">
             <div id="system-status" class="text-xs text-slate-400 flex items-center gap-2 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700/50">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -61,258 +71,353 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
         
-        <!-- Left Sidebar: Ingestion & Library (4 cols) -->
-        <aside class="lg:col-span-4 space-y-6 flex flex-col">
+        <!-- VIEW 1: Stem Studio (Default) -->
+        <div id="view-stem-studio" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Ingestion Card -->
-            <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                        <span>✨</span> Add Song for Separation
-                    </h2>
-                </div>
+            <!-- Left Sidebar: Ingestion & Library (4 cols) -->
+            <aside class="lg:col-span-4 space-y-6 flex flex-col">
+                
+                <!-- Ingestion Card -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                            <span>✨</span> Add Song for Separation
+                        </h2>
+                    </div>
 
-                <!-- Source Tabs -->
-                <div class="flex p-1 bg-surface-950 rounded-xl border border-slate-800/80 text-xs font-medium">
-                    <button id="tab-upload-btn" class="flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5">
-                        <span>📁</span> Upload Audio
-                    </button>
-                    <button id="tab-youtube-btn" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
-                        <span>▶️</span> YouTube Link
-                    </button>
-                </div>
+                    <!-- Source Tabs -->
+                    <div class="flex p-1 bg-surface-950 rounded-xl border border-slate-800/80 text-xs font-medium">
+                        <button id="tab-upload-btn" class="flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5">
+                            <span>📁</span> Upload Audio
+                        </button>
+                        <button id="tab-youtube-btn" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
+                            <span>▶️</span> YouTube Link
+                        </button>
+                    </div>
 
-                <!-- Tab 1: File Upload Form -->
-                <div id="tab-upload-content" class="space-y-4">
-                    <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-brand-500/70 hover:bg-brand-500/5 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center gap-2 group">
-                        <input type="file" id="file-input" class="hidden" accept=".mp3,.wav,.m4a,.flac,.ogg">
-                        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-xl group-hover:scale-110 transition group-hover:bg-brand-500/20">
-                            🎵
+                    <!-- Tab 1: File Upload Form -->
+                    <div id="tab-upload-content" class="space-y-4">
+                        <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-brand-500/70 hover:bg-brand-500/5 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center gap-2 group">
+                            <input type="file" id="file-input" class="hidden" accept=".mp3,.wav,.m4a,.flac,.ogg">
+                            <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-xl group-hover:scale-110 transition group-hover:bg-brand-500/20">
+                                🎵
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-slate-200">Drag & drop your audio file here</p>
+                                <p class="text-[11px] text-slate-400 mt-0.5">or <span class="text-brand-400 underline">browse from computer</span></p>
+                            </div>
+                            <p class="text-[10px] text-slate-500">MP3, WAV, FLAC, M4A, OGG (Max 100MB)</p>
                         </div>
+
+                        <div id="selected-file-badge" class="hidden flex items-center justify-between p-2.5 bg-slate-800/80 border border-slate-700 rounded-lg text-xs">
+                            <div class="flex items-center gap-2 truncate">
+                                <span>📄</span>
+                                <span id="selected-file-name" class="font-medium text-slate-200 truncate">filename.mp3</span>
+                                <span id="selected-file-size" class="text-[10px] text-slate-400"></span>
+                            </div>
+                            <button id="clear-file-btn" class="text-slate-400 hover:text-rose-400 p-1 text-xs">✕</button>
+                        </div>
+
+                        <button id="submit-upload-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-brand-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                            <span>⚡</span> Separate Stems
+                        </button>
+                    </div>
+
+                    <!-- Tab 2: YouTube Form -->
+                    <div id="tab-youtube-content" class="hidden space-y-4">
+                        <div class="space-y-1.5">
+                            <label for="youtube-url-input" class="text-xs font-medium text-slate-300">YouTube Video / Song URL</label>
+                            <div class="relative">
+                                <input type="url" id="youtube-url-input" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-surface-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
+                            </div>
+                            <p class="text-[10px] text-slate-500">Supports YouTube & YouTube Music (Max 15 mins)</p>
+                        </div>
+
+                        <button id="submit-youtube-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-brand-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                            <span>⚡</span> Download & Separate
+                        </button>
+                    </div>
+
+                    <!-- Live Progress Card -->
+                    <div id="processing-card" class="hidden border border-brand-500/40 bg-brand-950/20 rounded-xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-brand-300 flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-brand-400 animate-ping"></span>
+                                Separation Pipeline Active
+                            </span>
+                            <span id="progress-percent" class="text-xs font-bold text-brand-400">0%</span>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-brand-500 to-violet-400 transition-all duration-300 w-0"></div>
+                        </div>
+
+                        <p id="progress-stage-text" class="text-[11px] text-slate-300 truncate">Initializing pipeline...</p>
+
+                        <!-- Stage Steps -->
+                        <div class="grid grid-cols-3 gap-1 text-[10px] text-center pt-1 border-t border-slate-800/80">
+                            <div id="step-ingest" class="p-1 rounded bg-slate-800/60 text-slate-400">1. Ingestion</div>
+                            <div id="step-stage1" class="p-1 rounded bg-slate-800/60 text-slate-400">2. RoFormer</div>
+                            <div id="step-stage2" class="p-1 rounded bg-slate-800/60 text-slate-400">3. Karaoke</div>
+                        </div>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div id="error-card" class="hidden border border-rose-500/40 bg-rose-950/20 rounded-xl p-3.5 space-y-2">
+                        <div class="flex items-center justify-between text-rose-400 text-xs font-semibold">
+                            <span class="flex items-center gap-1.5">⚠️ Processing Error</span>
+                            <button id="dismiss-error-btn" class="text-slate-400 hover:text-slate-200">✕</button>
+                        </div>
+                        <p id="error-message-text" class="text-[11px] text-rose-300/90 leading-relaxed"></p>
+                    </div>
+                </section>
+
+                <!-- Song Library Card -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex-1 flex flex-col min-h-[320px]">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                            <span>📚</span> Song Library
+                        </h2>
+                        <span id="library-count-badge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <input type="text" id="library-search-input" placeholder="Search by song title..." class="w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
+                        <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
+                    </div>
+
+                    <!-- Library List Container -->
+                    <div id="library-list-container" class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[380px]">
+                        <div id="library-empty-state" class="text-center py-8 text-slate-500 text-xs">
+                            No songs in library yet.<br>Upload or extract a track above!
+                        </div>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Right Column: Multitrack Player & Queue (8 cols) -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Multitrack Player Card -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-5">
+                    <!-- Track Header -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
                         <div>
-                            <p class="text-xs font-medium text-slate-200">Drag & drop your audio file here</p>
-                            <p class="text-[11px] text-slate-400 mt-0.5">or <span class="text-brand-400 underline">browse from computer</span></p>
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-brand-400">Active Multitrack Session</span>
+                            <h2 id="player-song-title" class="text-lg font-bold text-white tracking-tight truncate">No Track Loaded</h2>
                         </div>
-                        <p class="text-[10px] text-slate-500">MP3, WAV, FLAC, M4A, OGG (Max 100MB)</p>
-                    </div>
-
-                    <div id="selected-file-badge" class="hidden flex items-center justify-between p-2.5 bg-slate-800/80 border border-slate-700 rounded-lg text-xs">
-                        <div class="flex items-center gap-2 truncate">
-                            <span>📄</span>
-                            <span id="selected-file-name" class="font-medium text-slate-200 truncate">filename.mp3</span>
-                            <span id="selected-file-size" class="text-[10px] text-slate-400"></span>
+                        <div class="flex items-center gap-3">
+                            <span id="player-timecode" class="text-xs font-mono text-slate-300 bg-surface-950 px-3 py-1.5 rounded-lg border border-slate-800">
+                                00:00 / 00:00
+                            </span>
                         </div>
-                        <button id="clear-file-btn" class="text-slate-400 hover:text-rose-400 p-1 text-xs">✕</button>
                     </div>
 
-                    <button id="submit-upload-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-brand-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <span>⚡</span> Separate Stems
-                    </button>
-                </div>
-
-                <!-- Tab 2: YouTube Form -->
-                <div id="tab-youtube-content" class="hidden space-y-4">
-                    <div class="space-y-1.5">
-                        <label for="youtube-url-input" class="text-xs font-medium text-slate-300">YouTube Video / Song URL</label>
-                        <div class="relative">
-                            <input type="url" id="youtube-url-input" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-surface-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
+                    <!-- Master Transport Bar -->
+                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-4">
+                        <!-- Transport Buttons -->
+                        <div class="flex items-center gap-2">
+                            <button id="transport-play-btn" class="w-10 h-10 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-bold flex items-center justify-center transition shadow-lg shadow-brand-500/30 disabled:opacity-40 disabled:cursor-not-allowed">
+                                ▶
+                            </button>
+                            <button id="transport-stop-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition disabled:opacity-40">
+                                ⏹
+                            </button>
                         </div>
-                        <p class="text-[10px] text-slate-500">Supports YouTube & YouTube Music (Max 15 mins)</p>
+
+                        <!-- Master Volume -->
+                        <div class="flex items-center gap-2 text-xs text-slate-400">
+                            <span>🔊 Master</span>
+                            <input type="range" id="master-volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-24 accent-brand-500 cursor-pointer">
+                        </div>
                     </div>
 
-                    <button id="submit-youtube-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-brand-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <span>⚡</span> Download & Separate
-                    </button>
-                </div>
+                    <!-- 3 Stacked Multitrack Waveform Channels -->
+                    <div id="multitrack-container" class="space-y-4">
+                        
+                        <!-- Channel 1: Instrumental -->
+                        <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2 font-semibold text-emerald-400">
+                                    <span>🎸</span>
+                                    <span>Instrumental (Music)</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button id="mute-btn-instrumental" class="channel-mute-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">
+                                        Mute
+                                    </button>
+                                    <button id="solo-btn-instrumental" class="channel-solo-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 text-[11px] font-medium transition">
+                                        Solo
+                                    </button>
+                                    <input type="range" id="vol-slider-instrumental" min="0" max="1" step="0.01" value="1.0" class="w-20 accent-emerald-500 cursor-pointer">
+                                </div>
+                            </div>
+                            <div id="waveform-instrumental" class="h-16 rounded bg-slate-900/90 relative overflow-hidden border border-slate-800/50">
+                                <div class="waveform-placeholder absolute inset-0 flex items-center justify-center text-slate-600 text-[11px]">No audio loaded</div>
+                            </div>
+                        </div>
 
-                <!-- Live Progress Card -->
-                <div id="processing-card" class="hidden border border-brand-500/40 bg-brand-950/20 rounded-xl p-4 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-brand-300 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-brand-400 animate-ping"></span>
-                            Separation Pipeline Active
-                        </span>
-                        <span id="progress-percent" class="text-xs font-bold text-brand-400">0%</span>
+                        <!-- Channel 2: Lead Vocals -->
+                        <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2 font-semibold text-brand-400">
+                                    <span>🎤</span>
+                                    <span>Lead Vocals</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button id="mute-btn-lead_vocals" class="channel-mute-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">
+                                        Mute
+                                    </button>
+                                    <button id="solo-btn-lead_vocals" class="channel-solo-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 text-[11px] font-medium transition">
+                                        Solo
+                                    </button>
+                                    <input type="range" id="vol-slider-lead_vocals" min="0" max="1" step="0.01" value="1.0" class="w-20 accent-brand-500 cursor-pointer">
+                                </div>
+                            </div>
+                            <div id="waveform-lead_vocals" class="h-16 rounded bg-slate-900/90 relative overflow-hidden border border-slate-800/50">
+                                <div class="waveform-placeholder absolute inset-0 flex items-center justify-center text-slate-600 text-[11px]">No audio loaded</div>
+                            </div>
+                        </div>
+
+                        <!-- Channel 3: Backing Vocals -->
+                        <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2 font-semibold text-violet-400">
+                                    <span>👥</span>
+                                    <span>Backing Vocals & Harmonies</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button id="mute-btn-backing_vocals" class="channel-mute-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">
+                                        Mute
+                                    </button>
+                                    <button id="solo-btn-backing_vocals" class="channel-solo-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 text-[11px] font-medium transition">
+                                        Solo
+                                    </button>
+                                    <input type="range" id="vol-slider-backing_vocals" min="0" max="1" step="0.01" value="1.0" class="w-20 accent-violet-500 cursor-pointer">
+                                </div>
+                            </div>
+                            <div id="waveform-backing_vocals" class="h-16 rounded bg-slate-900/90 relative overflow-hidden border border-slate-800/50">
+                                <div class="waveform-placeholder absolute inset-0 flex items-center justify-center text-slate-600 text-[11px]">No audio loaded</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- Playback Queue Card -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                            <span>📋</span> Playback Queue
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <button id="clear-queue-btn" class="text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
+                            <button id="play-next-queue-btn" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded font-medium transition">Skip Next ⏭</button>
+                        </div>
                     </div>
 
-                    <!-- Progress Bar -->
-                    <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                        <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-brand-500 to-violet-400 transition-all duration-300 w-0"></div>
+                    <div id="queue-list-container" class="space-y-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+                        <div id="queue-empty-state" class="text-center py-6 text-slate-500 text-xs">
+                            Playback queue is empty.<br>Add songs from the library on the left!
+                        </div>
                     </div>
+                </section>
 
-                    <p id="progress-stage-text" class="text-[11px] text-slate-300 truncate">Initializing pipeline...</p>
+            </div>
 
-                    <!-- Stage Steps -->
-                    <div class="grid grid-cols-3 gap-1 text-[10px] text-center pt-1 border-t border-slate-800/80">
-                        <div id="step-ingest" class="p-1 rounded bg-slate-800/60 text-slate-400">1. Ingestion</div>
-                        <div id="step-stage1" class="p-1 rounded bg-slate-800/60 text-slate-400">2. RoFormer</div>
-                        <div id="step-stage2" class="p-1 rounded bg-slate-800/60 text-slate-400">3. Karaoke</div>
-                    </div>
-                </div>
+        </div>
 
-                <!-- Error Alert -->
-                <div id="error-card" class="hidden border border-rose-500/40 bg-rose-950/20 rounded-xl p-3.5 space-y-2">
-                    <div class="flex items-center justify-between text-rose-400 text-xs font-semibold">
-                        <span class="flex items-center gap-1.5">⚠️ Processing Error</span>
-                        <button id="dismiss-error-btn" class="text-slate-400 hover:text-slate-200">✕</button>
-                    </div>
-                    <p id="error-message-text" class="text-[11px] text-rose-300/90 leading-relaxed"></p>
-                </div>
-            </section>
-
-            <!-- Song Library Card -->
-            <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex-1 flex flex-col min-h-[320px]">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                    <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                        <span>📚</span> Song Library
-                    </h2>
-                    <span id="library-count-badge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
-                </div>
-
-                <!-- Search Input -->
-                <div class="relative">
-                    <input type="text" id="library-search-input" placeholder="Search by song title..." class="w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
-                    <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
-                </div>
-
-                <!-- Library List Container -->
-                <div id="library-list-container" class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[380px]">
-                    <div id="library-empty-state" class="text-center py-8 text-slate-500 text-xs">
-                        No songs in library yet.<br>Upload or extract a track above!
-                    </div>
-                </div>
-            </section>
-        </aside>
-
-        <!-- Right Column: Multitrack Player & Queue (8 cols) -->
-        <div class="lg:col-span-8 space-y-6">
+        <!-- VIEW 2: Karaoke Mode (Dedicated Lyrics Stage) -->
+        <div id="view-karaoke" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Multitrack Player Card -->
-            <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-5">
-                <!-- Track Header -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
-                    <div>
-                        <span class="text-[10px] uppercase font-bold tracking-wider text-brand-400">Active Multitrack Session</span>
-                        <h2 id="player-song-title" class="text-lg font-bold text-white tracking-tight truncate">No Track Loaded</h2>
+            <!-- Left Sidebar (Shared Library & Ingestion Shortcut) (4 cols) -->
+            <aside class="lg:col-span-4 space-y-6">
+                <!-- Karaoke Shared Library / Queue info -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                            <span>🎤</span> Karaoke Session
+                        </h2>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 font-semibold">Live Stage</span>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span id="player-timecode" class="text-xs font-mono text-slate-300 bg-surface-950 px-3 py-1.5 rounded-lg border border-slate-800">
+
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Sing along with synchronized timestamped lyrics. Use the vocal strip below the stage to mute the original artist's lead vocals for solo singing!
+                    </p>
+
+                    <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                        <span class="text-slate-400">Want to add stems/files?</span>
+                        <button id="karaoke-switch-to-studio-btn" class="text-brand-400 hover:underline font-semibold">
+                            Open Stem Studio →
+                        </button>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Right Column: Big Center Stage Lyrics & Karaoke Controls (8 cols) -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Center Stage Lyrics Card -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-6 shadow-2xl space-y-6 min-h-[460px] flex flex-col justify-between relative overflow-hidden">
+                    
+                    <!-- Karaoke Track Info Header -->
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 z-10">
+                        <div class="truncate">
+                            <span class="text-[10px] uppercase font-bold tracking-widest text-brand-400">Now Singing</span>
+                            <h2 id="karaoke-song-title" class="text-xl font-extrabold text-white tracking-tight truncate">No Track Selected</h2>
+                        </div>
+                        <span id="karaoke-timecode" class="text-xs font-mono text-slate-300 bg-surface-950 px-3 py-1.5 rounded-lg border border-slate-800">
                             00:00 / 00:00
                         </span>
                     </div>
-                </div>
 
-                <!-- Master Transport Bar -->
-                <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-4">
-                    <!-- Transport Buttons -->
-                    <div class="flex items-center gap-2">
-                        <button id="transport-play-btn" class="w-10 h-10 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-bold flex items-center justify-center transition shadow-lg shadow-brand-500/30 disabled:opacity-40 disabled:cursor-not-allowed">
-                            ▶
-                        </button>
-                        <button id="transport-stop-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition disabled:opacity-40">
-                            ⏹
-                        </button>
-                    </div>
-
-                    <!-- Master Volume -->
-                    <div class="flex items-center gap-2 text-xs text-slate-400">
-                        <span>🔊 Master</span>
-                        <input type="range" id="master-volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-24 accent-brand-500 cursor-pointer">
-                    </div>
-                </div>
-
-                <!-- 3 Stacked Multitrack Waveform Channels -->
-                <div id="multitrack-container" class="space-y-4">
-                    
-                    <!-- Channel 1: Instrumental -->
-                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
-                        <div class="flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2 font-semibold text-emerald-400">
-                                <span>🎸</span>
-                                <span>Instrumental (Music)</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button id="mute-btn-instrumental" class="channel-mute-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">
-                                    Mute
-                                </button>
-                                <button id="solo-btn-instrumental" class="channel-solo-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 text-[11px] font-medium transition">
-                                    Solo
-                                </button>
-                                <input type="range" id="vol-slider-instrumental" min="0" max="1" step="0.01" value="1.0" class="w-20 accent-emerald-500 cursor-pointer">
-                            </div>
-                        </div>
-                        <div id="waveform-instrumental" class="h-16 rounded bg-slate-900/90 relative overflow-hidden border border-slate-800/50">
-                            <div class="waveform-placeholder absolute inset-0 flex items-center justify-center text-slate-600 text-[11px]">No audio loaded</div>
+                    <!-- Center Stage Scrolling Lyrics Container -->
+                    <div id="karaoke-lyrics-stage" class="flex-1 overflow-y-auto py-12 px-4 space-y-5 text-center custom-scrollbar max-h-[360px] flex flex-col items-center justify-center">
+                        <div id="karaoke-empty-state" class="text-slate-500 text-sm italic">
+                            Select a song from the library to start karaoke!
                         </div>
                     </div>
 
-                    <!-- Channel 2: Lead Vocals -->
-                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
-                        <div class="flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2 font-semibold text-brand-400">
+                    <!-- Karaoke Quick Vocal Toggles & Transport Bar -->
+                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-4 z-10">
+                        
+                        <!-- Play / Pause & Skip -->
+                        <div class="flex items-center gap-2">
+                            <button id="karaoke-play-btn" class="w-10 h-10 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-bold flex items-center justify-center transition shadow-lg shadow-brand-500/30">
+                                ▶
+                            </button>
+                            <button id="karaoke-skip-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition font-semibold">
+                                ⏭
+                            </button>
+                        </div>
+
+                        <!-- Quick Vocal Toggles for Singers -->
+                        <div class="flex items-center gap-2">
+                            <button id="karaoke-toggle-lead-btn" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700">
                                 <span>🎤</span>
-                                <span>Lead Vocals</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button id="mute-btn-lead_vocals" class="channel-mute-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">
-                                    Mute
-                                </button>
-                                <button id="solo-btn-lead_vocals" class="channel-solo-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 text-[11px] font-medium transition">
-                                    Solo
-                                </button>
-                                <input type="range" id="vol-slider-lead_vocals" min="0" max="1" step="0.01" value="1.0" class="w-20 accent-brand-500 cursor-pointer">
-                            </div>
-                        </div>
-                        <div id="waveform-lead_vocals" class="h-16 rounded bg-slate-900/90 relative overflow-hidden border border-slate-800/50">
-                            <div class="waveform-placeholder absolute inset-0 flex items-center justify-center text-slate-600 text-[11px]">No audio loaded</div>
-                        </div>
-                    </div>
-
-                    <!-- Channel 3: Backing Vocals -->
-                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 space-y-2">
-                        <div class="flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2 font-semibold text-violet-400">
+                                <span id="karaoke-lead-status-text">Lead Vocals: ON</span>
+                            </button>
+                            <button id="karaoke-toggle-backing-btn" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5 border border-slate-700">
                                 <span>👥</span>
-                                <span>Backing Vocals & Harmonies</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button id="mute-btn-backing_vocals" class="channel-mute-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition">
-                                    Mute
-                                </button>
-                                <button id="solo-btn-backing_vocals" class="channel-solo-btn px-2.5 py-1 rounded bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 text-[11px] font-medium transition">
-                                    Solo
-                                </button>
-                                <input type="range" id="vol-slider-backing_vocals" min="0" max="1" step="0.01" value="1.0" class="w-20 accent-violet-500 cursor-pointer">
-                            </div>
+                                <span id="karaoke-backing-status-text">Backing: ON</span>
+                            </button>
                         </div>
-                        <div id="waveform-backing_vocals" class="h-16 rounded bg-slate-900/90 relative overflow-hidden border border-slate-800/50">
-                            <div class="waveform-placeholder absolute inset-0 flex items-center justify-center text-slate-600 text-[11px]">No audio loaded</div>
+
+                        <!-- Master Volume -->
+                        <div class="flex items-center gap-2 text-xs text-slate-400">
+                            <span>🔊</span>
+                            <input type="range" id="karaoke-volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-20 accent-brand-500 cursor-pointer">
                         </div>
+
                     </div>
 
-                </div>
-            </section>
+                </section>
 
-            <!-- Playback Queue Card -->
-            <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                    <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                        <span>📋</span> Playback Queue
-                    </h2>
-                    <div class="flex items-center gap-2">
-                        <button id="clear-queue-btn" class="text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
-                        <button id="play-next-queue-btn" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded font-medium transition">Skip Next ⏭</button>
-                    </div>
-                </div>
-
-                <div id="queue-list-container" class="space-y-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-                    <div id="queue-empty-state" class="text-center py-6 text-slate-500 text-xs">
-                        Playback queue is empty.<br>Add songs from the library on the left!
-                    </div>
-                </div>
-            </section>
+            </div>
 
         </div>
 
@@ -347,6 +452,29 @@
                         <span>💾</span> Save Lyrics
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playback Interruption Confirmation Modal -->
+    <div id="play-confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3 text-amber-400">
+                <span class="text-2xl">⚠️</span>
+                <h3 class="text-sm font-bold text-white">Song Currently Playing</h3>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+                A track is currently playing. Starting <span id="confirm-song-title" class="font-semibold text-brand-300"></span> will stop current playback. Your existing playback queue will remain preserved.
+            </p>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button id="confirm-cancel-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                    Cancel
+                </button>
+                <button id="confirm-play-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition shadow-md shadow-brand-500/20">
+                    Play Now
+                </button>
             </div>
         </div>
     </div>
