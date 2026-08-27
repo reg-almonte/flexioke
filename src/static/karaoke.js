@@ -1,5 +1,5 @@
 /**
- * Flexioke — Karaoke Synchronized Stage & LRC Engine (Overhauled)
+ * Flexioke — Karaoke Synchronized Stage & LRC Engine (Overhauled with Fullscreen)
  */
 class LrcParser {
     static parse(lrcText) {
@@ -55,8 +55,15 @@ class LrcParser {
 class KaraokeStageManager {
     constructor() {
         this.stageContainer = document.getElementById('karaoke-lyrics-stage');
+        this.stageCard = document.getElementById('karaoke-stage-card');
         this.songTitleEl = document.getElementById('karaoke-song-title');
         this.timecodeEl = document.getElementById('karaoke-timecode');
+
+        // Fullscreen elements
+        this.fullscreenBtn = document.getElementById('karaoke-fullscreen-btn');
+        this.fullscreenIcon = document.getElementById('fullscreen-icon');
+        this.fullscreenBtnText = document.getElementById('fullscreen-btn-text');
+        this.isFullscreen = false;
 
         // Karaoke Transport Elements
         this.playBtn = document.getElementById('karaoke-play-btn');
@@ -77,6 +84,17 @@ class KaraokeStageManager {
     }
 
     init() {
+        // Fullscreen Toggle
+        if (this.fullscreenBtn) {
+            this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isFullscreen) {
+                this.exitFullscreen();
+            }
+        });
+
         // Bind Karaoke Transport Controls
         if (this.playBtn) {
             this.playBtn.addEventListener('click', () => {
@@ -173,6 +191,34 @@ class KaraokeStageManager {
         setInterval(() => this.onTimeCheck(), 100);
     }
 
+    toggleFullscreen() {
+        if (this.isFullscreen) {
+            this.exitFullscreen();
+        } else {
+            this.enterFullscreen();
+        }
+    }
+
+    enterFullscreen() {
+        this.isFullscreen = true;
+        if (this.stageCard) {
+            this.stageCard.classList.add('stage-fullscreen');
+        }
+        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '🗗';
+        if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Collapse';
+        if (this.fullscreenBtn) this.fullscreenBtn.title = "Exit Fullscreen Stage (Esc)";
+    }
+
+    exitFullscreen() {
+        this.isFullscreen = false;
+        if (this.stageCard) {
+            this.stageCard.classList.remove('stage-fullscreen');
+        }
+        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '⛶';
+        if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Expand';
+        if (this.fullscreenBtn) this.fullscreenBtn.title = "Toggle Fullscreen Stage";
+    }
+
     onSongLoaded(job) {
         this.currentJobId = job.job_id;
         if (this.songTitleEl) {
@@ -253,7 +299,7 @@ class KaraokeStageManager {
         // If plain text (no timestamps)
         if (!this.lyricsData.hasTimestamps) {
             const wrapper = document.createElement('div');
-            wrapper.className = "space-y-3 py-6 text-slate-200 text-base leading-relaxed max-w-lg mx-auto text-center";
+            wrapper.className = "space-y-3 py-6 text-slate-200 text-base sm:text-lg leading-relaxed max-w-lg mx-auto text-center";
             this.lyricsData.lines.forEach(line => {
                 const p = document.createElement('p');
                 p.className = "py-1";
@@ -266,7 +312,7 @@ class KaraokeStageManager {
 
         // Timestamped LRC mode
         const wrapper = document.createElement('div');
-        wrapper.className = "space-y-4 py-32 max-w-2xl mx-auto w-full text-center";
+        wrapper.className = "space-y-4 py-32 max-w-3xl mx-auto w-full text-center";
 
         this.lyricsData.lines.forEach((line, index) => {
             const lineEl = document.createElement('div');
