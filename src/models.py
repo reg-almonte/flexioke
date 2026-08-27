@@ -32,3 +32,16 @@ class JobRecord(BaseModel):
 class JobListResponse(BaseModel):
     total: int
     jobs: List[JobRecord]
+
+class QueueItem(BaseModel):
+    queue_id: str
+    job_id: str
+    title: str
+    duration_seconds: Optional[float] = None
+    stems: Dict[str, str] = Field(default_factory=dict)
+    added_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class QueueResponse(BaseModel):
+    current_track: Optional[QueueItem] = None
+    queue: List[QueueItem]
+    total_queued: int

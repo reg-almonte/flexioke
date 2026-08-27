@@ -5,15 +5,26 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
 from fastapi.responses import FileResponse
 
 from src.services.job_manager import job_manager
+from src.services.queue_manager import queue_manager
 from src.services.audio_validator import validate_audio_file, clean_song_title
 from src.services.youtube_downloader import validate_youtube_url, download_youtube_audio
 from src.services.pipeline import run_separation_pipeline, VALID_STEM_TYPES
-from src.models import JobRecord, JobListResponse, SourceType, JobStatus
+from src.models import (
+    JobRecord,
+    JobListResponse,
+    QueueItem,
+    QueueResponse,
+    SourceType,
+    JobStatus,
+)
 
 router = APIRouter(prefix="/api", tags=["api"])
 
 class YouTubeRequest(BaseModel):
     url: str = Field(..., description="YouTube video or music link")
+
+class QueueActionRequest(BaseModel):
+    job_id: str = Field(..., description="Target Job ID to add or play")
 
 def _handle_youtube_download_and_pipeline(job_id: str, url: str):
     """Background task handler for downloading YouTube audio and triggering separation."""
@@ -159,3 +170,52 @@ def get_stem_audio(job_id: str, stem_type: str):
         media_type="audio/mpeg",
         filename=f"{stem_type_clean}.mp3"
     )
+
+# --- Playback Queue Endpoints ---
+
+@router.get("/queue", response_model=QueueResponse)
+def get_queue():
+    """Retrieve current playback queue state."""
+    return queue_manager.get_state()
+
+@router.post("/queue/add", response_model=QueueResponse)
+def add_to_queue(req: QueueActionRequest):
+    """Add a completed song to the playback queue."""
+    job = job_manager.get_job(req.job_id)
+    if not job or job.status != JobStatus.COMPLETED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Job '{req.job_id}' is not ready for playback."
+        )
+    queue_manager.add_to_queue(job.job_id, job.title, job.duration_seconds, job.stems)
+    return queue_manager.get_state()
+
+@router.post("/queue/play-now", response_model=QueueResponse)
+def play_now(req: QueueActionRequest):
+    """Set a completed song as the active track immediately."""
+    job = job_manager.get_job(req.job_id)
+    if not job or job.status != JobStatus.COMPLETED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Job '{req.job_id}' is not ready for playback."
+        )
+    queue_manager.play_now(job.job_id, job.title, job.duration_seconds, job.stems)
+    return queue_manager.get_state()
+
+@router.post("/queue/next", response_model=QueueResponse)
+def advance_queue_next():
+    """Advance to the next track in the queue."""
+    queue_manager.advance_next()
+    return queue_manager.get_state()
+
+@router.delete("/queue/{queue_id}", response_model=QueueResponse)
+def remove_queue_item(queue_id: str):
+    """Remove a track from the queue by queue ID."""
+    queue_manager.remove_from_queue(queue_id)
+    return queue_manager.get_state()
+
+@router.delete("/queue", response_model=QueueResponse)
+def clear_queue():
+    """Clear all songs from the playback queue."""
+    queue_manager.clear_queue()
+    return queue_manager.get_state()
