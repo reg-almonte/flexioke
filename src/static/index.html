@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexioke — Audio Stem Separation & Multitrack Player</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">🎤</span>
+            <h1 class="text-xl font-bold tracking-tight text-white">Flexioke</h1>
+            <span class="text-xs uppercase px-2 py-0.5 rounded bg-brand-500/20 text-brand-500 border border-brand-500/30">AI Stem Studio</span>
+        </div>
+        <div id="status-indicator" class="text-xs text-slate-400 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Ready
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+        <section id="app-container" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Ingestion & Library -->
+            <div class="space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                    <h2 class="text-base font-semibold text-slate-200 mb-3">Add Song</h2>
+                    <p class="text-xs text-slate-400">Upload an audio file or paste a YouTube URL to separate stems.</p>
+                </div>
+            </div>
+
+            <!-- Right: Multitrack Player & Mixer -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                    <h2 class="text-base font-semibold text-slate-200 mb-3">Multitrack Player</h2>
+                    <p class="text-xs text-slate-400">Select or process a track to begin playback.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-900 bg-slate-950 px-6 py-3 text-center text-xs text-slate-500">
+        Flexioke • AI-Powered 2-Stage Stem Separation & Multitrack Playback
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
