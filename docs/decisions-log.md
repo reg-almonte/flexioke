@@ -36,3 +36,7 @@ made while building the template itself.
 - artifact: docs/releases/v0.1.0.md
 - approved_by: user
 - notes: Approved Release Manifest v0.1.0 covering full EPIC-0001 implementation (Stories 1 through 4), all 12 tasks, and verification of bugfixes with clean 33/33 test suite.
+## 2026-08-27 — Approved Requirements & Functional Spec: Version 2 Synchronized Lyrics & Karaoke Mode
+- artifact: docs/requirements/karaoke-lyrics-mode.md, docs/specs/karaoke-lyrics-mode.md
+- approved_by: user
+- notes: Approved Version 2 requirements and functional spec covering timestamped .lrc lyrics management, dedicated Karaoke Mode tab, real-time synchronized active line display, smart playback interruption guard, and quick vocal mute toggles.
