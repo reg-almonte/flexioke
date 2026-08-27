@@ -52,3 +52,7 @@ made while building the template itself.
 - artifact: docs/design/ADR-0003-independent-karaoke-page-and-lyrics-overhaul.md
 - approved_by: reg
 - notes: Approved independent page systems with dedicated Song Library & Playback Queue per mode, mutual exclusion playback coordinator, and high-contrast, robust lyrics rendering engine.
+## 2026-08-28 — Approved Release v0.2.0: Synchronized Lyrics & Dedicated Karaoke Player Mode
+- artifact: docs/releases/v0.2.0.md
+- approved_by: reg
+- notes: Version 2 fully approved and released. Includes independent page systems for Stem Studio and Karaoke Mode, synchronized LRC lyrics engine with glowing active-line auto-scroll, fullscreen expand mode, quick vocal mutes, and cue-stop controls.
