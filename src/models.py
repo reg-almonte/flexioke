@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 class JobStatus(str, Enum):
@@ -28,3 +28,7 @@ class JobRecord(BaseModel):
     stems: Dict[str, str] = Field(default_factory=dict)
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class JobListResponse(BaseModel):
+    total: int
+    jobs: List[JobRecord]

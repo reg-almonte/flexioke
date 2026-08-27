@@ -1,13 +1,14 @@
+from typing import Optional
 from pathlib import Path
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
 from fastapi.responses import FileResponse
 
 from src.services.job_manager import job_manager
 from src.services.audio_validator import validate_audio_file, clean_song_title
 from src.services.youtube_downloader import validate_youtube_url, download_youtube_audio
 from src.services.pipeline import run_separation_pipeline, VALID_STEM_TYPES
-from src.models import JobRecord, SourceType, JobStatus
+from src.models import JobRecord, JobListResponse, SourceType, JobStatus
 
 router = APIRouter(prefix="/api", tags=["api"])
 
@@ -52,6 +53,15 @@ def health_check():
         "app": "flexioke",
         "version": "0.1.0",
     }
+
+@router.get("/jobs", response_model=JobListResponse)
+def list_jobs(
+    status: Optional[JobStatus] = Query(default=JobStatus.COMPLETED, description="Filter by job status"),
+    q: Optional[str] = Query(default=None, description="Search query for title or source")
+):
+    """List and search songs in the processed library."""
+    jobs = job_manager.list_jobs(status=status, query=q)
+    return JobListResponse(total=len(jobs), jobs=jobs)
 
 @router.post("/jobs/upload", status_code=status.HTTP_202_ACCEPTED, response_model=JobRecord)
 async def upload_audio(file: UploadFile = File(...)):
