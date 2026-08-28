@@ -108,7 +108,7 @@ class SongLibraryManager {
             if (jobs.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8 text-slate-500 text-xs">
-                        No songs found.<br>Upload or extract audio in Stem Studio!
+                        No matching songs found.<br>Upload or extract audio in Stem Studio!
                     </div>
                 `;
                 return;
@@ -121,12 +121,14 @@ class SongLibraryManager {
 
                 const sourceIcon = job.source_type === 'youtube' ? '▶️' : '📁';
                 const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
+                const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
 
                 card.innerHTML = `
                     <div class="flex items-center gap-2.5 min-w-0 flex-1">
                         <span class="text-base">${sourceIcon}</span>
                         <div class="truncate">
                             <h4 class="text-xs font-semibold text-slate-200 truncate group-hover:text-brand-300 transition">${escapeHtml(job.title)}</h4>
+                            <div class="text-[11px] text-slate-400 truncate">${artistHtml}</div>
                             <div class="flex items-center gap-2 text-[10px] text-slate-500">
                                 <span>${durationFmt || 'Stems ready'}</span>
                                 <span>•</span>
@@ -141,7 +143,7 @@ class SongLibraryManager {
                         <button class="add-queue-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" data-job-id="${job.job_id}">
                             + Queue
                         </button>
-                        <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Add / Edit Lyrics" data-job-id="${job.job_id}">
+                        <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
                             📝
                         </button>
                     </div>
