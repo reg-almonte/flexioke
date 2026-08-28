@@ -62,6 +62,11 @@ class KaraokeStageManager {
         this.songArtistEl = document.getElementById('karaoke-song-artist');
         this.timecodeEl = document.getElementById('karaoke-timecode');
 
+        // Countdown cue elements
+        this.countdownCue = document.getElementById('karaoke-countdown-cue');
+        this.countdownDots = document.getElementById('countdown-dots');
+        this.countdownNumber = document.getElementById('countdown-number');
+
         // Fullscreen elements
         this.fullscreenBtn = document.getElementById('karaoke-fullscreen-btn');
         this.fullscreenIcon = document.getElementById('fullscreen-icon');
@@ -510,6 +515,67 @@ class KaraokeStageManager {
 
         if (newIndex !== this.activeLineIndex && newIndex >= 0) {
             this.highlightLine(newIndex);
+        }
+
+        // Update 3-beat countdown cue
+        this.updateCountdownCue(currentTime);
+    }
+
+    updateCountdownCue(currentTime) {
+        if (!this.countdownCue || !this.lyricsData || !this.lyricsData.hasTimestamps || !this.lyricsData.lines.length) {
+            this.hideCountdownCue();
+            return;
+        }
+
+        // Find next upcoming lyric line
+        let nextIndex = -1;
+        for (let i = 0; i < this.lyricsData.lines.length; i++) {
+            if (this.lyricsData.lines[i].time > currentTime) {
+                nextIndex = i;
+                break;
+            }
+        }
+
+        if (nextIndex === -1) {
+            this.hideCountdownCue();
+            return;
+        }
+
+        const nextLine = this.lyricsData.lines[nextIndex];
+        const delta = nextLine.time - currentTime;
+
+        // Check if intro (first line) or musical interlude (> 5.0s between lines)
+        const isIntro = (nextIndex === 0);
+        const prevLineTime = nextIndex > 0 ? this.lyricsData.lines[nextIndex - 1].time : 0;
+        const isInterlude = !isIntro && (nextLine.time - prevLineTime > 5.0);
+
+        if ((isIntro || isInterlude) && delta > 0.05 && delta <= 3.0) {
+            this.countdownCue.classList.remove('hidden');
+            let num = Math.ceil(delta);
+            if (num > 3) num = 3;
+            if (num < 1) num = 1;
+
+            if (this.countdownNumber) {
+                this.countdownNumber.textContent = String(num);
+            }
+
+            if (this.countdownDots) {
+                if (num === 3) {
+                    this.countdownDots.innerHTML = `<span>●</span><span>○</span><span>○</span>`;
+                } else if (num === 2) {
+                    this.countdownDots.innerHTML = `<span>●</span><span>●</span><span>○</span>`;
+                } else {
+                    this.countdownDots.innerHTML = `<span>●</span><span>●</span><span>●</span>`;
+                }
+            }
+        } else {
+            this.hideCountdownCue();
+        }
+    }
+
+    hideCountdownCue() {
+        if (this.countdownCue && !this.countdownCue.classList.contains('hidden')) {
+            this.countdownCue.classList.add('hidden');
         }
     }
 

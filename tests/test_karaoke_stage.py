@@ -24,6 +24,7 @@ def test_karaoke_stage_markup_structure():
     assert 'id="karaoke-song-artist"' in html
     assert 'id="karaoke-banner-label"' in html
     assert 'id="karaoke-timecode"' in html
+    assert 'id="karaoke-countdown-cue"' in html
 
 def test_karaoke_js_alternating_header_logic():
     resp = client.get("/static/karaoke.js")
@@ -31,4 +32,11 @@ def test_karaoke_js_alternating_header_logic():
     assert "Up Next" in resp.text
     assert "Now Singing" in resp.text
     assert "remaining" in resp.text.lower() or "(-" in resp.text
+
+def test_karaoke_countdown_cue_logic():
+    resp = client.get("/static/karaoke.js")
+    assert resp.status_code == 200
+    assert "countdownCue" in resp.text or "countdown-cue" in resp.text
+    assert "updateCountdownCue" in resp.text or "countdown" in resp.text.lower()
+
 
