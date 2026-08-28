@@ -107,6 +107,13 @@ class SongLibraryManager {
         }
         const currentJobs = this.jobs || [];
 
+        // Auto-sort songs alphabetically by title
+        currentJobs.sort((a, b) => {
+            const titleA = (a.title || "").toLowerCase();
+            const titleB = (b.title || "").toLowerCase();
+            return titleA.localeCompare(titleB);
+        });
+
         this.countBadges.forEach(badge => {
             badge.textContent = `${currentJobs.length} ${currentJobs.length === 1 ? 'song' : 'songs'}`;
         });
