@@ -23,3 +23,12 @@ def test_static_assets_serving():
 
     css_resp = client.get("/static/styles.css")
     assert css_resp.status_code == 200
+
+def test_favicon_serving():
+    resp = client.get("/favicon.ico")
+    assert resp.status_code == 200
+    assert "image" in resp.headers.get("content-type", "").lower()
+
+    svg_resp = client.get("/static/favicon.svg")
+    assert svg_resp.status_code == 200
+

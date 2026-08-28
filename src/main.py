@@ -36,6 +36,12 @@ def serve_index():
     index_file = STATIC_DIR / "index.html"
     return FileResponse(str(index_file))
 
+@app.get("/favicon.ico", include_in_schema=False)
+def serve_favicon():
+    """Serve favicon icon."""
+    favicon_file = STATIC_DIR / "favicon.ico"
+    return FileResponse(str(favicon_file), media_type="image/x-icon")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)
