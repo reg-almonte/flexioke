@@ -351,6 +351,14 @@ class KaraokeStageManager {
         if (this.activeLineIndex >= 0) {
             this.highlightLine(this.activeLineIndex);
         }
+
+        // Dynamically restart alternating cycle with updated interval
+        if (this.currentJob) {
+            const queue = (window.flexiokeQueue && window.flexiokeQueue.queue) ? window.flexiokeQueue.queue : [];
+            if (queue.length > 0) {
+                this.startAlternatingBannerCycle();
+            }
+        }
     }
 
     saveSettings(newConfig) {
@@ -694,10 +702,10 @@ class KaraokeStageManager {
         const nextLine = this.lyricsData.lines[nextIndex];
         const delta = nextLine.time - currentTime;
 
-        // Check if intro (first line) or musical interlude (> 5.0s between lines)
-        const isIntro = (nextIndex === 0);
+        // Check if intro (first line with >= 2.5s intro) or musical interlude (> 8.0s gap between lines)
+        const isIntro = (nextIndex === 0 && nextLine.time >= 2.5);
         const prevLineTime = nextIndex > 0 ? this.lyricsData.lines[nextIndex - 1].time : 0;
-        const isInterlude = !isIntro && (nextLine.time - prevLineTime > 5.0);
+        const isInterlude = !isIntro && (nextLine.time - prevLineTime > 8.0);
 
         if ((isIntro || isInterlude) && delta > 0.05 && delta <= 3.0) {
             this.countdownCue.classList.remove('hidden');
