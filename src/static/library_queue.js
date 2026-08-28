@@ -7,6 +7,7 @@ class SongLibraryManager {
         this.listContainers = document.querySelectorAll('.library-list-container');
         this.countBadges = document.querySelectorAll('.library-count-badge');
         this.debounceTimeout = null;
+        this.jobs = [];
 
         // Lyrics modal elements
         this.lyricsModal = document.getElementById('lyrics-modal');
@@ -93,19 +94,25 @@ class SongLibraryManager {
             const resp = await fetch(url);
             if (!resp.ok) return;
             const data = await resp.json();
-            this.render(data.jobs || []);
+            this.jobs = data.jobs || [];
+            this.render(this.jobs);
         } catch (err) {
             console.error("Error fetching library:", err);
         }
     }
 
-    render(jobs) {
+    render(jobs = null) {
+        if (jobs !== null) {
+            this.jobs = jobs;
+        }
+        const currentJobs = this.jobs || [];
+
         this.countBadges.forEach(badge => {
-            badge.textContent = `${jobs.length} ${jobs.length === 1 ? 'song' : 'songs'}`;
+            badge.textContent = `${currentJobs.length} ${currentJobs.length === 1 ? 'song' : 'songs'}`;
         });
 
         this.listContainers.forEach(container => {
-            if (jobs.length === 0) {
+            if (currentJobs.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8 text-slate-500 text-xs">
                         No matching songs found.<br>Upload or extract audio in Stem Studio!
@@ -115,7 +122,7 @@ class SongLibraryManager {
             }
 
             container.innerHTML = '';
-            jobs.forEach(job => {
+            currentJobs.forEach(job => {
                 const card = document.createElement('div');
                 card.className = "p-3 bg-surface-950/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-3 group";
 
@@ -251,10 +258,12 @@ class SongLibraryManager {
                 });
                 if (metaResp.ok) {
                     updatedJob = await metaResp.json();
-                    const idx = this.jobs.findIndex(j => j.job_id === this.activeLyricsJobId);
-                    if (idx !== -1 && updatedJob) {
-                        this.jobs[idx] = updatedJob;
-                        this.render();
+                    if (this.jobs && Array.isArray(this.jobs)) {
+                        const idx = this.jobs.findIndex(j => j.job_id === this.activeLyricsJobId);
+                        if (idx !== -1 && updatedJob) {
+                            this.jobs[idx] = updatedJob;
+                            this.render(this.jobs);
+                        }
                     }
                     window.dispatchEvent(new CustomEvent('flexioke:metadata-updated', {
                         detail: updatedJob
