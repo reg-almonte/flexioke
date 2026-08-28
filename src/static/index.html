@@ -392,13 +392,14 @@
                     
                     <!-- Karaoke Track Info Header -->
                     <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <div class="truncate">
-                            <span class="text-[10px] uppercase font-bold tracking-widest text-brand-400">Now Singing</span>
+                        <div id="karaoke-header-banner" class="truncate transition-opacity duration-300">
+                            <span id="karaoke-banner-label" class="text-[10px] uppercase font-bold tracking-widest text-brand-400">Now Singing</span>
                             <h2 id="karaoke-song-title" class="text-xl font-extrabold text-white tracking-tight truncate">No Track Selected</h2>
+                            <p id="karaoke-song-artist" class="text-xs text-slate-400 truncate"></p>
                         </div>
-                        <div class="flex items-center gap-2.5">
+                        <div class="flex items-center gap-2.5 shrink-0">
                             <span id="karaoke-timecode" class="text-xs font-mono text-slate-300 bg-surface-950 px-3 py-1.5 rounded-lg border border-slate-800">
-                                00:00 / 00:00
+                                00:00 / 00:00 (-00:00)
                             </span>
                             <button id="karaoke-fullscreen-btn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5" title="Toggle Fullscreen Stage">
                                 <span id="fullscreen-icon">⛶</span>

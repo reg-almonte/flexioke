@@ -56,7 +56,10 @@ class KaraokeStageManager {
     constructor() {
         this.stageContainer = document.getElementById('karaoke-lyrics-stage');
         this.stageCard = document.getElementById('karaoke-stage-card');
+        this.headerBanner = document.getElementById('karaoke-header-banner');
+        this.bannerLabel = document.getElementById('karaoke-banner-label');
         this.songTitleEl = document.getElementById('karaoke-song-title');
+        this.songArtistEl = document.getElementById('karaoke-song-artist');
         this.timecodeEl = document.getElementById('karaoke-timecode');
 
         // Fullscreen elements
@@ -75,10 +78,16 @@ class KaraokeStageManager {
         this.backingStatusText = document.getElementById('karaoke-backing-status-text');
         this.volumeSlider = document.getElementById('karaoke-volume-slider');
 
+        this.currentJob = null;
         this.currentJobId = null;
         this.lyricsData = null;
         this.activeLineIndex = -1;
         this.lineElements = [];
+
+        // Alternating Header Banner state
+        this.bannerState = 'now_singing'; // 'now_singing' | 'up_next'
+        this.bannerIntervalTimer = null;
+        this.headerTransitionInterval = 6000;
 
         this.init();
     }
@@ -161,16 +170,36 @@ class KaraokeStageManager {
             }
         });
 
+        // Listen for metadata updates from editor
+        window.addEventListener('flexioke:metadata-updated', (e) => {
+            if (e.detail && this.currentJob && e.detail.job_id === this.currentJob.job_id) {
+                this.currentJob = e.detail;
+                if (this.bannerState === 'now_singing') {
+                    if (this.songTitleEl) this.songTitleEl.textContent = this.currentJob.title || "Untitled Song";
+                    if (this.songArtistEl) this.songArtistEl.textContent = this.currentJob.artist || "Unknown Artist";
+                }
+            }
+        });
+
         // Listen for player reset (when queue finishes or stop clicked without queue)
         window.addEventListener('flexioke:player-reset', () => {
+            this.currentJob = null;
             this.currentJobId = null;
             this.lyricsData = null;
             this.activeLineIndex = -1;
+            this.stopAlternatingBannerCycle();
+            if (this.bannerLabel) {
+                this.bannerLabel.textContent = "Now Singing";
+                this.bannerLabel.className = "text-[10px] uppercase font-bold tracking-widest text-brand-400";
+            }
             if (this.songTitleEl) {
                 this.songTitleEl.textContent = "No Track Selected";
             }
+            if (this.songArtistEl) {
+                this.songArtistEl.textContent = "";
+            }
             if (this.timecodeEl) {
-                this.timecodeEl.textContent = "00:00 / 00:00";
+                this.timecodeEl.textContent = "00:00 / 00:00 (-00:00)";
             }
             this.renderDefaultState();
             this.updatePlayBtnUI();
@@ -189,6 +218,84 @@ class KaraokeStageManager {
 
         // Time & Transport state check
         setInterval(() => this.onTimeCheck(), 100);
+    }
+
+    startAlternatingBannerCycle() {
+        if (this.bannerIntervalTimer) {
+            clearInterval(this.bannerIntervalTimer);
+            this.bannerIntervalTimer = null;
+        }
+
+        const configStr = localStorage.getItem('flexioke_stage_config');
+        let intervalSec = 6;
+        if (configStr) {
+            try {
+                const cfg = JSON.parse(configStr);
+                if (cfg.headerTransitionInterval) intervalSec = cfg.headerTransitionInterval;
+            } catch (e) {}
+        }
+        this.headerTransitionInterval = intervalSec * 1000;
+
+        this.bannerIntervalTimer = setInterval(() => {
+            this.toggleAlternatingBanner();
+        }, this.headerTransitionInterval);
+    }
+
+    stopAlternatingBannerCycle() {
+        if (this.bannerIntervalTimer) {
+            clearInterval(this.bannerIntervalTimer);
+            this.bannerIntervalTimer = null;
+        }
+        this.setBannerContent('now_singing');
+    }
+
+    toggleAlternatingBanner() {
+        const nextTrack = (window.flexiokeQueue && window.flexiokeQueue.queue && window.flexiokeQueue.queue.length > 0)
+            ? window.flexiokeQueue.queue[0]
+            : null;
+
+        if (!nextTrack || !this.currentJob) {
+            if (this.bannerState !== 'now_singing') {
+                this.setBannerContent('now_singing');
+            }
+            return;
+        }
+
+        const targetState = (this.bannerState === 'now_singing') ? 'up_next' : 'now_singing';
+        this.setBannerContent(targetState, nextTrack);
+    }
+
+    setBannerContent(state, nextTrack = null) {
+        this.bannerState = state;
+        if (!this.headerBanner) return;
+
+        this.headerBanner.classList.add('opacity-0');
+        setTimeout(() => {
+            if (state === 'up_next' && nextTrack) {
+                if (this.bannerLabel) {
+                    this.bannerLabel.textContent = "Up Next";
+                    this.bannerLabel.className = "text-[10px] uppercase font-bold tracking-widest text-violet-400";
+                }
+                if (this.songTitleEl) {
+                    this.songTitleEl.textContent = nextTrack.title || "Untitled Song";
+                }
+                if (this.songArtistEl) {
+                    this.songArtistEl.textContent = nextTrack.artist || "Unknown Artist";
+                }
+            } else {
+                if (this.bannerLabel) {
+                    this.bannerLabel.textContent = "Now Singing";
+                    this.bannerLabel.className = "text-[10px] uppercase font-bold tracking-widest text-brand-400";
+                }
+                if (this.songTitleEl) {
+                    this.songTitleEl.textContent = this.currentJob ? (this.currentJob.title || "Untitled Song") : "No Track Selected";
+                }
+                if (this.songArtistEl) {
+                    this.songArtistEl.textContent = this.currentJob ? (this.currentJob.artist || "Unknown Artist") : "";
+                }
+            }
+            this.headerBanner.classList.remove('opacity-0');
+        }, 250);
     }
 
     toggleFullscreen() {
@@ -220,10 +327,10 @@ class KaraokeStageManager {
     }
 
     onSongLoaded(job) {
+        this.currentJob = job;
         this.currentJobId = job.job_id;
-        if (this.songTitleEl) {
-            this.songTitleEl.textContent = job.title || "Untitled Song";
-        }
+        this.setBannerContent('now_singing');
+        this.startAlternatingBannerCycle();
         if (this.stageContainer) {
             this.stageContainer.scrollTop = 0;
         }
@@ -386,7 +493,8 @@ class KaraokeStageManager {
                     const sc = Math.floor(s % 60);
                     return `${String(m).padStart(2, '0')}:${String(sc).padStart(2, '0')}`;
                 };
-                this.timecodeEl.textContent = `${fmt(currentTime)} / ${fmt(dur || 0)}`;
+                const remaining = Math.max(0, (dur || 0) - currentTime);
+                this.timecodeEl.textContent = `${fmt(currentTime)} / ${fmt(dur || 0)} (-${fmt(remaining)})`;
             }
         }
 

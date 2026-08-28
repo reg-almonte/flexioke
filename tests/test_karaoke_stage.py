@@ -21,4 +21,14 @@ def test_karaoke_stage_markup_structure():
     html = resp.text
     assert 'id="karaoke-lyrics-stage"' in html
     assert 'id="karaoke-song-title"' in html
+    assert 'id="karaoke-song-artist"' in html
+    assert 'id="karaoke-banner-label"' in html
     assert 'id="karaoke-timecode"' in html
+
+def test_karaoke_js_alternating_header_logic():
+    resp = client.get("/static/karaoke.js")
+    assert resp.status_code == 200
+    assert "Up Next" in resp.text
+    assert "Now Singing" in resp.text
+    assert "remaining" in resp.text.lower() or "(-" in resp.text
+
