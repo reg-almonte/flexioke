@@ -9,10 +9,15 @@ def test_lyrics_modal_in_html():
     assert resp.status_code == 200
     html = resp.text
     assert "lyrics-modal" in html
+    assert "lyrics-edit-title" in html
+    assert "lyrics-edit-artist" in html
     assert "lyrics-textarea" in html
     assert "save-lyrics-btn" in html
 
 def test_library_js_contains_lyrics_modal_logic():
     resp = client.get("/static/library_queue.js")
     assert resp.status_code == 200
-    assert "openLyricsModal" in resp.text or "lyrics" in resp.text.lower()
+    assert "openLyricsModal" in resp.text
+    assert "lyricsEditTitle" in resp.text or "lyrics-edit-title" in resp.text
+    assert "lyricsEditArtist" in resp.text or "lyrics-edit-artist" in resp.text
+

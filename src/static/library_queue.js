@@ -11,6 +11,8 @@ class SongLibraryManager {
         // Lyrics modal elements
         this.lyricsModal = document.getElementById('lyrics-modal');
         this.lyricsModalTitle = document.getElementById('lyrics-modal-title');
+        this.lyricsEditTitle = document.getElementById('lyrics-edit-title');
+        this.lyricsEditArtist = document.getElementById('lyrics-edit-artist');
         this.lyricsTextarea = document.getElementById('lyrics-textarea');
         this.lyricsSaveStatus = document.getElementById('lyrics-save-status');
         this.closeLyricsModalBtn = document.getElementById('close-lyrics-modal-btn');
@@ -185,6 +187,12 @@ class SongLibraryManager {
         if (this.lyricsModalTitle) {
             this.lyricsModalTitle.textContent = job.title || "Untitled Song";
         }
+        if (this.lyricsEditTitle) {
+            this.lyricsEditTitle.value = job.title || "";
+        }
+        if (this.lyricsEditArtist) {
+            this.lyricsEditArtist.value = job.artist || "";
+        }
         if (this.lyricsTextarea) {
             this.lyricsTextarea.value = "Loading lyrics...";
         }
@@ -221,11 +229,37 @@ class SongLibraryManager {
     async saveLyrics() {
         if (!this.activeLyricsJobId || !this.lyricsTextarea) return;
         const text = this.lyricsTextarea.value;
+        const newTitle = this.lyricsEditTitle ? this.lyricsEditTitle.value.trim() : "";
+        const newArtist = this.lyricsEditArtist ? this.lyricsEditArtist.value.trim() : "";
 
         if (this.saveLyricsBtn) this.saveLyricsBtn.disabled = true;
         if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saving...";
 
         try {
+            // Save metadata (title & artist) if title is provided
+            let updatedJob = null;
+            if (newTitle) {
+                const metaResp = await fetch(`/api/jobs/${this.activeLyricsJobId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: newTitle,
+                        artist: newArtist || null
+                    })
+                });
+                if (metaResp.ok) {
+                    updatedJob = await metaResp.json();
+                    const idx = this.jobs.findIndex(j => j.job_id === this.activeLyricsJobId);
+                    if (idx !== -1 && updatedJob) {
+                        this.jobs[idx] = updatedJob;
+                        this.render();
+                    }
+                    window.dispatchEvent(new CustomEvent('flexioke:metadata-updated', {
+                        detail: updatedJob
+                    }));
+                }
+            }
+
             const resp = await fetch(`/api/jobs/${this.activeLyricsJobId}/lyrics`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -236,7 +270,13 @@ class SongLibraryManager {
                 const data = await resp.json();
                 if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saved!";
                 window.dispatchEvent(new CustomEvent('flexioke:lyrics-updated', {
-                    detail: { job_id: this.activeLyricsJobId, lyrics: text, has_timestamps: data.has_timestamps }
+                    detail: {
+                        job_id: this.activeLyricsJobId,
+                        lyrics: text,
+                        has_timestamps: data.has_timestamps,
+                        title: newTitle,
+                        artist: newArtist
+                    }
                 }));
                 setTimeout(() => this.closeLyricsModal(), 600);
             } else {

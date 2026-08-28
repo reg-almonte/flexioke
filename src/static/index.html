@@ -465,18 +465,29 @@
         <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div class="truncate">
-                    <span class="text-[10px] uppercase font-bold text-brand-400 tracking-wider">Lyrics Editor</span>
-                    <h3 id="lyrics-modal-title" class="text-sm font-semibold text-white truncate">Song Title</h3>
+                    <span class="text-[10px] uppercase font-bold text-brand-400 tracking-wider">Song Details & Lyrics</span>
+                    <h3 id="lyrics-modal-title" class="text-sm font-semibold text-white truncate">Edit Song</h3>
                 </div>
                 <button id="close-lyrics-modal-btn" class="text-slate-400 hover:text-slate-200 p-1">✕</button>
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label for="lyrics-edit-title" class="text-xs text-slate-300 font-medium">Song Title</label>
+                    <input type="text" id="lyrics-edit-title" placeholder="Song Title" class="w-full bg-surface-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500 transition">
+                </div>
+                <div class="space-y-1">
+                    <label for="lyrics-edit-artist" class="text-xs text-slate-300 font-medium">Artist Name</label>
+                    <input type="text" id="lyrics-edit-artist" placeholder="e.g. Queen, Adele, etc." class="w-full bg-surface-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500 transition">
+                </div>
+            </div>
+
             <div class="space-y-2">
                 <label for="lyrics-textarea" class="text-xs text-slate-300 flex items-center justify-between">
-                    <span>Paste Timestamped (.lrc) or Plain Text Lyrics</span>
+                    <span>Synchronized (.lrc) or Plain Text Lyrics</span>
                     <span class="text-[10px] text-slate-500">e.g. [00:05.12] Lyric line</span>
                 </label>
-                <textarea id="lyrics-textarea" rows="10" placeholder="[00:00.00] Song starts&#10;[00:05.20] First line of lyrics&#10;[00:10.50] Second line of lyrics" class="w-full bg-surface-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-brand-500 transition resize-none custom-scrollbar"></textarea>
+                <textarea id="lyrics-textarea" rows="8" placeholder="[00:00.00] Song starts&#10;[00:05.20] First line of lyrics&#10;[00:10.50] Second line of lyrics" class="w-full bg-surface-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-brand-500 transition resize-none custom-scrollbar"></textarea>
             </div>
 
             <div class="flex items-center justify-between pt-2 border-t border-slate-800">
@@ -486,7 +497,7 @@
                         Cancel
                     </button>
                     <button id="save-lyrics-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition shadow-md shadow-brand-500/20 flex items-center gap-1.5">
-                        <span>💾</span> Save Lyrics
+                        <span>💾</span> Save Changes
                     </button>
                 </div>
             </div>
