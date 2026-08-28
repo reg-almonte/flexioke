@@ -259,6 +259,16 @@ class KaraokeStageManager {
             }
         });
 
+        // Listen for queue updates to dynamically start or reset alternating banner
+        window.addEventListener('flexioke:queue-updated', (e) => {
+            const queue = (e.detail && e.detail.queue) ? e.detail.queue : [];
+            if (queue.length === 0 && this.bannerState === 'up_next') {
+                this.setBannerContent('now_singing');
+            } else if (queue.length > 0 && this.currentJob && !this.bannerIntervalTimer) {
+                this.startAlternatingBannerCycle();
+            }
+        });
+
         // Listen for player reset (when queue finishes or stop clicked without queue)
         window.addEventListener('flexioke:player-reset', () => {
             this.currentJob = null;
@@ -378,14 +388,7 @@ class KaraokeStageManager {
             this.bannerIntervalTimer = null;
         }
 
-        const configStr = localStorage.getItem('flexioke_stage_config');
-        let intervalSec = 6;
-        if (configStr) {
-            try {
-                const cfg = JSON.parse(configStr);
-                if (cfg.headerTransitionInterval) intervalSec = cfg.headerTransitionInterval;
-            } catch (e) {}
-        }
+        const intervalSec = this.config.headerTransitionInterval || 6;
         this.headerTransitionInterval = intervalSec * 1000;
 
         this.bannerIntervalTimer = setInterval(() => {
@@ -402,9 +405,8 @@ class KaraokeStageManager {
     }
 
     toggleAlternatingBanner() {
-        const nextTrack = (window.flexiokeQueue && window.flexiokeQueue.queue && window.flexiokeQueue.queue.length > 0)
-            ? window.flexiokeQueue.queue[0]
-            : null;
+        const queue = (window.flexiokeQueue && window.flexiokeQueue.queue) ? window.flexiokeQueue.queue : [];
+        const nextTrack = queue.length > 0 ? queue[0] : null;
 
         if (!nextTrack || !this.currentJob) {
             if (this.bannerState !== 'now_singing') {

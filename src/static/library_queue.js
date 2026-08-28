@@ -315,6 +315,8 @@ class PlaybackQueueManager {
         this.clearBtns = document.querySelectorAll('.clear-queue-btn');
         this.playNextBtns = document.querySelectorAll('.play-next-queue-btn');
         this.isAdvancing = false;
+        this.queue = [];
+        this.state = { queue: [], current_track: null, history: [] };
 
         this.init();
     }
@@ -443,7 +445,11 @@ class PlaybackQueueManager {
     }
 
     render(state) {
-        const queue = state.queue || [];
+        this.state = state || { queue: [], current_track: null, history: [] };
+        this.queue = this.state.queue || [];
+        const queue = this.queue;
+
+        window.dispatchEvent(new CustomEvent('flexioke:queue-updated', { detail: this.state }));
 
         this.queueContainers.forEach(container => {
             if (queue.length === 0) {

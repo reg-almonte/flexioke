@@ -61,19 +61,23 @@ input[type="range"]::-webkit-slider-thumb:hover {
     box-shadow: none !important;
 }
 
+.stage-fullscreen .karaoke-toolbar-settings-group {
+    display: none !important;
+}
+
 .stage-fullscreen #karaoke-lyrics-stage {
     max-height: calc(100vh - 250px) !important;
 }
 
 .stage-fullscreen .karaoke-line {
-    font-size: 1.5rem !important;
+    font-size: calc(var(--karaoke-font-size, 20px) * 1.35) !important;
     line-height: 2.25rem !important;
     padding-top: 0.75rem !important;
     padding-bottom: 0.75rem !important;
 }
 
 .stage-fullscreen .karaoke-line.text-white {
-    font-size: 2.5rem !important;
+    font-size: calc(var(--karaoke-active-font-size, 27px) * 1.35) !important;
     line-height: 3.25rem !important;
     padding-top: 1.25rem !important;
     padding-bottom: 1.25rem !important;
