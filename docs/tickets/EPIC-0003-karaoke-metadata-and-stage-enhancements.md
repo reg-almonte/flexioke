@@ -13,6 +13,6 @@ Deliver end-to-end enhancements for Flexioke Karaoke Mode and Song Management. T
 - `docs/design/ADR-0004-karaoke-metadata-and-stage-enhancements.md`
 
 ## Stories
-- [ ] STORY-0008: Backend Song Metadata Model, Persistence & Patch API
-- [ ] STORY-0009: Song Details & Lyrics Editor Modal & Dual-Field Search
-- [ ] STORY-0010: Dynamic Karaoke Stage Header, Countdown Cues & Customization Controls
+- [x] STORY-0008: Backend Song Metadata Model, Persistence & Patch API
+- [x] STORY-0009: Song Details & Lyrics Editor Modal & Dual-Field Search
+- [x] STORY-0010: Dynamic Karaoke Stage Header, Countdown Cues & Customization Controls
