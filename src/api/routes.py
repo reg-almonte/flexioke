@@ -213,7 +213,7 @@ def add_to_queue(req: QueueActionRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Job '{req.job_id}' is not ready for playback."
         )
-    queue_manager.add_to_queue(job.job_id, job.title, job.duration_seconds, job.stems)
+    queue_manager.add_to_queue(job.job_id, job.title, job.artist, job.duration_seconds, job.stems)
     return queue_manager.get_state()
 
 @router.post("/queue/play-now", response_model=QueueResponse)
@@ -225,7 +225,7 @@ def play_now(req: QueueActionRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Job '{req.job_id}' is not ready for playback."
         )
-    queue_manager.play_now(job.job_id, job.title, job.duration_seconds, job.stems)
+    queue_manager.play_now(job.job_id, job.title, job.artist, job.duration_seconds, job.stems)
     return queue_manager.get_state()
 
 @router.post("/queue/next", response_model=QueueResponse)

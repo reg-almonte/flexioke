@@ -13,6 +13,7 @@ class QueueManager:
         self,
         job_id: str,
         title: str,
+        artist: Optional[str] = None,
         duration_seconds: Optional[float] = None,
         stems: Optional[Dict[str, str]] = None
     ) -> QueueItem:
@@ -21,6 +22,7 @@ class QueueManager:
             queue_id=str(uuid.uuid4()),
             job_id=job_id,
             title=title,
+            artist=artist,
             duration_seconds=duration_seconds,
             stems=stems or {}
         )
@@ -32,6 +34,7 @@ class QueueManager:
         self,
         job_id: str,
         title: str,
+        artist: Optional[str] = None,
         duration_seconds: Optional[float] = None,
         stems: Optional[Dict[str, str]] = None
     ) -> QueueItem:
@@ -40,6 +43,7 @@ class QueueManager:
             queue_id=str(uuid.uuid4()),
             job_id=job_id,
             title=title,
+            artist=artist,
             duration_seconds=duration_seconds,
             stems=stems or {}
         )

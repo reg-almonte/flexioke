@@ -56,3 +56,23 @@ made while building the template itself.
 - artifact: docs/releases/v0.2.0.md
 - approved_by: reg
 - notes: Version 2 fully approved and released. Includes independent page systems for Stem Studio and Karaoke Mode, synchronized LRC lyrics engine with glowing active-line auto-scroll, fullscreen expand mode, quick vocal mutes, and cue-stop controls.
+## 2026-08-28 — Approved Requirements: Version 0.2.1 Karaoke Mode Enhancements & Metadata Separation
+- artifact: docs/requirements/karaoke-mode-enhancements.md
+- approved_by: reg
+- notes: Approved requirements covering structured artist/title separation with backwards-compatible migration, unified dual-field search, song & lyrics editor modal, configurable stage settings (transition interval, highlight color, font size), remaining time badge, and visual countdown intro/interlude cues.
+## 2026-08-28 — Approved Functional Spec: Version 0.2.1 Karaoke Mode Enhancements & Metadata Separation
+- artifact: docs/specs/karaoke-mode-enhancements.md
+- approved_by: reg
+- notes: Functional spec approved detailing backward-compatible job model schema migration, atomic metadata/lyrics update endpoints, dual-field client-side search, CSS-animated alternating header transitions, intro/interlude visual countdown cues, and client-persisted stage settings.
+## 2026-08-28 — Approved ADR-0004: Unified Song Metadata Model Extension & Reactive Karaoke Stage Enhancements
+- artifact: docs/design/ADR-0004-karaoke-metadata-and-stage-enhancements.md
+- approved_by: reg
+- notes: Approved Option 1 (Unified REST Model Extension with Client-Side Reactive Stage Coordinator & LocalStorage Preferences) for zero external dependencies, robust backwards-compatible job.json migration, and real-time client-side stage controls.
+## 2026-08-28 — Approved Ticket Breakdown: EPIC-0003 Karaoke Mode Enhancements & Metadata Separation
+- artifact: docs/tickets/EPIC-0003-karaoke-metadata-and-stage-enhancements.md
+- approved_by: reg
+- notes: Approved ticket breakdown comprising STORY-0008 to STORY-0010 and TASK-0019 to TASK-0025 covering backend model/store/API metadata extensions, song & lyrics editor modal, dual-field library search, alternating stage header, visual countdown cues, and stage customization controls.
+
+
+
+

@@ -20,6 +20,7 @@ class JobRecord(BaseModel):
     source_type: SourceType
     source_name: str
     title: str
+    artist: Optional[str] = None
     status: JobStatus = JobStatus.QUEUED
     progress: int = Field(default=0, ge=0, le=100)
     current_stage: str = "Queued"
@@ -37,6 +38,7 @@ class QueueItem(BaseModel):
     queue_id: str
     job_id: str
     title: str
+    artist: Optional[str] = None
     duration_seconds: Optional[float] = None
     stems: Dict[str, str] = Field(default_factory=dict)
     added_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

@@ -61,7 +61,7 @@ class JobManager:
         job_dir.mkdir(parents=True, exist_ok=True)
         return job_dir
 
-    def create_job(self, source_type: SourceType, source_name: str, title: str) -> JobRecord:
+    def create_job(self, source_type: SourceType, source_name: str, title: str, artist: Optional[str] = None) -> JobRecord:
         """Creates a new job record, persists it to disk, and tracks it in cache."""
         job_id = str(uuid.uuid4())
         record = JobRecord(
@@ -69,6 +69,7 @@ class JobManager:
             source_type=source_type,
             source_name=source_name,
             title=title,
+            artist=artist,
             status=JobStatus.QUEUED,
             progress=0,
             current_stage="Job created, queued for processing"
@@ -120,7 +121,10 @@ class JobManager:
 
         if query:
             q = query.lower().strip()
-            jobs = [j for j in jobs if q in j.title.lower() or q in j.source_name.lower()]
+            jobs = [
+                j for j in jobs
+                if q in j.title.lower() or q in j.source_name.lower() or (j.artist and q in j.artist.lower())
+            ]
 
         jobs.sort(key=lambda j: j.created_at, reverse=True)
         return jobs

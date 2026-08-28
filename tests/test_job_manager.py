@@ -97,3 +97,53 @@ def test_api_get_job_status_404(monkeypatch, tmp_path):
     resp = client.get("/api/jobs/invalid-job-id")
     assert resp.status_code == 404
     assert "not found" in resp.json()["detail"].lower()
+
+def test_job_record_with_artist(temp_job_manager):
+    job = temp_job_manager.create_job(
+        source_type=SourceType.UPLOAD,
+        source_name="artist_song.mp3",
+        title="Come Alive",
+        artist="Rachel Taylor"
+    )
+    assert job.title == "Come Alive"
+    assert job.artist == "Rachel Taylor"
+
+    retrieved = temp_job_manager.get_job(job.job_id)
+    assert retrieved is not None
+    assert retrieved.artist == "Rachel Taylor"
+
+def test_legacy_job_json_without_artist_loads_gracefully(tmp_path):
+    # Simulate a legacy v0.1.0/v0.2.0 job.json file without an artist field
+    legacy_job_dir = tmp_path / "jobs" / "legacy-uuid-1234"
+    legacy_job_dir.mkdir(parents=True)
+    legacy_json = {
+        "job_id": "legacy-uuid-1234",
+        "source_type": "upload",
+        "source_name": "legacy_track.mp3",
+        "title": "Legacy Track",
+        "status": "completed",
+        "progress": 100,
+        "current_stage": "Ready for playback",
+        "error": None,
+        "duration_seconds": 120.0,
+        "stems": {},
+        "created_at": "2026-08-27T00:00:00Z",
+        "updated_at": "2026-08-27T00:00:00Z"
+    }
+    import json
+    (legacy_job_dir / "job.json").write_text(json.dumps(legacy_json), encoding="utf-8")
+
+    manager = JobManager(data_dir=tmp_path / "jobs", max_workers=1)
+    job = manager.get_job("legacy-uuid-1234")
+    assert job is not None
+    assert job.title == "Legacy Track"
+    assert job.artist is None
+
+    # Updating artist on legacy job
+    updated = manager.update_job("legacy-uuid-1234", artist="Legacy Artist")
+    assert updated.artist == "Legacy Artist"
+    
+    # Verify persisted to disk
+    reloaded = json.loads((legacy_job_dir / "job.json").read_text(encoding="utf-8"))
+    assert reloaded["artist"] == "Legacy Artist"
+
