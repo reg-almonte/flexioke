@@ -67,6 +67,31 @@ class KaraokeStageManager {
         this.countdownDots = document.getElementById('countdown-dots');
         this.countdownNumber = document.getElementById('countdown-number');
 
+        // Stage Toolbar Controls
+        this.fontDecBtn = document.getElementById('karaoke-font-dec-btn');
+        this.fontIncBtn = document.getElementById('karaoke-font-inc-btn');
+        this.settingsBtn = document.getElementById('karaoke-settings-btn');
+
+        // Stage Settings Modal Elements
+        this.settingsModal = document.getElementById('karaoke-settings-modal');
+        this.closeSettingsModalBtn = document.getElementById('close-settings-modal-btn');
+        this.saveSettingsBtn = document.getElementById('save-settings-btn');
+        this.resetSettingsBtn = document.getElementById('settings-reset-btn');
+        this.settingIntervalInput = document.getElementById('settings-transition-interval');
+        this.settingIntervalDisplay = document.getElementById('settings-interval-display');
+        this.settingColorInput = document.getElementById('settings-highlight-color');
+        this.settingColorDisplay = document.getElementById('settings-color-display');
+        this.settingFontSizeInput = document.getElementById('settings-font-size');
+        this.settingFontSizeDisplay = document.getElementById('settings-font-size-display');
+
+        // Default Config & State
+        this.defaultConfig = {
+            headerTransitionInterval: 6,
+            activeHighlightColor: '#06b6d4',
+            baseFontSizePx: 20
+        };
+        this.config = { ...this.defaultConfig };
+
         // Fullscreen elements
         this.fullscreenBtn = document.getElementById('karaoke-fullscreen-btn');
         this.fullscreenIcon = document.getElementById('fullscreen-icon');
@@ -94,10 +119,58 @@ class KaraokeStageManager {
         this.bannerIntervalTimer = null;
         this.headerTransitionInterval = 6000;
 
+        this.loadSettings();
         this.init();
     }
 
     init() {
+        // Stage Toolbar Resizing (A- / A+)
+        if (this.fontDecBtn) {
+            this.fontDecBtn.addEventListener('click', () => this.adjustFontSize(-2));
+        }
+        if (this.fontIncBtn) {
+            this.fontIncBtn.addEventListener('click', () => this.adjustFontSize(2));
+        }
+
+        // Settings Modal Bindings
+        if (this.settingsBtn) {
+            this.settingsBtn.addEventListener('click', () => this.openSettingsModal());
+        }
+        if (this.closeSettingsModalBtn) {
+            this.closeSettingsModalBtn.addEventListener('click', () => this.closeSettingsModal());
+        }
+        if (this.saveSettingsBtn) {
+            this.saveSettingsBtn.addEventListener('click', () => this.closeSettingsModal());
+        }
+        if (this.resetSettingsBtn) {
+            this.resetSettingsBtn.addEventListener('click', () => {
+                this.saveSettings(this.defaultConfig);
+            });
+        }
+
+        // Real-time Settings Input Handlers
+        if (this.settingIntervalInput) {
+            this.settingIntervalInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10) || 6;
+                if (this.settingIntervalDisplay) this.settingIntervalDisplay.textContent = `${val}s`;
+                this.saveSettings({ headerTransitionInterval: val });
+            });
+        }
+        if (this.settingColorInput) {
+            this.settingColorInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (this.settingColorDisplay) this.settingColorDisplay.textContent = val;
+                this.saveSettings({ activeHighlightColor: val });
+            });
+        }
+        if (this.settingFontSizeInput) {
+            this.settingFontSizeInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10) || 20;
+                if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${val}px`;
+                this.saveSettings({ baseFontSizePx: val });
+            });
+        }
+
         // Fullscreen Toggle
         if (this.fullscreenBtn) {
             this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
@@ -223,6 +296,80 @@ class KaraokeStageManager {
 
         // Time & Transport state check
         setInterval(() => this.onTimeCheck(), 100);
+    }
+
+    loadSettings() {
+        try {
+            const raw = localStorage.getItem('flexioke_stage_config');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                this.config = { ...this.defaultConfig, ...parsed };
+            }
+        } catch (err) {
+            console.error("Error loading stage settings:", err);
+            this.config = { ...this.defaultConfig };
+        }
+        this.applySettings();
+    }
+
+    applySettings() {
+        this.headerTransitionInterval = (this.config.headerTransitionInterval || 6) * 1000;
+
+        const basePx = this.config.baseFontSizePx || 20;
+        const activePx = Math.round(basePx * 1.35);
+        const color = this.config.activeHighlightColor || '#06b6d4';
+
+        document.documentElement.style.setProperty('--karaoke-font-size', `${basePx}px`);
+        document.documentElement.style.setProperty('--karaoke-active-font-size', `${activePx}px`);
+        document.documentElement.style.setProperty('--karaoke-highlight-color', color);
+
+        if (this.settingIntervalInput) this.settingIntervalInput.value = this.config.headerTransitionInterval;
+        if (this.settingIntervalDisplay) this.settingIntervalDisplay.textContent = `${this.config.headerTransitionInterval}s`;
+        if (this.settingColorInput) this.settingColorInput.value = color;
+        if (this.settingColorDisplay) this.settingColorDisplay.textContent = color;
+        if (this.settingFontSizeInput) this.settingFontSizeInput.value = basePx;
+        if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${basePx}px`;
+
+        if (this.lineElements && this.lineElements.length > 0) {
+            this.lineElements.forEach((el, idx) => {
+                if (idx !== this.activeLineIndex) {
+                    el.style.fontSize = `var(--karaoke-font-size, ${basePx}px)`;
+                }
+            });
+        }
+
+        if (this.activeLineIndex >= 0) {
+            this.highlightLine(this.activeLineIndex);
+        }
+    }
+
+    saveSettings(newConfig) {
+        this.config = { ...this.config, ...newConfig };
+        try {
+            localStorage.setItem('flexioke_stage_config', JSON.stringify(this.config));
+        } catch (err) {
+            console.error("Error persisting stage settings:", err);
+        }
+        this.applySettings();
+    }
+
+    adjustFontSize(delta) {
+        let newSize = (this.config.baseFontSizePx || 20) + delta;
+        newSize = Math.max(14, Math.min(36, newSize));
+        this.saveSettings({ baseFontSizePx: newSize });
+    }
+
+    openSettingsModal() {
+        if (this.settingsModal) {
+            this.applySettings();
+            this.settingsModal.classList.remove('hidden');
+        }
+    }
+
+    closeSettingsModal() {
+        if (this.settingsModal) {
+            this.settingsModal.classList.add('hidden');
+        }
     }
 
     startAlternatingBannerCycle() {
@@ -432,7 +579,8 @@ class KaraokeStageManager {
 
         this.lyricsData.lines.forEach((line, index) => {
             const lineEl = document.createElement('div');
-            lineEl.className = "karaoke-line text-slate-400 font-semibold text-base sm:text-lg transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
+            lineEl.className = "karaoke-line text-slate-400 font-semibold transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
+            lineEl.style.fontSize = "var(--karaoke-font-size, 20px)";
             lineEl.textContent = line.text;
             lineEl.dataset.index = index;
 
@@ -581,13 +729,23 @@ class KaraokeStageManager {
 
     highlightLine(index) {
         if (this.activeLineIndex >= 0 && this.lineElements[this.activeLineIndex]) {
-            this.lineElements[this.activeLineIndex].className = "karaoke-line text-slate-400 font-semibold text-base sm:text-lg transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
+            const prevEl = this.lineElements[this.activeLineIndex];
+            prevEl.className = "karaoke-line text-slate-400 font-semibold transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
+            prevEl.style.fontSize = "var(--karaoke-font-size, 20px)";
+            prevEl.style.borderColor = "transparent";
+            prevEl.style.backgroundColor = "transparent";
+            prevEl.style.boxShadow = "none";
         }
 
         this.activeLineIndex = index;
         const activeEl = this.lineElements[index];
         if (activeEl) {
-            activeEl.className = "karaoke-line text-white font-extrabold text-xl sm:text-2xl bg-brand-600/30 border border-brand-500/60 rounded-2xl py-3.5 px-6 shadow-xl shadow-brand-500/25 scale-105 transition-all duration-300 cursor-pointer";
+            const highlightColor = this.config.activeHighlightColor || '#06b6d4';
+            activeEl.className = "karaoke-line text-white font-extrabold rounded-2xl py-3.5 px-6 scale-105 transition-all duration-300 cursor-pointer border";
+            activeEl.style.fontSize = "var(--karaoke-active-font-size, 27px)";
+            activeEl.style.borderColor = "var(--karaoke-highlight-color, " + highlightColor + ")";
+            activeEl.style.backgroundColor = "rgba(6, 182, 212, 0.15)";
+            activeEl.style.boxShadow = `0 10px 25px -5px ${highlightColor}40`;
             activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }

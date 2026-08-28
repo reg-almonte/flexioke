@@ -25,6 +25,13 @@ def test_karaoke_stage_markup_structure():
     assert 'id="karaoke-banner-label"' in html
     assert 'id="karaoke-timecode"' in html
     assert 'id="karaoke-countdown-cue"' in html
+    assert 'id="karaoke-font-dec-btn"' in html
+    assert 'id="karaoke-font-inc-btn"' in html
+    assert 'id="karaoke-settings-btn"' in html
+    assert 'id="karaoke-settings-modal"' in html
+    assert 'id="settings-transition-interval"' in html
+    assert 'id="settings-highlight-color"' in html
+    assert 'id="settings-font-size"' in html
 
 def test_karaoke_js_alternating_header_logic():
     resp = client.get("/static/karaoke.js")
@@ -38,5 +45,12 @@ def test_karaoke_countdown_cue_logic():
     assert resp.status_code == 200
     assert "countdownCue" in resp.text or "countdown-cue" in resp.text
     assert "updateCountdownCue" in resp.text or "countdown" in resp.text.lower()
+
+def test_karaoke_settings_and_font_scaling():
+    resp = client.get("/static/karaoke.js")
+    assert resp.status_code == 200
+    assert "flexioke_stage_config" in resp.text
+    assert "applySettings" in resp.text or "baseFontSize" in resp.text
+
 
 
