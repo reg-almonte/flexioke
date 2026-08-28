@@ -72,7 +72,8 @@ made while building the template itself.
 - artifact: docs/tickets/EPIC-0003-karaoke-metadata-and-stage-enhancements.md
 - approved_by: reg
 - notes: Approved ticket breakdown comprising STORY-0008 to STORY-0010 and TASK-0019 to TASK-0025 covering backend model/store/API metadata extensions, song & lyrics editor modal, dual-field library search, alternating stage header, visual countdown cues, and stage customization controls.
-
-
-
+## 2026-08-29 — Approved Release v0.2.1: Karaoke Mode Enhancements & Metadata Separation
+- artifact: docs/releases/v0.2.1.md
+- approved_by: reg
+- notes: Version 0.2.1 fully approved and released. Includes Song Title and Artist metadata separation with backwards compatibility, unified song details & lyrics modal, dual-field search, auto-sort by song title, alternating stage banner ("Now Singing" ⟷ "Up Next"), timecode countdown badge, visual 3-beat countdown cues, and customizable stage settings modal.
 
