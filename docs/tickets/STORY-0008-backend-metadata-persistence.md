@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-08-28
-implementation: pending
+implementation: in-review
 ---
 
 # STORY-0008: Backend Song Metadata Model, Persistence & Patch API
@@ -14,14 +14,15 @@ implementation: pending
 Extends the backend data layer and REST API to support structured song metadata (`title` and `artist`). Enables updating song details via a `PATCH` endpoint, while ensuring 100% backward compatibility for existing `job.json` records without data loss.
 
 ## Acceptance Criteria
-- [ ] Backend data models accept and return `artist` alongside `title`.
-- [ ] Existing jobs without an `artist` field load without validation errors, defaulting `artist` to `null`/empty string.
-- [ ] `PATCH /api/jobs/{job_id}` allows updating `title` and `artist`, persisting changes to `job.json`.
-- [ ] Comprehensive unit tests verify serialization, deserialization, backward compatibility, and endpoint behavior.
+- [x] Backend data models accept and return `artist` alongside `title`.
+- [x] Existing jobs without an `artist` field load without validation errors, defaulting `artist` to `null`/empty string.
+- [x] `PATCH /api/jobs/{job_id}` allows updating `title` and `artist`, persisting changes to `job.json`.
+- [x] Comprehensive unit tests verify serialization, deserialization, backward compatibility, and endpoint behavior.
 
 ## Tasks
-- [ ] TASK-0019: Model & JobStore Artist Field Extension with Legacy Deserialization
-- [ ] TASK-0020: Song Metadata Update REST Endpoint (PATCH /api/jobs/{job_id})
+- [x] TASK-0019: Model & JobStore Artist Field Extension with Legacy Deserialization
+- [x] TASK-0020: Song Metadata Update REST Endpoint (PATCH /api/jobs/{job_id})
 
 ## Blocked by
 - None (can start immediately)
+

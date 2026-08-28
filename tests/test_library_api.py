@@ -55,3 +55,56 @@ def test_list_all_jobs_explicit_status(mock_job_library):
     data = resp.json()
     assert data["total"] == 1
     assert data["jobs"][0]["title"] == "In Progress Track"
+
+def test_patch_job_metadata_success(mock_job_library):
+    jobs = mock_job_library.list_jobs()
+    target_job = jobs[0]
+
+    resp = client.patch(
+        f"/api/jobs/{target_job.job_id}",
+        json={"title": "Updated Title", "artist": "Updated Artist"}
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["job_id"] == target_job.job_id
+    assert data["title"] == "Updated Title"
+    assert data["artist"] == "Updated Artist"
+
+    # Verify reflected in GET /api/jobs/{job_id}
+    get_resp = client.get(f"/api/jobs/{target_job.job_id}")
+    assert get_resp.status_code == 200
+    assert get_resp.json()["title"] == "Updated Title"
+    assert get_resp.json()["artist"] == "Updated Artist"
+
+def test_patch_job_metadata_partial(mock_job_library):
+    jobs = mock_job_library.list_jobs()
+    target_job = jobs[0]
+
+    # Update only artist
+    resp = client.patch(
+        f"/api/jobs/{target_job.job_id}",
+        json={"artist": "Solo Artist"}
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["artist"] == "Solo Artist"
+
+def test_patch_job_metadata_404(mock_job_library):
+    resp = client.patch(
+        "/api/jobs/non-existent-uuid",
+        json={"title": "New Title", "artist": "New Artist"}
+    )
+    assert resp.status_code == 404
+    assert "not found" in resp.json()["detail"].lower()
+
+def test_patch_job_metadata_validation_error(mock_job_library):
+    jobs = mock_job_library.list_jobs()
+    target_job = jobs[0]
+
+    # Empty string title is invalid
+    resp = client.patch(
+        f"/api/jobs/{target_job.job_id}",
+        json={"title": ""}
+    )
+    assert resp.status_code == 422
+

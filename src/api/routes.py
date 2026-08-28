@@ -12,6 +12,7 @@ from src.services.pipeline import run_separation_pipeline, VALID_STEM_TYPES
 from src.models import (
     JobRecord,
     JobListResponse,
+    JobUpdateMetadataRequest,
     QueueItem,
     QueueResponse,
     LyricsResponse,
@@ -141,6 +142,26 @@ def get_job_status(job_id: str):
             detail=f"Job '{job_id}' not found."
         )
     return job
+
+@router.patch("/jobs/{job_id}", response_model=JobRecord)
+def update_job_metadata(job_id: str, req: JobUpdateMetadataRequest):
+    """Update song title and artist metadata for a job."""
+    job = job_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found."
+        )
+
+    updates = {}
+    if req.title is not None:
+        updates["title"] = req.title.strip()
+    if req.artist is not None:
+        updates["artist"] = req.artist.strip() if req.artist.strip() else None
+
+    updated_job = job_manager.update_job(job_id, **updates)
+    return updated_job
+
 
 @router.get("/jobs/{job_id}/stems/{stem_type}")
 def get_stem_audio(job_id: str, stem_type: str):

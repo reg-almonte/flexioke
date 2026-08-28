@@ -56,3 +56,8 @@ class LyricsResponse(BaseModel):
     lyrics: str = ""
     has_lyrics: bool = False
     has_timestamps: bool = False
+
+class JobUpdateMetadataRequest(BaseModel):
+    title: Optional[str] = Field(default=None, min_length=1, max_length=200)
+    artist: Optional[str] = Field(default=None, max_length=200)
+
