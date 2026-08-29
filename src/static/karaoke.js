@@ -35,6 +35,13 @@ class LrcParser {
 
         if (parsedLines.length > 0) {
             parsedLines.sort((a, b) => a.time - b.time);
+
+            // If the final line is an empty timestamp or instrumental placeholder, label it as "End"
+            const lastLine = parsedLines[parsedLines.length - 1];
+            if (lastLine.text === "♪ ♪ ♪ (Instrumental)" || !lastLine.text.trim()) {
+                lastLine.text = "• End •";
+            }
+
             return {
                 lines: parsedLines,
                 hasTimestamps: true,
@@ -339,6 +346,18 @@ class KaraokeStageManager {
             this.onSongLoaded(window.flexiokePlayer.currentJob);
         }
 
+        // Setup dynamic observer for Stage Header Marquee
+        if (window.ResizeObserver && this.stageCard) {
+            const resizeObs = new ResizeObserver(() => {
+                this.updateStageHeader();
+            });
+            resizeObs.observe(this.stageCard);
+        }
+
+        window.addEventListener('resize', () => {
+            this.updateStageHeader();
+        });
+
         // Time & Transport state check
         setInterval(() => this.onTimeCheck(), 100);
     }
@@ -449,13 +468,23 @@ class KaraokeStageManager {
     checkMarquee(el) {
         if (!el || !el.parentElement) return;
         const parent = el.parentElement;
-        setTimeout(() => {
-            if (el.scrollWidth > parent.clientWidth + 5) {
+        const evaluate = () => {
+            if (!el || !el.parentElement) return;
+            const wasScrolling = el.classList.contains('marquee-scroll');
+            if (wasScrolling) {
+                el.classList.remove('marquee-scroll');
+            }
+            const isOverflowing = el.scrollWidth > parent.clientWidth + 4;
+            if (isOverflowing) {
                 el.classList.add('marquee-scroll');
             } else {
                 el.classList.remove('marquee-scroll');
             }
-        }, 50);
+        };
+
+        evaluate();
+        setTimeout(evaluate, 60);
+        setTimeout(evaluate, 350);
     }
 
     toggleFullscreen() {
@@ -474,6 +503,8 @@ class KaraokeStageManager {
         if (this.fullscreenIcon) this.fullscreenIcon.textContent = '🗗';
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Collapse';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Exit Fullscreen Stage (Esc)";
+        this.updateStageHeader();
+        setTimeout(() => this.updateStageHeader(), 350);
     }
 
     exitFullscreen() {
@@ -484,6 +515,8 @@ class KaraokeStageManager {
         if (this.fullscreenIcon) this.fullscreenIcon.textContent = '⛶';
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Expand';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Toggle Fullscreen Stage";
+        this.updateStageHeader();
+        setTimeout(() => this.updateStageHeader(), 350);
     }
 
     onSongLoaded(job) {
