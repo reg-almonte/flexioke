@@ -475,7 +475,7 @@ class KaraokeStageManager {
         }
         // Fullscreen Active: button toggles to Collapse View
         // NOTE: Customize collapse icon here (e.g. '⤡', '🗕', '↙', '✕', '⛶')
-        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '⤡';
+        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '↙';
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Collapse';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Exit Fullscreen Stage (Esc)";
         this.updateStageHeader();
