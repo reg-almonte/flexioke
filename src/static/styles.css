@@ -36,6 +36,14 @@ input[type="range"]::-webkit-slider-thumb:hover {
     transform: scale(1.2);
 }
 
+/* Expanding Hover Volume Slider */
+.karaoke-volume-wrapper:hover .karaoke-hover-volume-slider,
+.karaoke-volume-wrapper:focus-within .karaoke-hover-volume-slider {
+    width: 5.5rem !important;
+    opacity: 1 !important;
+    margin-left: 0.25rem;
+}
+
 /* Active buttons */
 .btn-active-mute {
     background-color: #ef4444 !important;

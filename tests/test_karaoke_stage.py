@@ -63,6 +63,22 @@ def test_stage_click_to_play_and_bounded_pills():
     assert resp_css.status_code == 200
     assert ".karaoke-line" in resp_css.text
 
+def test_left_transport_cluster_and_timecode_toggle():
+    resp = client.get("/")
+    assert resp.status_code == 200
+    html = resp.text
+    assert 'id="karaoke-play-btn"' in html
+    assert 'id="karaoke-volume-slider"' in html
+    assert 'id="karaoke-timecode"' in html
+    assert 'karaoke-volume-control' in html or 'karaoke-volume-wrapper' in html
+
+    resp_js = client.get("/static/karaoke.js")
+    assert resp_js.status_code == 200
+    assert "timecodeMode" in resp_js.text
+    assert "toggleTimecodeMode" in resp_js.text or "timecodeMode" in resp_js.text
+    assert "flexioke_master_volume" in resp_js.text
+
+
 
 
 

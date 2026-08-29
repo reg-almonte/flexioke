@@ -117,6 +117,8 @@ class KaraokeStageManager {
         this.bannerIntervalTimer = null;
         this.headerTransitionInterval = 6000;
 
+        this.timecodeMode = localStorage.getItem('flexioke_timecode_mode') || 'elapsed';
+
         this.loadSettings();
         this.init();
     }
@@ -217,14 +219,30 @@ class KaraokeStageManager {
         }
 
         if (this.volumeSlider) {
+            const savedVol = parseFloat(localStorage.getItem('flexioke_master_volume') || '0.8');
+            this.volumeSlider.value = savedVol;
+            if (window.flexiokePlayer) {
+                window.flexiokePlayer.masterVolume = savedVol;
+            }
+
             this.volumeSlider.addEventListener('input', (e) => {
                 const val = parseFloat(e.target.value);
                 if (window.flexiokePlayer) {
                     window.flexiokePlayer.masterVolume = val;
                     window.flexiokePlayer.applyGainMatrix();
                 }
+                try {
+                    localStorage.setItem('flexioke_master_volume', String(val));
+                } catch(err) {}
                 const masterSlider = document.getElementById('master-volume-slider');
                 if (masterSlider) masterSlider.value = val;
+            });
+        }
+
+        // Timecode Click-to-Toggle Mode
+        if (this.timecodeEl) {
+            this.timecodeEl.addEventListener('click', () => {
+                this.toggleTimecodeMode();
             });
         }
 
@@ -275,11 +293,9 @@ class KaraokeStageManager {
             this.activeLineIndex = -1;
             this.updateStageHeader();
             if (this.timecodeEl) {
-                this.timecodeEl.textContent = "00:00 / 00:00 (-00:00)";
+                this.timecodeEl.textContent = (this.timecodeMode === 'remaining') ? "-00:00 / 00:00" : "00:00 / 00:00";
             }
             this.renderDefaultState();
-            this.updatePlayBtnUI();
-        });
             this.updatePlayBtnUI();
         });
 
@@ -599,12 +615,23 @@ class KaraokeStageManager {
         this.stageContainer.scrollTop = 0;
     }
 
+    toggleTimecodeMode() {
+        this.timecodeMode = (this.timecodeMode === 'elapsed') ? 'remaining' : 'elapsed';
+        try {
+            localStorage.setItem('flexioke_timecode_mode', this.timecodeMode);
+        } catch(err) {}
+        this.onTimeCheck();
+    }
+
     onTimeCheck() {
         if (!window.flexiokePlayer) return;
 
         this.updatePlayBtnUI();
 
-        if (!this.currentJobId || !this.lyricsData || !this.lyricsData.hasTimestamps) {
+        if (!this.currentJobId) {
+            if (this.timecodeEl) {
+                this.timecodeEl.textContent = (this.timecodeMode === 'remaining') ? "-00:00 / 00:00" : "00:00 / 00:00";
+            }
             return;
         }
 
@@ -621,8 +648,16 @@ class KaraokeStageManager {
                     return `${String(m).padStart(2, '0')}:${String(sc).padStart(2, '0')}`;
                 };
                 const remaining = Math.max(0, (dur || 0) - currentTime);
-                this.timecodeEl.textContent = `${fmt(currentTime)} / ${fmt(dur || 0)} (-${fmt(remaining)})`;
+                if (this.timecodeMode === 'remaining') {
+                    this.timecodeEl.textContent = `-${fmt(remaining)} / ${fmt(dur || 0)}`;
+                } else {
+                    this.timecodeEl.textContent = `${fmt(currentTime)} / ${fmt(dur || 0)}`;
+                }
             }
+        }
+
+        if (!this.lyricsData || !this.lyricsData.hasTimestamps) {
+            return;
         }
 
         // Find active line
