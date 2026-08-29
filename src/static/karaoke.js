@@ -504,21 +504,25 @@ class KaraokeStageManager {
 
         if (this.toggleLeadBtn && this.leadStatusText && leadTrack) {
             if (leadTrack.muted) {
-                this.toggleLeadBtn.className = "px-3.5 py-1.5 rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-rose-600/50 hover:text-white";
                 this.leadStatusText.textContent = "Lead Vocals: MUTED";
+                this.toggleLeadBtn.title = "Lead Vocals: MUTED (Click to Unmute)";
             } else {
-                this.toggleLeadBtn.className = "px-3.5 py-1.5 rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-brand-600/50 hover:text-white";
                 this.leadStatusText.textContent = "Lead Vocals: ON";
+                this.toggleLeadBtn.title = "Lead Vocals: ON (Click to Mute)";
             }
         }
 
         if (this.toggleBackingBtn && this.backingStatusText && backingTrack) {
             if (backingTrack.muted) {
-                this.toggleBackingBtn.className = "px-3.5 py-1.5 rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.toggleBackingBtn.className = "karaoke-vocal-toggle rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-rose-600/50 hover:text-white";
                 this.backingStatusText.textContent = "Backing: MUTED";
+                this.toggleBackingBtn.title = "Backing Vocals: MUTED (Click to Unmute)";
             } else {
-                this.toggleBackingBtn.className = "px-3.5 py-1.5 rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.toggleBackingBtn.className = "karaoke-vocal-toggle rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-violet-600/50 hover:text-white";
                 this.backingStatusText.textContent = "Backing: ON";
+                this.toggleBackingBtn.title = "Backing Vocals: ON (Click to Mute)";
             }
         }
     }

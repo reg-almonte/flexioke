@@ -152,5 +152,33 @@ body.karaoke-active #app-header.header-revealed {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
 }
 
+/* Center Vocal Buttons: Compact in default mode, expanded in fullscreen */
+#karaoke-toggle-lead-btn,
+#karaoke-toggle-backing-btn {
+    width: 2.35rem;
+    height: 2.35rem;
+    padding: 0;
+    justify-content: center;
+}
+
+#karaoke-lead-status-text,
+#karaoke-backing-status-text {
+    display: none;
+}
+
+.stage-fullscreen #karaoke-toggle-lead-btn,
+.stage-fullscreen #karaoke-toggle-backing-btn {
+    width: auto !important;
+    height: auto !important;
+    padding: 0.45rem 0.9rem !important;
+    justify-content: flex-start !important;
+}
+
+.stage-fullscreen #karaoke-lead-status-text,
+.stage-fullscreen #karaoke-backing-status-text {
+    display: inline !important;
+}
+
+
 
 
