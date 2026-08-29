@@ -93,3 +93,7 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved ticket breakdown comprising STORY-0011 to STORY-0013 and TASK-0026 to TASK-0032 covering simultaneous dual stage header with marquee, stage background click-to-play, modernized bottom transport bar with expanding volume and restart, backend queue reorder endpoint (POST /api/queue/reorder), sidebar reorganization with up/down controls, and auto-hiding navbar.
 
+## 2026-08-29 — Approved Release v0.2.2: Karaoke Stage Transport, Queue Reordering & Responsive UI Refinements
+- artifact: docs/releases/v0.2.2.md
+- approved_by: reg
+- notes: Version 0.2.2 fully approved and released. Includes simultaneous dual stage headers ("Now Singing" and "Up Next") with auto-scrolling CSS marquee, stage background click-to-play with bounded lyric pills, modernized bottom transport bar with expanding hover volume slider, dedicated restart song button, interactive click-toggleable timecode modes, compact vocal toggles in default view, backend atomic queue reorder endpoint (POST /api/queue/reorder), sidebar reorganization with live up/down reordering and song count badges, search bar clear (✕) button, 3-choice playback interruption modal, and auto-hiding navbar.
