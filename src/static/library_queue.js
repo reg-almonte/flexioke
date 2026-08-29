@@ -432,6 +432,22 @@ class PlaybackQueueManager {
         }
     }
 
+    async reorderItem(queueId, direction) {
+        try {
+            const resp = await fetch('/api/queue/reorder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ queue_id: queueId, direction })
+            });
+            if (resp.ok) {
+                const state = await resp.json();
+                this.render(state);
+            }
+        } catch (err) {
+            console.error("Error reordering queue:", err);
+        }
+    }
+
     async clearQueue() {
         try {
             const resp = await fetch('/api/queue', { method: 'DELETE' });
@@ -466,17 +482,38 @@ class PlaybackQueueManager {
                 const row = document.createElement('div');
                 row.className = "p-2.5 bg-surface-950/70 border border-slate-800/80 rounded-xl flex items-center justify-between gap-3 text-xs";
 
+                const isFirst = index === 0;
+                const isLast = index === queue.length - 1;
+
                 row.innerHTML = `
-                    <div class="flex items-center gap-2.5 truncate min-w-0">
+                    <div class="flex items-center gap-2.5 truncate min-w-0 flex-1">
                         <span class="w-5 h-5 rounded-full bg-slate-800 text-[10px] text-slate-400 font-bold flex items-center justify-center shrink-0">
                             ${index + 1}
                         </span>
                         <span class="font-medium text-slate-200 truncate">${escapeHtml(item.title)}</span>
                     </div>
-                    <button class="remove-queue-btn text-slate-500 hover:text-rose-400 p-1 text-xs shrink-0 transition" data-queue-id="${item.queue_id}">
-                        ✕
-                    </button>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button class="reorder-up-btn p-1 text-[10px] rounded hover:bg-slate-800 ${isFirst ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Up" ${isFirst ? 'disabled' : ''}>
+                            ▲
+                        </button>
+                        <button class="reorder-down-btn p-1 text-[10px] rounded hover:bg-slate-800 ${isLast ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Down" ${isLast ? 'disabled' : ''}>
+                            ▼
+                        </button>
+                        <button class="remove-queue-btn text-slate-500 hover:text-rose-400 p-1 text-xs transition" title="Remove from Queue" data-queue-id="${item.queue_id}">
+                            ✕
+                        </button>
+                    </div>
                 `;
+
+                const upBtn = row.querySelector('.reorder-up-btn');
+                if (!isFirst && upBtn) {
+                    upBtn.addEventListener('click', () => this.reorderItem(item.queue_id, 'up'));
+                }
+
+                const downBtn = row.querySelector('.reorder-down-btn');
+                if (!isLast && downBtn) {
+                    downBtn.addEventListener('click', () => this.reorderItem(item.queue_id, 'down'));
+                }
 
                 const removeBtn = row.querySelector('.remove-queue-btn');
                 removeBtn.addEventListener('click', () => this.removeFromQueue(item.queue_id));
