@@ -82,18 +82,18 @@ class KaraokeStageManager {
         this.closeSettingsModalBtn = document.getElementById('close-settings-modal-btn');
         this.saveSettingsBtn = document.getElementById('save-settings-btn');
         this.resetSettingsBtn = document.getElementById('settings-reset-btn');
-        this.settingIntervalInput = document.getElementById('settings-transition-interval');
-        this.settingIntervalDisplay = document.getElementById('settings-interval-display');
         this.settingColorInput = document.getElementById('settings-highlight-color');
         this.settingColorDisplay = document.getElementById('settings-color-display');
         this.settingFontSizeInput = document.getElementById('settings-font-size');
         this.settingFontSizeDisplay = document.getElementById('settings-font-size-display');
+        this.settingActiveFontSizeInput = document.getElementById('settings-active-font-size');
+        this.settingActiveFontSizeDisplay = document.getElementById('settings-active-font-size-display');
 
         // Default Config & State
         this.defaultConfig = {
-            headerTransitionInterval: 6,
             activeHighlightColor: '#06b6d4',
-            baseFontSizePx: 20
+            baseFontSizePx: 20,
+            activeFontSizePx: 24
         };
         this.config = { ...this.defaultConfig };
 
@@ -120,11 +120,6 @@ class KaraokeStageManager {
         this.activeLineIndex = -1;
         this.lineElements = [];
 
-        // Alternating Header Banner state
-        this.bannerState = 'now_singing'; // 'now_singing' | 'up_next'
-        this.bannerIntervalTimer = null;
-        this.headerTransitionInterval = 6000;
-
         this.timecodeMode = localStorage.getItem('flexioke_timecode_mode') || 'elapsed';
 
         this.loadSettings();
@@ -132,14 +127,6 @@ class KaraokeStageManager {
     }
 
     init() {
-        // Stage Toolbar Resizing (A- / A+)
-        if (this.fontDecBtn) {
-            this.fontDecBtn.addEventListener('click', () => this.adjustFontSize(-2));
-        }
-        if (this.fontIncBtn) {
-            this.fontIncBtn.addEventListener('click', () => this.adjustFontSize(2));
-        }
-
         // Settings Modal Bindings
         if (this.settingsBtn) {
             this.settingsBtn.addEventListener('click', () => this.openSettingsModal());
@@ -157,13 +144,6 @@ class KaraokeStageManager {
         }
 
         // Real-time Settings Input Handlers
-        if (this.settingIntervalInput) {
-            this.settingIntervalInput.addEventListener('input', (e) => {
-                const val = parseInt(e.target.value, 10) || 6;
-                if (this.settingIntervalDisplay) this.settingIntervalDisplay.textContent = `${val}s`;
-                this.saveSettings({ headerTransitionInterval: val });
-            });
-        }
         if (this.settingColorInput) {
             this.settingColorInput.addEventListener('input', (e) => {
                 const val = e.target.value;
@@ -176,6 +156,13 @@ class KaraokeStageManager {
                 const val = parseInt(e.target.value, 10) || 20;
                 if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${val}px`;
                 this.saveSettings({ baseFontSizePx: val });
+            });
+        }
+        if (this.settingActiveFontSizeInput) {
+            this.settingActiveFontSizeInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10) || 24;
+                if (this.settingActiveFontSizeDisplay) this.settingActiveFontSizeDisplay.textContent = `${val}px`;
+                this.saveSettings({ activeFontSizePx: val });
             });
         }
 
@@ -372,22 +359,20 @@ class KaraokeStageManager {
     }
 
     applySettings() {
-        this.headerTransitionInterval = (this.config.headerTransitionInterval || 6) * 1000;
-
-        const basePx = this.config.baseFontSizePx || 20;
-        const activePx = Math.round(basePx * 1.35);
+        const basePx = parseInt(this.config.baseFontSizePx, 10) || 20;
+        const activePx = parseInt(this.config.activeFontSizePx, 10) || 24;
         const color = this.config.activeHighlightColor || '#06b6d4';
 
         document.documentElement.style.setProperty('--karaoke-font-size', `${basePx}px`);
         document.documentElement.style.setProperty('--karaoke-active-font-size', `${activePx}px`);
         document.documentElement.style.setProperty('--karaoke-highlight-color', color);
 
-        if (this.settingIntervalInput) this.settingIntervalInput.value = this.config.headerTransitionInterval;
-        if (this.settingIntervalDisplay) this.settingIntervalDisplay.textContent = `${this.config.headerTransitionInterval}s`;
         if (this.settingColorInput) this.settingColorInput.value = color;
         if (this.settingColorDisplay) this.settingColorDisplay.textContent = color;
         if (this.settingFontSizeInput) this.settingFontSizeInput.value = basePx;
         if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${basePx}px`;
+        if (this.settingActiveFontSizeInput) this.settingActiveFontSizeInput.value = activePx;
+        if (this.settingActiveFontSizeDisplay) this.settingActiveFontSizeDisplay.textContent = `${activePx}px`;
 
         if (this.lineElements && this.lineElements.length > 0) {
             this.lineElements.forEach((el, idx) => {
@@ -400,7 +385,6 @@ class KaraokeStageManager {
         if (this.activeLineIndex >= 0) {
             this.highlightLine(this.activeLineIndex);
         }
-
     }
 
     saveSettings(newConfig) {
@@ -411,12 +395,6 @@ class KaraokeStageManager {
             console.error("Error persisting stage settings:", err);
         }
         this.applySettings();
-    }
-
-    adjustFontSize(delta) {
-        let newSize = (this.config.baseFontSizePx || 20) + delta;
-        newSize = Math.max(14, Math.min(36, newSize));
-        this.saveSettings({ baseFontSizePx: newSize });
     }
 
     openSettingsModal() {
@@ -808,7 +786,7 @@ class KaraokeStageManager {
         if (activeEl) {
             const highlightColor = this.config.activeHighlightColor || '#06b6d4';
             activeEl.className = "karaoke-line inline-block text-white font-extrabold rounded-full py-2.5 px-7 scale-105 transition-all duration-300 cursor-pointer border";
-            activeEl.style.fontSize = "var(--karaoke-active-font-size, 27px)";
+            activeEl.style.fontSize = "var(--karaoke-active-font-size, 24px)";
             activeEl.style.borderColor = "var(--karaoke-highlight-color, " + highlightColor + ")";
             activeEl.style.backgroundColor = "rgba(6, 182, 212, 0.18)";
             activeEl.style.boxShadow = `0 10px 25px -5px ${highlightColor}40`;

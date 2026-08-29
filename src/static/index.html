@@ -573,16 +573,6 @@
             </div>
             
             <div class="space-y-4 text-xs">
-                <!-- Header Transition Interval -->
-                <div class="space-y-1.5">
-                    <div class="flex justify-between items-center text-slate-300">
-                        <label for="settings-transition-interval" class="font-medium">Header Alternating Interval</label>
-                        <span id="settings-interval-display" class="font-mono text-brand-400 font-semibold">6s</span>
-                    </div>
-                    <input type="range" id="settings-transition-interval" min="3" max="30" step="1" value="6" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
-                    <p class="text-[10px] text-slate-500">Duration before toggling between 'Now Singing' and 'Up Next' (3s - 30s).</p>
-                </div>
-
                 <!-- Active Lyric Highlight Glow Color -->
                 <div class="space-y-1.5">
                     <label for="settings-highlight-color" class="block font-medium text-slate-300">Active Lyric Highlight Color</label>
@@ -599,8 +589,18 @@
                         <label for="settings-font-size" class="font-medium">Base Lyric Font Size</label>
                         <span id="settings-font-size-display" class="font-mono text-brand-400 font-semibold">20px</span>
                     </div>
-                    <input type="range" id="settings-font-size" min="14" max="36" step="1" value="20" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
-                    <p class="text-[10px] text-slate-500">Base font size for stage lyrics (can also be scaled with A- / A+ toolbar buttons).</p>
+                    <input type="range" id="settings-font-size" min="14" max="28" step="1" value="20" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                    <p class="text-[10px] text-slate-500">Base font size for all inactive lyrics lines on the stage (14px - 28px).</p>
+                </div>
+
+                <!-- Highlighted Lyric Font Size -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <label for="settings-active-font-size" class="font-medium">Highlighted Lyric Font Size</label>
+                        <span id="settings-active-font-size-display" class="font-mono text-brand-400 font-semibold">24px</span>
+                    </div>
+                    <input type="range" id="settings-active-font-size" min="16" max="28" step="1" value="24" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                    <p class="text-[10px] text-slate-500">Font size for the currently active/sung lyric line (16px - 28px).</p>
                 </div>
             </div>
 

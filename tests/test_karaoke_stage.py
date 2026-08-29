@@ -26,6 +26,8 @@ def test_karaoke_stage_markup_structure():
     assert 'id="karaoke-settings-modal"' in html
     assert 'id="settings-highlight-color"' in html
     assert 'id="settings-font-size"' in html
+    assert 'id="settings-active-font-size"' in html
+
 
 def test_karaoke_js_dual_header_marquee_logic():
     resp = client.get("/static/karaoke.js")
