@@ -84,4 +84,9 @@ made while building the template itself.
 - artifact: docs/specs/karaoke-ui-refinements.md
 - approved_by: reg
 - notes: Functional spec approved detailing simultaneous dual stage header with marquee, bottom transport bar (expanding volume, toggleable timecode, restart, settings, expand/collapse), stage background click-to-play with bounded lyric pills, queue reorder endpoint (POST /api/queue/reorder), and auto-hiding navbar.
+## 2026-08-29 — Approved ADR-0005: Directional Queue Reordering API with Reactive Stage Transport & CSS Marquee Engine
+- artifact: docs/design/ADR-0005-karaoke-stage-transport-queue-reordering.md
+- approved_by: reg
+- notes: Approved Option 1 (Directional Queue Reordering API with Reactive DOM Event Bus & CSS Marquee Engine) providing atomic thread-safe queue mutation, simultaneous dual stage header with marquee, modernized transport bar with expanding volume and restart, stage click-to-play, and auto-hiding navbar.
+
 
