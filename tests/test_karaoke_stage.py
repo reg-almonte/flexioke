@@ -52,5 +52,17 @@ def test_karaoke_settings_and_font_scaling():
     assert "flexioke_stage_config" in resp.text
     assert "applySettings" in resp.text or "baseFontSize" in resp.text
 
+def test_stage_click_to_play_and_bounded_pills():
+    resp_js = client.get("/static/karaoke.js")
+    assert resp_js.status_code == 200
+    assert "togglePlayPause" in resp_js.text or "togglePlay" in resp_js.text
+    assert "stopPropagation" in resp_js.text
+    assert "karaoke-line" in resp_js.text
+
+    resp_css = client.get("/static/styles.css")
+    assert resp_css.status_code == 200
+    assert ".karaoke-line" in resp_css.text
+
+
 
 

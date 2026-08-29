@@ -167,6 +167,14 @@ class KaraokeStageManager {
                 if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${val}px`;
                 this.saveSettings({ baseFontSizePx: val });
             });
+        // Stage Background Click-to-Play/Pause
+        if (this.stageContainer) {
+            this.stageContainer.style.cursor = 'pointer';
+            this.stageContainer.addEventListener('click', (e) => {
+                if (!e.target.closest('.karaoke-line')) {
+                    this.togglePlayPause();
+                }
+            });
         }
 
         // Fullscreen Toggle
@@ -470,6 +478,13 @@ class KaraokeStageManager {
         }
     }
 
+    togglePlayPause() {
+        if (window.flexiokePlayer && this.currentJob) {
+            window.flexiokePlayer.togglePlay();
+            this.updatePlayBtnUI();
+        }
+    }
+
     updatePlayBtnUI() {
         if (!this.playBtn || !window.flexiokePlayer) return;
         this.playBtn.innerHTML = window.flexiokePlayer.isPlaying ? '⏸' : '▶';
@@ -529,17 +544,21 @@ class KaraokeStageManager {
 
         // Timestamped LRC mode
         const wrapper = document.createElement('div');
-        wrapper.className = "space-y-4 py-32 max-w-3xl mx-auto w-full text-center";
+        wrapper.className = "space-y-3 py-32 max-w-3xl mx-auto w-full text-center";
 
         this.lyricsData.lines.forEach((line, index) => {
-            const lineEl = document.createElement('div');
-            lineEl.className = "karaoke-line text-slate-400 font-semibold transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
+            const rowWrapper = document.createElement('div');
+            rowWrapper.className = "karaoke-line-row py-1 text-center";
+
+            const lineEl = document.createElement('span');
+            lineEl.className = "karaoke-line inline-block text-slate-400 font-semibold transition-all duration-300 py-1.5 px-5 rounded-full cursor-pointer hover:text-white hover:bg-slate-800/60";
             lineEl.style.fontSize = "var(--karaoke-font-size, 20px)";
             lineEl.textContent = line.text;
             lineEl.dataset.index = index;
 
-            // Click to seek to line
-            lineEl.addEventListener('click', () => {
+            // Click to seek directly to line with stopPropagation
+            lineEl.addEventListener('click', (e) => {
+                e.stopPropagation();
                 if (window.flexiokePlayer && line.time !== null) {
                     window.flexiokePlayer.syncSeek(line.time, 'none');
                     const primary = Object.values(window.flexiokePlayer.tracks).find(t => t.ws && t.isReady);
@@ -549,7 +568,8 @@ class KaraokeStageManager {
                 }
             });
 
-            wrapper.appendChild(lineEl);
+            rowWrapper.appendChild(lineEl);
+            wrapper.appendChild(rowWrapper);
             this.lineElements.push(lineEl);
         });
 
@@ -684,7 +704,7 @@ class KaraokeStageManager {
     highlightLine(index) {
         if (this.activeLineIndex >= 0 && this.lineElements[this.activeLineIndex]) {
             const prevEl = this.lineElements[this.activeLineIndex];
-            prevEl.className = "karaoke-line text-slate-400 font-semibold transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
+            prevEl.className = "karaoke-line inline-block text-slate-400 font-semibold transition-all duration-300 py-1.5 px-5 rounded-full cursor-pointer hover:text-white hover:bg-slate-800/60";
             prevEl.style.fontSize = "var(--karaoke-font-size, 20px)";
             prevEl.style.borderColor = "transparent";
             prevEl.style.backgroundColor = "transparent";
@@ -695,10 +715,10 @@ class KaraokeStageManager {
         const activeEl = this.lineElements[index];
         if (activeEl) {
             const highlightColor = this.config.activeHighlightColor || '#06b6d4';
-            activeEl.className = "karaoke-line text-white font-extrabold rounded-2xl py-3.5 px-6 scale-105 transition-all duration-300 cursor-pointer border";
+            activeEl.className = "karaoke-line inline-block text-white font-extrabold rounded-full py-2.5 px-7 scale-105 transition-all duration-300 cursor-pointer border";
             activeEl.style.fontSize = "var(--karaoke-active-font-size, 27px)";
             activeEl.style.borderColor = "var(--karaoke-highlight-color, " + highlightColor + ")";
-            activeEl.style.backgroundColor = "rgba(6, 182, 212, 0.15)";
+            activeEl.style.backgroundColor = "rgba(6, 182, 212, 0.18)";
             activeEl.style.boxShadow = `0 10px 25px -5px ${highlightColor}40`;
             activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
