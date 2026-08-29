@@ -76,4 +76,12 @@ made while building the template itself.
 - artifact: docs/releases/v0.2.1.md
 - approved_by: reg
 - notes: Version 0.2.1 fully approved and released. Includes Song Title and Artist metadata separation with backwards compatibility, unified song details & lyrics modal, dual-field search, auto-sort by song title, alternating stage banner ("Now Singing" ⟷ "Up Next"), timecode countdown badge, visual 3-beat countdown cues, and customizable stage settings modal.
+## 2026-08-29 — Approved Requirements: Version 0.2.2 Karaoke UI Refinements & Stage Controls
+- artifact: docs/requirements/karaoke-ui-refinements.md
+- approved_by: reg
+- notes: Requirements approved for Version 0.2.2 covering simultaneous Now Singing & Up Next header, modernized transport bar with expanding volume slider and restart button, click-to-play on stage background, queue reordering (up/down) with top position in sidebar, and auto-hiding navbar.
+## 2026-08-29 — Approved Functional Spec: Version 0.2.2 Karaoke UI Refinements & Stage Controls
+- artifact: docs/specs/karaoke-ui-refinements.md
+- approved_by: reg
+- notes: Functional spec approved detailing simultaneous dual stage header with marquee, bottom transport bar (expanding volume, toggleable timecode, restart, settings, expand/collapse), stage background click-to-play with bounded lyric pills, queue reorder endpoint (POST /api/queue/reorder), and auto-hiding navbar.
 
