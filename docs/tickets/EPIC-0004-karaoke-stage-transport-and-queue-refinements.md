@@ -13,6 +13,7 @@ Deliver comprehensive UI and workflow refinements for Flexioke Karaoke Mode. Thi
 - `docs/design/ADR-0005-karaoke-stage-transport-queue-reordering.md`
 
 ## Stories
-- [ ] STORY-0011: Simultaneous Stage Header with CSS Marquee & Lyrics Stage Click-to-Play
-- [ ] STORY-0012: Modernized Karaoke Stage Bottom Transport Bar & Interactive Timecode
-- [ ] STORY-0013: Queue Reordering API, Sidebar Reorganization & Auto-Hiding Navbar
+- [x] STORY-0011: Simultaneous Stage Header with CSS Marquee & Lyrics Stage Click-to-Play
+- [x] STORY-0012: Modernized Karaoke Stage Bottom Transport Bar & Interactive Timecode
+- [x] STORY-0013: Queue Reordering API, Sidebar Reorganization & Auto-Hiding Navbar
+
