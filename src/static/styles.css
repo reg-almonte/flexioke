@@ -124,3 +124,30 @@ input[type="range"]::-webkit-slider-thumb:hover {
     user-select: none;
 }
 
+/* Top Nav Sensor and Auto-Hiding Header in Karaoke Mode */
+#top-nav-sensor {
+    display: none;
+}
+
+body.karaoke-active #top-nav-sensor {
+    display: block;
+}
+
+body.karaoke-active #app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    transform: translateY(-100%);
+}
+
+body.karaoke-active #app-header:hover,
+body.karaoke-active #top-nav-sensor:hover ~ #app-header,
+body.karaoke-active #app-header.header-revealed {
+    transform: translateY(0);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+}
+
+

@@ -9,8 +9,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewKaraoke = document.getElementById('view-karaoke');
     const headerModeBadge = document.getElementById('header-mode-badge');
 
+    const topNavSensor = document.getElementById('top-nav-sensor');
+    const appHeader = document.getElementById('app-header');
+    let headerHideTimeout = null;
+
+    const revealHeader = () => {
+        if (headerHideTimeout) clearTimeout(headerHideTimeout);
+        if (appHeader) appHeader.classList.add('header-revealed');
+    };
+
+    const scheduleHideHeader = () => {
+        if (headerHideTimeout) clearTimeout(headerHideTimeout);
+        headerHideTimeout = setTimeout(() => {
+            if (appHeader) appHeader.classList.remove('header-revealed');
+        }, 1200);
+    };
+
+    if (topNavSensor && appHeader) {
+        topNavSensor.addEventListener('mouseenter', revealHeader);
+        appHeader.addEventListener('mouseenter', revealHeader);
+        appHeader.addEventListener('mouseleave', scheduleHideHeader);
+
+        document.addEventListener('mousemove', (e) => {
+            if (document.body.classList.contains('karaoke-active')) {
+                if (e.clientY <= 25) {
+                    revealHeader();
+                } else if (e.clientY > 85 && !appHeader.matches(':hover')) {
+                    scheduleHideHeader();
+                }
+            }
+        });
+    }
+
     if (navTabStudio && navTabKaraoke) {
         navTabStudio.addEventListener('click', () => {
+            document.body.classList.remove('karaoke-active');
+            if (appHeader) appHeader.classList.remove('header-revealed');
             navTabStudio.className = "px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5";
             navTabKaraoke.className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
             if (headerModeBadge) headerModeBadge.textContent = "Stem Studio";
@@ -19,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         navTabKaraoke.addEventListener('click', () => {
+            document.body.classList.add('karaoke-active');
             navTabKaraoke.className = "px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5";
             navTabStudio.className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
             if (headerModeBadge) headerModeBadge.textContent = "Karaoke Mode";
