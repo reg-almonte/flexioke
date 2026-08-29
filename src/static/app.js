@@ -15,13 +15,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const revealHeader = () => {
         if (headerHideTimeout) clearTimeout(headerHideTimeout);
-        if (appHeader) appHeader.classList.add('header-revealed');
+        if (appHeader) {
+            appHeader.classList.add('header-revealed');
+            if (document.body.classList.contains('karaoke-active')) {
+                appHeader.style.marginTop = '0px';
+            }
+        }
     };
 
     const scheduleHideHeader = () => {
         if (headerHideTimeout) clearTimeout(headerHideTimeout);
         headerHideTimeout = setTimeout(() => {
-            if (appHeader) appHeader.classList.remove('header-revealed');
+            if (appHeader && !appHeader.matches(':hover')) {
+                appHeader.classList.remove('header-revealed');
+                if (document.body.classList.contains('karaoke-active')) {
+                    const h = appHeader.offsetHeight || 66;
+                    appHeader.style.marginTop = `-${h}px`;
+                }
+            }
         }, 1200);
     };
 
@@ -39,12 +50,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+        window.addEventListener('resize', () => {
+            if (document.body.classList.contains('karaoke-active') && !appHeader.classList.contains('header-revealed')) {
+                const h = appHeader.offsetHeight || 66;
+                appHeader.style.marginTop = `-${h}px`;
+            }
+        });
     }
 
     if (navTabStudio && navTabKaraoke) {
         navTabStudio.addEventListener('click', () => {
             document.body.classList.remove('karaoke-active');
-            if (appHeader) appHeader.classList.remove('header-revealed');
+            if (appHeader) {
+                appHeader.classList.remove('header-revealed');
+                appHeader.style.marginTop = '';
+            }
             navTabStudio.className = "px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5";
             navTabKaraoke.className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
             if (headerModeBadge) headerModeBadge.textContent = "Stem Studio";
@@ -59,6 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (headerModeBadge) headerModeBadge.textContent = "Karaoke Mode";
             if (viewKaraoke) viewKaraoke.classList.remove('hidden');
             if (viewStemStudio) viewStemStudio.classList.add('hidden');
+            // Auto hide on switching to karaoke
+            scheduleHideHeader();
         });
     }
 
