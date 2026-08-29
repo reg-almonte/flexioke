@@ -92,7 +92,7 @@ def test_right_transport_cluster_and_restart_action():
     resp_js = client.get("/static/karaoke.js")
     assert resp_js.status_code == 200
     assert "restartBtn" in resp_js.text or "karaoke-restart-btn" in resp_js.text
-    assert "syncSeek(0" in resp_js.text or "setTime(0" in resp_js.text
+    assert "restart(" in resp_js.text or "syncSeek" in resp_js.text
 
 def test_lrc_end_line_labeling():
     resp_js = client.get("/static/karaoke.js")

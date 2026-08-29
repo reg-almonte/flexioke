@@ -213,12 +213,7 @@ class KaraokeStageManager {
         if (this.restartBtn) {
             this.restartBtn.addEventListener('click', () => {
                 if (window.flexiokePlayer && this.currentJob) {
-                    window.flexiokePlayer.syncSeek(0.0, 'none');
-                    const primary = Object.values(window.flexiokePlayer.tracks).find(t => t.ws && t.isReady);
-                    if (primary) {
-                        primary.ws.setTime(0.0);
-                    }
-                    window.flexiokePlayer.play();
+                    window.flexiokePlayer.restart(true);
                     this.updatePlayBtnUI();
                 }
             });
