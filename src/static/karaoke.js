@@ -39,7 +39,7 @@ class LrcParser {
             // If the final line is an empty timestamp or instrumental placeholder, label it as "End"
             const lastLine = parsedLines[parsedLines.length - 1];
             if (lastLine.text === "♪ ♪ ♪ (Instrumental)" || !lastLine.text.trim()) {
-                lastLine.text = "♪ End ♪";
+                lastLine.text = "♪  End  ♪";
             }
 
             return {
@@ -473,7 +473,9 @@ class KaraokeStageManager {
         if (this.stageCard) {
             this.stageCard.classList.add('stage-fullscreen');
         }
-        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '🗗';
+        // Fullscreen Active: button toggles to Collapse View
+        // NOTE: Customize collapse icon here (e.g. '⤡', '🗕', '↙', '✕', '⛶')
+        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '⤡';
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Collapse';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Exit Fullscreen Stage (Esc)";
         this.updateStageHeader();
@@ -485,6 +487,8 @@ class KaraokeStageManager {
         if (this.stageCard) {
             this.stageCard.classList.remove('stage-fullscreen');
         }
+        // Default View: button toggles to Expand View
+        // NOTE: Customize expand icon here (e.g. '⛶', '⤢', '⤧', '↗')
         if (this.fullscreenIcon) this.fullscreenIcon.textContent = '⛶';
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Expand';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Toggle Fullscreen Stage";

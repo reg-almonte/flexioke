@@ -35,5 +35,17 @@ def test_queue_reordering_frontend_logic():
     assert "reorderItem" in resp.text or "reorder" in resp.text
     assert "/api/queue/reorder" in resp.text
 
+def test_search_clear_button_and_queue_count_badges():
+    resp_html = client.get("/")
+    assert resp_html.status_code == 200
+    assert "library-search-clear-btn" in resp_html.text
+    assert "queue-count-badge" in resp_html.text
+
+    resp_js = client.get("/static/library_queue.js")
+    assert resp_js.status_code == 200
+    assert "searchClearBtns" in resp_js.text or "library-search-clear-btn" in resp_js.text
+    assert "queueCountBadges" in resp_js.text or "queue-count-badge" in resp_js.text
+
+
 
 

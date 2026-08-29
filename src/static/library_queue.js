@@ -4,6 +4,7 @@
 class SongLibraryManager {
     constructor() {
         this.searchInputs = document.querySelectorAll('.library-search-input');
+        this.searchClearBtns = document.querySelectorAll('.library-search-clear-btn');
         this.listContainers = document.querySelectorAll('.library-list-container');
         this.countBadges = document.querySelectorAll('.library-count-badge');
         this.debounceTimeout = null;
@@ -40,10 +41,28 @@ class SongLibraryManager {
                 this.searchInputs.forEach(other => {
                     if (other !== e.target) other.value = query;
                 });
+                // Toggle clear buttons
+                this.searchClearBtns.forEach(btn => {
+                    if (query.trim().length > 0) {
+                        btn.classList.remove('hidden');
+                    } else {
+                        btn.classList.add('hidden');
+                    }
+                });
                 clearTimeout(this.debounceTimeout);
                 this.debounceTimeout = setTimeout(() => {
                     this.fetchLibrary(query.trim());
                 }, 250);
+            });
+        });
+
+        this.searchClearBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.searchInputs.forEach(input => {
+                    input.value = '';
+                });
+                this.searchClearBtns.forEach(b => b.classList.add('hidden'));
+                this.fetchLibrary('');
             });
         });
 
@@ -327,6 +346,7 @@ class SongLibraryManager {
 class PlaybackQueueManager {
     constructor() {
         this.queueContainers = document.querySelectorAll('.queue-list-container');
+        this.queueCountBadges = document.querySelectorAll('.queue-count-badge');
         this.clearBtns = document.querySelectorAll('.clear-queue-btn');
         this.playNextBtns = document.querySelectorAll('.play-next-queue-btn');
         this.isAdvancing = false;
@@ -481,6 +501,11 @@ class PlaybackQueueManager {
         const queue = this.queue;
 
         window.dispatchEvent(new CustomEvent('flexioke:queue-updated', { detail: this.state }));
+
+        const count = queue.length;
+        this.queueCountBadges.forEach(badge => {
+            badge.textContent = `${count} ${count === 1 ? 'song' : 'songs'}`;
+        });
 
         this.queueContainers.forEach(container => {
             if (queue.length === 0) {
