@@ -637,11 +637,7 @@ class KaraokeStageManager {
             lineEl.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (window.flexiokePlayer && line.time !== null) {
-                    window.flexiokePlayer.syncSeek(line.time, 'none');
-                    const primary = Object.values(window.flexiokePlayer.tracks).find(t => t.ws && t.isReady);
-                    if (primary) {
-                        primary.ws.setTime(line.time);
-                    }
+                    window.flexiokePlayer.seekTo(line.time);
                 }
             });
 

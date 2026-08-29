@@ -195,19 +195,8 @@ class FlexiokePlayer {
 
             ws.on('timeupdate', (currentTime) => {
                 if (trackKey === 'instrumental' || (!this.tracks.instrumental.ws && track.isReady)) {
-                    this.updateTimecode(currentTime, this.duration || ws.getDuration());
-
-                    // Auto drift correction: keep lead and backing vocals aligned with instrumental anchor
-                    if (this.isPlaying && !this.isSyncingSeek) {
-                        ['lead_vocals', 'backing_vocals'].forEach(stemKey => {
-                            const stemTrack = this.tracks[stemKey];
-                            if (stemTrack && stemTrack.ws && stemTrack.isReady && stemTrack.ws.isPlaying()) {
-                                const stemTime = stemTrack.ws.getCurrentTime();
-                                if (Math.abs(stemTime - currentTime) > 0.08) {
-                                    try { stemTrack.ws.setTime(currentTime); } catch (e) {}
-                                }
-                            }
-                        });
+                    if (!this.isSyncingSeek) {
+                        this.updateTimecode(currentTime, this.duration || ws.getDuration());
                     }
                 }
             });
@@ -215,8 +204,12 @@ class FlexiokePlayer {
             ws.on('seeking', (currentTime) => {
                 if (this.isSyncingSeek) return;
                 this.isSyncingSeek = true;
+                if (this.seekTimeout) clearTimeout(this.seekTimeout);
+
                 this.syncSeek(currentTime, trackKey);
-                setTimeout(() => { this.isSyncingSeek = false; }, 50);
+                this.seekTimeout = setTimeout(() => {
+                    this.isSyncingSeek = false;
+                }, 150);
             });
 
             ws.on('finish', () => {
@@ -226,6 +219,30 @@ class FlexiokePlayer {
                 }
             });
         });
+    }
+
+    seekTo(time) {
+        if (!this.currentJob || time === null || isNaN(time)) return;
+        const targetTime = Math.max(0, Math.min(time, this.duration || 999999));
+
+        this.isSyncingSeek = true;
+        if (this.seekTimeout) clearTimeout(this.seekTimeout);
+
+        Object.values(this.tracks).forEach(track => {
+            if (track.ws && track.isReady) {
+                try {
+                    track.ws.setTime(targetTime);
+                } catch (e) {
+                    console.warn(`Error seeking track ${track.id}:`, e);
+                }
+            }
+        });
+
+        this.updateTimecode(targetTime, this.duration);
+
+        this.seekTimeout = setTimeout(() => {
+            this.isSyncingSeek = false;
+        }, 150);
     }
 
     resetToDefault() {
@@ -267,7 +284,9 @@ class FlexiokePlayer {
     syncSeek(time, sourceTrackKey) {
         Object.keys(this.tracks).forEach((key) => {
             if (key !== sourceTrackKey && this.tracks[key].ws && this.tracks[key].isReady) {
-                this.tracks[key].ws.setTime(time);
+                try {
+                    this.tracks[key].ws.setTime(time);
+                } catch (e) {}
             }
         });
     }
