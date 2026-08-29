@@ -39,7 +39,7 @@ class LrcParser {
             // If the final line is an empty timestamp or instrumental placeholder, label it as "End"
             const lastLine = parsedLines[parsedLines.length - 1];
             if (lastLine.text === "♪ ♪ ♪ (Instrumental)" || !lastLine.text.trim()) {
-                lastLine.text = "• End •";
+                lastLine.text = "♪ End ♪";
             }
 
             return {

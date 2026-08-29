@@ -25,6 +25,7 @@ class SongLibraryManager {
         this.playConfirmModal = document.getElementById('play-confirm-modal');
         this.confirmSongTitle = document.getElementById('confirm-song-title');
         this.confirmPlayBtn = document.getElementById('confirm-play-btn');
+        this.confirmQueueBtn = document.getElementById('confirm-queue-btn');
         this.confirmCancelBtn = document.getElementById('confirm-cancel-btn');
         this.pendingPlayJob = null;
 
@@ -65,6 +66,20 @@ class SongLibraryManager {
                     window.flexiokeQueue.playNow(this.pendingPlayJob.job_id);
                 }
                 this.pendingPlayJob = null;
+            });
+        }
+
+        if (this.confirmQueueBtn) {
+            this.confirmQueueBtn.addEventListener('click', () => {
+                if (this.playConfirmModal) this.playConfirmModal.classList.add('hidden');
+                if (this.pendingPlayJob && window.flexiokeQueue) {
+                    window.flexiokeQueue.addToQueue(this.pendingPlayJob.job_id);
+                }
+                this.pendingPlayJob = null;
+                // Resume previous music
+                if (window.flexiokePlayer) {
+                    window.flexiokePlayer.play();
+                }
             });
         }
 

@@ -12,7 +12,9 @@ def test_karaoke_controls_markup_in_html():
     assert "karaoke-toggle-backing-btn" in html
     assert "play-confirm-modal" in html
     assert "confirm-play-btn" in html
+    assert "confirm-queue-btn" in html
     assert "confirm-cancel-btn" in html
+
 
 def test_karaoke_script_contains_vocal_toggle_logic():
     resp = client.get("/static/karaoke.js")
