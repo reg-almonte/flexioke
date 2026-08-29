@@ -88,5 +88,8 @@ made while building the template itself.
 - artifact: docs/design/ADR-0005-karaoke-stage-transport-queue-reordering.md
 - approved_by: reg
 - notes: Approved Option 1 (Directional Queue Reordering API with Reactive DOM Event Bus & CSS Marquee Engine) providing atomic thread-safe queue mutation, simultaneous dual stage header with marquee, modernized transport bar with expanding volume and restart, stage click-to-play, and auto-hiding navbar.
-
+## 2026-08-29 — Approved Ticket Breakdown: EPIC-0004 Karaoke Stage Transport, Queue Reordering & Responsive UI Refinements
+- artifact: docs/tickets/EPIC-0004-karaoke-stage-transport-and-queue-refinements.md
+- approved_by: reg
+- notes: Approved ticket breakdown comprising STORY-0011 to STORY-0013 and TASK-0026 to TASK-0032 covering simultaneous dual stage header with marquee, stage background click-to-play, modernized bottom transport bar with expanding volume and restart, backend queue reorder endpoint (POST /api/queue/reorder), sidebar reorganization with up/down controls, and auto-hiding navbar.
 
