@@ -98,6 +98,7 @@ class KaraokeStageManager {
 
         // Karaoke Transport Elements
         this.playBtn = document.getElementById('karaoke-play-btn');
+        this.restartBtn = document.getElementById('karaoke-restart-btn');
         this.skipBtn = document.getElementById('karaoke-skip-btn');
         this.stopBtn = document.getElementById('karaoke-stop-btn');
         this.toggleLeadBtn = document.getElementById('karaoke-toggle-lead-btn');
@@ -195,6 +196,20 @@ class KaraokeStageManager {
             this.playBtn.addEventListener('click', () => {
                 if (window.flexiokePlayer) {
                     window.flexiokePlayer.togglePlay();
+                    this.updatePlayBtnUI();
+                }
+            });
+        }
+
+        if (this.restartBtn) {
+            this.restartBtn.addEventListener('click', () => {
+                if (window.flexiokePlayer && this.currentJob) {
+                    window.flexiokePlayer.syncSeek(0.0, 'none');
+                    const primary = Object.values(window.flexiokePlayer.tracks).find(t => t.ws && t.isReady);
+                    if (primary) {
+                        primary.ws.setTime(0.0);
+                    }
+                    window.flexiokePlayer.play();
                     this.updatePlayBtnUI();
                 }
             });

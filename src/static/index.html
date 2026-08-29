@@ -460,6 +460,9 @@
 
                         <!-- Right Cluster: Transport Controls & Settings -->
                         <div class="flex items-center gap-2 text-xs text-slate-400">
+                            <button id="karaoke-restart-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition font-semibold" title="Restart Song (0:00)">
+                                🔄
+                            </button>
                             <button id="karaoke-skip-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition font-semibold" title="Skip to Next Track">
                                 ⏭
                             </button>
@@ -553,7 +556,7 @@
     </div>
 
     <!-- Karaoke Stage Settings Modal -->
-    <div id="karaoke-settings-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
+    <div id="karaoke-settings-modal" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
         <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div class="flex items-center gap-2">

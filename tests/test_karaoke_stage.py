@@ -78,6 +78,23 @@ def test_left_transport_cluster_and_timecode_toggle():
     assert "toggleTimecodeMode" in resp_js.text or "timecodeMode" in resp_js.text
     assert "flexioke_master_volume" in resp_js.text
 
+def test_right_transport_cluster_and_restart_action():
+    resp = client.get("/")
+    assert resp.status_code == 200
+    html = resp.text
+    assert 'id="karaoke-restart-btn"' in html
+    assert 'id="karaoke-skip-btn"' in html
+    assert 'id="karaoke-stop-btn"' in html
+    assert 'id="karaoke-settings-btn"' in html
+    assert 'id="karaoke-fullscreen-btn"' in html
+    assert 'z-[10000]' in html or 'z-50' in html or 'z-[9999]' in html
+
+    resp_js = client.get("/static/karaoke.js")
+    assert resp_js.status_code == 200
+    assert "restartBtn" in resp_js.text or "karaoke-restart-btn" in resp_js.text
+    assert "syncSeek(0" in resp_js.text or "setTime(0" in resp_js.text
+
+
 
 
 
