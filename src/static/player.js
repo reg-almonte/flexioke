@@ -120,6 +120,8 @@ class FlexiokePlayer {
         this.isPlaying = false;
         this.updatePlayBtnUI();
 
+        window.dispatchEvent(new CustomEvent('flexioke:song-loaded', { detail: { job, autoPlay } }));
+
         // Track how many stems need to load
         const expectedStems = Object.keys(this.tracks).filter(key => !!job.stems[key]);
         let readyCount = 0;

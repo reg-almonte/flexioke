@@ -170,6 +170,8 @@ class KaraokeStageManager {
                 if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${val}px`;
                 this.saveSettings({ baseFontSizePx: val });
             });
+        }
+
         // Stage Background Click-to-Play/Pause
         if (this.stageContainer) {
             this.stageContainer.style.cursor = 'pointer';
@@ -314,7 +316,14 @@ class KaraokeStageManager {
             this.updatePlayBtnUI();
         });
 
-        // Hook into FlexiokePlayer loadSong
+        // Listen for song loaded event from FlexiokePlayer
+        window.addEventListener('flexioke:song-loaded', (e) => {
+            if (e.detail && e.detail.job) {
+                this.onSongLoaded(e.detail.job);
+            }
+        });
+
+        // Hook into FlexiokePlayer loadSong as fallback
         const originalLoadSong = window.flexiokePlayer ? window.flexiokePlayer.loadSong.bind(window.flexiokePlayer) : null;
         if (window.flexiokePlayer && originalLoadSong) {
             window.flexiokePlayer.loadSong = (job, autoPlay = false) => {
@@ -323,6 +332,11 @@ class KaraokeStageManager {
                     this.onSongLoaded(job);
                 }
             };
+        }
+
+        // If player already has a job loaded on initialization
+        if (window.flexiokePlayer && window.flexiokePlayer.currentJob) {
+            this.onSongLoaded(window.flexiokePlayer.currentJob);
         }
 
         // Time & Transport state check
