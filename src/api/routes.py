@@ -15,6 +15,7 @@ from src.models import (
     JobUpdateMetadataRequest,
     QueueItem,
     QueueResponse,
+    QueueReorderRequest,
     LyricsResponse,
     LyricsUpdateRequest,
     SourceType,
@@ -266,3 +267,26 @@ def clear_queue():
     """Clear all songs from the playback queue."""
     queue_manager.clear_queue()
     return queue_manager.get_state()
+
+@router.post("/queue/reorder", response_model=QueueResponse)
+def reorder_queue(req: QueueReorderRequest):
+    """Reorder a queued track up or down."""
+    if req.direction not in ("up", "down"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Direction must be 'up' or 'down'."
+        )
+    try:
+        res = queue_manager.reorder_queue(req.queue_id, req.direction)
+        if not res:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Queue item '{req.queue_id}' not found."
+            )
+        return res
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+

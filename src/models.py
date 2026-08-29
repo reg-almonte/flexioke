@@ -61,3 +61,8 @@ class JobUpdateMetadataRequest(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=200)
     artist: Optional[str] = Field(default=None, max_length=200)
 
+class QueueReorderRequest(BaseModel):
+    queue_id: str
+    direction: str = Field(..., description="'up' or 'down'")
+
+

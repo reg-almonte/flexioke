@@ -72,6 +72,29 @@ class QueueManager:
         with self._lock:
             self.queue.clear()
 
+    def reorder_queue(self, queue_id: str, direction: str) -> Optional[QueueResponse]:
+        """Atomically swaps a queued track up or down."""
+        with self._lock:
+            idx = next((i for i, item in enumerate(self.queue) if item.queue_id == queue_id), -1)
+            if idx == -1:
+                return None
+            if direction == "up":
+                if idx == 0:
+                    raise ValueError("Cannot move first item up")
+                self.queue[idx], self.queue[idx - 1] = self.queue[idx - 1], self.queue[idx]
+            elif direction == "down":
+                if idx >= len(self.queue) - 1:
+                    raise ValueError("Cannot move last item down")
+                self.queue[idx], self.queue[idx + 1] = self.queue[idx + 1], self.queue[idx]
+            else:
+                raise ValueError(f"Invalid direction: '{direction}'. Must be 'up' or 'down'")
+
+            return QueueResponse(
+                current_track=self.current_track,
+                queue=list(self.queue),
+                total_queued=len(self.queue)
+            )
+
     def get_state(self) -> QueueResponse:
         """Returns the full current queue snapshot."""
         with self._lock:
@@ -82,3 +105,5 @@ class QueueManager:
             )
 
 queue_manager = QueueManager()
+
+
