@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-08-29
-implementation: pending
+implementation: in-progress
 ---
 
 # TASK-0026: Dual Stage Header Layout with CSS Marquee on Overflow

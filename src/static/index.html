@@ -391,29 +391,21 @@
                 <section id="karaoke-stage-card" class="bg-surface-900 border border-slate-800/90 rounded-2xl p-6 shadow-2xl space-y-4 min-h-[560px] flex flex-col justify-between relative overflow-hidden transition-all">
                     
                     <!-- Karaoke Track Info Header -->
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <div id="karaoke-header-banner" class="truncate transition-opacity duration-300">
-                            <span id="karaoke-banner-label" class="text-[10px] uppercase font-bold tracking-widest text-brand-400">Now Singing</span>
-                            <h2 id="karaoke-song-title" class="text-xl font-extrabold text-white tracking-tight truncate">No Track Selected</h2>
-                            <p id="karaoke-song-artist" class="text-xs text-slate-400 truncate"></p>
-                        </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span id="karaoke-timecode" class="text-xs font-mono text-slate-300 bg-surface-950 px-3 py-1.5 rounded-lg border border-slate-800">
-                                00:00 / 00:00 (-00:00)
-                            </span>
-                            <div class="karaoke-toolbar-settings-group flex items-center gap-2">
-                                <div class="flex items-center bg-surface-950 border border-slate-800 rounded-lg p-0.5">
-                                    <button id="karaoke-font-dec-btn" class="text-xs text-slate-400 hover:text-white px-2 py-1 font-bold transition hover:bg-slate-800 rounded" title="Decrease Lyric Font Size">A-</button>
-                                    <button id="karaoke-font-inc-btn" class="text-xs text-slate-400 hover:text-white px-2 py-1 font-bold transition hover:bg-slate-800 rounded" title="Increase Lyric Font Size">A+</button>
-                                </div>
-                                <button id="karaoke-settings-btn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1" title="Karaoke Stage Settings">
-                                    <span>⚙</span>
-                                </button>
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 gap-4">
+                        <!-- Left: Now Singing -->
+                        <div id="karaoke-now-singing-container" class="flex-1 min-w-0 flex items-center gap-2 overflow-hidden">
+                            <span class="text-[10px] uppercase font-bold tracking-widest text-brand-400 shrink-0">Now Singing:</span>
+                            <div class="marquee-wrapper flex-1 overflow-hidden">
+                                <span id="karaoke-now-singing-text" class="text-xs sm:text-sm font-bold text-white tracking-tight inline-block whitespace-nowrap">No Track Selected</span>
                             </div>
-                            <button id="karaoke-fullscreen-btn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5" title="Toggle Fullscreen Stage">
-                                <span id="fullscreen-icon">⛶</span>
-                                <span id="fullscreen-btn-text">Expand</span>
-                            </button>
+                        </div>
+
+                        <!-- Right: Up Next -->
+                        <div id="karaoke-up-next-container" class="flex-1 min-w-0 flex items-center justify-end gap-2 text-right overflow-hidden">
+                            <span class="text-[10px] uppercase font-bold tracking-widest text-violet-400 shrink-0">Up Next:</span>
+                            <div class="marquee-wrapper flex-1 overflow-hidden text-right">
+                                <span id="karaoke-up-next-text" class="text-xs sm:text-sm font-medium text-slate-300 tracking-tight inline-block whitespace-nowrap">— (Queue Empty)</span>
+                            </div>
                         </div>
                     </div>
 
@@ -460,14 +452,24 @@
                             </button>
                         </div>
 
-                        <!-- Stop Button & Master Volume -->
-                        <div class="flex items-center gap-3 text-xs text-slate-400">
-                            <button id="karaoke-stop-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Stop & Cue Next">
+                        <!-- Stop Button, Settings, Fullscreen & Master Volume -->
+                        <div class="flex items-center gap-2 text-xs text-slate-400">
+                            <span id="karaoke-timecode" class="font-mono text-slate-300 bg-surface-900 px-2.5 py-1 rounded-lg border border-slate-800 cursor-pointer select-none" title="Click to toggle Elapsed / Remaining">
+                                00:00 / 00:00 (-00:00)
+                            </span>
+                            <button id="karaoke-stop-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Stop & Cue Next">
                                 ⏹
+                            </button>
+                            <button id="karaoke-settings-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Karaoke Stage Settings">
+                                ⚙
+                            </button>
+                            <button id="karaoke-fullscreen-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Toggle Fullscreen Stage">
+                                <span id="fullscreen-icon">⛶</span>
+                                <span id="fullscreen-btn-text" class="hidden">Expand</span>
                             </button>
                             <div class="flex items-center gap-1.5">
                                 <span>🔊</span>
-                                <input type="range" id="karaoke-volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-20 accent-brand-500 cursor-pointer">
+                                <input type="range" id="karaoke-volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-16 accent-brand-500 cursor-pointer">
                             </div>
                         </div>
 

@@ -82,3 +82,21 @@ input[type="range"]::-webkit-slider-thumb:hover {
     padding-top: 1.25rem !important;
     padding-bottom: 1.25rem !important;
 }
+
+/* Marquee Scrolling Engine */
+.marquee-wrapper {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+}
+
+.marquee-scroll {
+    display: inline-block;
+    animation: marquee-anim 10s linear infinite;
+}
+
+@keyframes marquee-anim {
+    0% { transform: translateX(0%); }
+    50% { transform: translateX(-30%); }
+    100% { transform: translateX(0%); }
+}

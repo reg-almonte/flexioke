@@ -20,25 +20,25 @@ def test_karaoke_stage_markup_structure():
     assert resp.status_code == 200
     html = resp.text
     assert 'id="karaoke-lyrics-stage"' in html
-    assert 'id="karaoke-song-title"' in html
-    assert 'id="karaoke-song-artist"' in html
-    assert 'id="karaoke-banner-label"' in html
-    assert 'id="karaoke-timecode"' in html
+    assert 'id="karaoke-now-singing-text"' in html
+    assert 'id="karaoke-up-next-text"' in html
     assert 'id="karaoke-countdown-cue"' in html
-    assert 'id="karaoke-font-dec-btn"' in html
-    assert 'id="karaoke-font-inc-btn"' in html
-    assert 'id="karaoke-settings-btn"' in html
     assert 'id="karaoke-settings-modal"' in html
-    assert 'id="settings-transition-interval"' in html
     assert 'id="settings-highlight-color"' in html
     assert 'id="settings-font-size"' in html
 
-def test_karaoke_js_alternating_header_logic():
+def test_karaoke_js_dual_header_marquee_logic():
     resp = client.get("/static/karaoke.js")
     assert resp.status_code == 200
-    assert "Up Next" in resp.text
-    assert "Now Singing" in resp.text
-    assert "remaining" in resp.text.lower() or "(-" in resp.text
+    assert "updateStageHeader" in resp.text
+    assert "marquee" in resp.text.lower()
+
+def test_marquee_css_rules():
+    resp = client.get("/static/styles.css")
+    assert resp.status_code == 200
+    assert "marquee" in resp.text
+
+
 
 def test_karaoke_countdown_cue_logic():
     resp = client.get("/static/karaoke.js")

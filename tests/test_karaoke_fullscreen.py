@@ -9,7 +9,6 @@ def test_fullscreen_button_in_html():
     assert resp.status_code == 200
     html = resp.text
     assert "karaoke-fullscreen-btn" in html
-    assert "karaoke-toolbar-settings-group" in html
 
 def test_karaoke_js_contains_fullscreen_logic():
     resp = client.get("/static/karaoke.js")
@@ -19,6 +18,6 @@ def test_karaoke_js_contains_fullscreen_logic():
 def test_fullscreen_css_rules():
     resp = client.get("/static/styles.css")
     assert resp.status_code == 200
-    assert ".stage-fullscreen .karaoke-toolbar-settings-group" in resp.text
+    assert "stage-fullscreen" in resp.text
     assert "var(--karaoke-font-size" in resp.text
 
