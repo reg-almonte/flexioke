@@ -97,3 +97,11 @@ made while building the template itself.
 - artifact: docs/releases/v0.2.2.md
 - approved_by: reg
 - notes: Version 0.2.2 fully approved and released. Includes simultaneous dual stage headers ("Now Singing" and "Up Next") with auto-scrolling CSS marquee, stage background click-to-play with bounded lyric pills, modernized bottom transport bar with expanding hover volume slider, dedicated restart song button, interactive click-toggleable timecode modes, compact vocal toggles in default view, backend atomic queue reorder endpoint (POST /api/queue/reorder), sidebar reorganization with live up/down reordering and song count badges, search bar clear (✕) button, 3-choice playback interruption modal, and auto-hiding navbar.
+## 2026-08-31 — Approved Requirements: Version 0.2.3 Karaoke Stage UX Refinements, Intro Splash & Song Catalog Modal
+- artifact: docs/requirements/version0.2.3.md
+- approved_by: reg
+- notes: Requirements approved for Version 0.2.3 covering configurable Title/Artist Intro Splash screen with delayed audio start (0–5s), visual countdown cue gap threshold setting (3–5s, default 3s), stage restart lyrics scroll & highlight reset, dual highlight color controls, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), expanded song catalog modal, and keyboard shortcuts (R/Home/Esc).
+## 2026-08-31 — Approved Functional Spec: Version 0.2.3 Karaoke Stage UX Refinements, Intro Splash & Song Catalog Modal
+- artifact: docs/specs/version0.2.3.md
+- approved_by: reg
+- notes: Functional spec approved detailing 7 behavioral flows: Title/Artist Intro Splash card with configurable audio delay (0–5s, default 3s), visual countdown cue gap threshold (3–5s, default 3s), stage restart lyrics scroll & highlight reset, dual highlight color controls, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), and expanded song catalog modal with search/sort and 1-click play/queue.
