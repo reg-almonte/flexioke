@@ -32,6 +32,7 @@ def test_karaoke_stage_markup_structure():
     assert 'id="intro-splash-artist"' in html
     assert 'id="intro-splash-timer"' in html
     assert 'id="settings-intro-splash"' in html
+    assert 'id="settings-countdown-threshold"' in html
 
 def test_intro_splash_js_logic():
     resp = client.get("/static/karaoke.js")
@@ -59,6 +60,8 @@ def test_karaoke_countdown_cue_logic():
     assert resp.status_code == 200
     assert "countdownCue" in resp.text or "countdown-cue" in resp.text
     assert "updateCountdownCue" in resp.text or "countdown" in resp.text.lower()
+    assert "countdownThreshold" in resp.text
+
 
 def test_karaoke_settings_and_font_scaling():
     resp = client.get("/static/karaoke.js")

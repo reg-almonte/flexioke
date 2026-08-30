@@ -98,9 +98,14 @@ class KaraokeStageManager {
         this.settingIntroSplashDisplay = document.getElementById('settings-intro-splash-display');
         this.introSplashInterval = null;
 
+        // Countdown Threshold Setting Elements
+        this.settingCountdownThresholdInput = document.getElementById('settings-countdown-threshold');
+        this.settingCountdownThresholdDisplay = document.getElementById('settings-countdown-threshold-display');
+
         // Default Config & State
         this.defaultConfig = {
             introSplashDuration: 3,
+            countdownThreshold: 3,
             activeHighlightColor: '#06b6d4',
             baseFontSizePx: 20,
             activeFontSizePx: 24
@@ -181,6 +186,14 @@ class KaraokeStageManager {
                 const safeVal = isNaN(val) ? 3 : Math.max(0, Math.min(5, val));
                 if (this.settingIntroSplashDisplay) this.settingIntroSplashDisplay.textContent = `${safeVal}s`;
                 this.saveSettings({ introSplashDuration: safeVal });
+            });
+        }
+        if (this.settingCountdownThresholdInput) {
+            this.settingCountdownThresholdInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                const safeVal = isNaN(val) ? 3 : Math.max(3, Math.min(5, val));
+                if (this.settingCountdownThresholdDisplay) this.settingCountdownThresholdDisplay.textContent = `${safeVal}s`;
+                this.saveSettings({ countdownThreshold: safeVal });
             });
         }
 
@@ -397,6 +410,10 @@ class KaraokeStageManager {
         const introSplashSec = (typeof this.config.introSplashDuration !== 'undefined') ? parseInt(this.config.introSplashDuration, 10) : 3;
         if (this.settingIntroSplashInput) this.settingIntroSplashInput.value = introSplashSec;
         if (this.settingIntroSplashDisplay) this.settingIntroSplashDisplay.textContent = `${introSplashSec}s`;
+
+        const countdownThresh = (typeof this.config.countdownThreshold !== 'undefined') ? parseInt(this.config.countdownThreshold, 10) : 3;
+        if (this.settingCountdownThresholdInput) this.settingCountdownThresholdInput.value = countdownThresh;
+        if (this.settingCountdownThresholdDisplay) this.settingCountdownThresholdDisplay.textContent = `${countdownThresh}s`;
 
         if (this.lineElements && this.lineElements.length > 0) {
             this.lineElements.forEach((el, idx) => {
@@ -816,10 +833,11 @@ class KaraokeStageManager {
         const nextLine = this.lyricsData.lines[nextIndex];
         const delta = nextLine.time - currentTime;
 
-        // Check if intro (first line with >= 2.5s intro) or musical interlude (> 8.0s gap between lines)
-        const isIntro = (nextIndex === 0 && nextLine.time >= 2.5);
+        // Check if intro or musical interlude meets or exceeds the configured countdownThreshold (3s - 5s, default 3s)
+        const threshold = (typeof this.config.countdownThreshold !== 'undefined') ? parseFloat(this.config.countdownThreshold) : 3.0;
+        const isIntro = (nextIndex === 0 && nextLine.time >= threshold);
         const prevLineTime = nextIndex > 0 ? this.lyricsData.lines[nextIndex - 1].time : 0;
-        const isInterlude = !isIntro && (nextLine.time - prevLineTime > 8.0);
+        const isInterlude = !isIntro && ((nextLine.time - prevLineTime) >= threshold);
 
         if ((isIntro || isInterlude) && delta > 0.05 && delta <= 3.0) {
             this.countdownCue.classList.remove('hidden');

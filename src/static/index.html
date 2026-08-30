@@ -605,6 +605,16 @@
                     <p class="text-[10px] text-slate-500">Shows Title and Artist before starting playback (0s = off, 1s - 5s delay).</p>
                 </div>
 
+                <!-- Countdown Cue Gap Threshold -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <label for="settings-countdown-threshold" class="font-medium">Countdown Cue Threshold</label>
+                        <span id="settings-countdown-threshold-display" class="font-mono text-brand-400 font-semibold">3s</span>
+                    </div>
+                    <input type="range" id="settings-countdown-threshold" min="3" max="5" step="1" value="3" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                    <p class="text-[10px] text-slate-500">Minimum non-lyric gap to trigger 3-beat countdown cue (3s - 5s, default 3s).</p>
+                </div>
+
                 <!-- Active Lyric Highlight Glow Color -->
                 <div class="space-y-1.5">
                     <label for="settings-highlight-color" class="block font-medium text-slate-300">Active Lyric Highlight Color</label>
