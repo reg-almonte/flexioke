@@ -425,6 +425,26 @@
                         <span id="countdown-number" class="text-xs font-mono font-extrabold text-white">3</span>
                     </div>
 
+                    <!-- Song Title & Artist Intro Splash Overlay -->
+                    <div id="karaoke-intro-splash" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-surface-950/95 backdrop-blur-md p-6 text-center transition-all duration-300">
+                        <div class="space-y-3.5 max-w-lg">
+                            <span class="inline-block text-[10px] uppercase font-extrabold tracking-widest text-brand-400 bg-brand-500/10 border border-brand-500/30 px-3.5 py-1 rounded-full shadow-inner">
+                                Get Ready to Sing
+                            </span>
+                            <h1 id="intro-splash-title" class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug drop-shadow-lg">
+                                Song Title
+                            </h1>
+                            <p id="intro-splash-artist" class="text-sm sm:text-base font-semibold text-brand-300 tracking-wide">
+                                Artist Name
+                            </p>
+                            <div class="pt-4 flex items-center justify-center">
+                                <div id="intro-splash-timer" class="w-9 h-9 rounded-full border-2 border-brand-400 bg-surface-900 flex items-center justify-center text-sm font-mono font-extrabold text-brand-300 shadow-lg shadow-brand-500/30">
+                                    3
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Center Stage Scrolling Lyrics Container -->
                     <div id="karaoke-lyrics-stage" class="flex-1 overflow-y-auto px-4 py-8 custom-scrollbar max-h-[420px] rounded-xl bg-surface-950/60 border border-slate-800/50">
                         <div id="karaoke-empty-state" class="text-center py-20 text-slate-500 text-sm italic">
@@ -575,6 +595,16 @@
             </div>
             
             <div class="space-y-4 text-xs">
+                <!-- Intro Splash Duration -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <label for="settings-intro-splash" class="font-medium">Intro Splash Duration</label>
+                        <span id="settings-intro-splash-display" class="font-mono text-brand-400 font-semibold">3s</span>
+                    </div>
+                    <input type="range" id="settings-intro-splash" min="0" max="5" step="1" value="3" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                    <p class="text-[10px] text-slate-500">Shows Title and Artist before starting playback (0s = off, 1s - 5s delay).</p>
+                </div>
+
                 <!-- Active Lyric Highlight Glow Color -->
                 <div class="space-y-1.5">
                     <label for="settings-highlight-color" class="block font-medium text-slate-300">Active Lyric Highlight Color</label>

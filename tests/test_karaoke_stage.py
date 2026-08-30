@@ -27,6 +27,18 @@ def test_karaoke_stage_markup_structure():
     assert 'id="settings-highlight-color"' in html
     assert 'id="settings-font-size"' in html
     assert 'id="settings-active-font-size"' in html
+    assert 'id="karaoke-intro-splash"' in html
+    assert 'id="intro-splash-title"' in html
+    assert 'id="intro-splash-artist"' in html
+    assert 'id="intro-splash-timer"' in html
+    assert 'id="settings-intro-splash"' in html
+
+def test_intro_splash_js_logic():
+    resp = client.get("/static/karaoke.js")
+    assert resp.status_code == 200
+    assert "introSplashDuration" in resp.text
+    assert "triggerIntroSplash" in resp.text or "introSplash" in resp.text
+
 
 
 def test_karaoke_js_dual_header_marquee_logic():

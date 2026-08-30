@@ -89,8 +89,18 @@ class KaraokeStageManager {
         this.settingActiveFontSizeInput = document.getElementById('settings-active-font-size');
         this.settingActiveFontSizeDisplay = document.getElementById('settings-active-font-size-display');
 
+        // Intro Splash Screen Elements
+        this.introSplash = document.getElementById('karaoke-intro-splash');
+        this.introSplashTitle = document.getElementById('intro-splash-title');
+        this.introSplashArtist = document.getElementById('intro-splash-artist');
+        this.introSplashTimer = document.getElementById('intro-splash-timer');
+        this.settingIntroSplashInput = document.getElementById('settings-intro-splash');
+        this.settingIntroSplashDisplay = document.getElementById('settings-intro-splash-display');
+        this.introSplashInterval = null;
+
         // Default Config & State
         this.defaultConfig = {
+            introSplashDuration: 3,
             activeHighlightColor: '#06b6d4',
             baseFontSizePx: 20,
             activeFontSizePx: 24
@@ -163,6 +173,14 @@ class KaraokeStageManager {
                 const val = parseInt(e.target.value, 10) || 24;
                 if (this.settingActiveFontSizeDisplay) this.settingActiveFontSizeDisplay.textContent = `${val}px`;
                 this.saveSettings({ activeFontSizePx: val });
+            });
+        }
+        if (this.settingIntroSplashInput) {
+            this.settingIntroSplashInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                const safeVal = isNaN(val) ? 3 : Math.max(0, Math.min(5, val));
+                if (this.settingIntroSplashDisplay) this.settingIntroSplashDisplay.textContent = `${safeVal}s`;
+                this.saveSettings({ introSplashDuration: safeVal });
             });
         }
 
@@ -293,6 +311,8 @@ class KaraokeStageManager {
 
         // Listen for player reset (when queue finishes or stop clicked without queue)
         window.addEventListener('flexioke:player-reset', () => {
+            this.clearIntroSplash();
+            this.hideIntroSplash();
             this.currentJob = null;
             this.currentJobId = null;
             this.lyricsData = null;
@@ -308,7 +328,7 @@ class KaraokeStageManager {
         // Listen for song loaded event from FlexiokePlayer
         window.addEventListener('flexioke:song-loaded', (e) => {
             if (e.detail && e.detail.job) {
-                this.onSongLoaded(e.detail.job);
+                this.onSongLoaded(e.detail.job, e.detail.autoPlay);
             }
         });
 
@@ -318,7 +338,7 @@ class KaraokeStageManager {
             window.flexiokePlayer.loadSong = (job, autoPlay = false) => {
                 originalLoadSong(job, autoPlay);
                 if (job) {
-                    this.onSongLoaded(job);
+                    this.onSongLoaded(job, autoPlay);
                 }
             };
         }
@@ -373,6 +393,10 @@ class KaraokeStageManager {
         if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${basePx}px`;
         if (this.settingActiveFontSizeInput) this.settingActiveFontSizeInput.value = activePx;
         if (this.settingActiveFontSizeDisplay) this.settingActiveFontSizeDisplay.textContent = `${activePx}px`;
+
+        const introSplashSec = (typeof this.config.introSplashDuration !== 'undefined') ? parseInt(this.config.introSplashDuration, 10) : 3;
+        if (this.settingIntroSplashInput) this.settingIntroSplashInput.value = introSplashSec;
+        if (this.settingIntroSplashDisplay) this.settingIntroSplashDisplay.textContent = `${introSplashSec}s`;
 
         if (this.lineElements && this.lineElements.length > 0) {
             this.lineElements.forEach((el, idx) => {
@@ -496,7 +520,7 @@ class KaraokeStageManager {
         setTimeout(() => this.updateStageHeader(), 350);
     }
 
-    onSongLoaded(job) {
+    onSongLoaded(job, autoPlay = true) {
         this.currentJob = job;
         this.currentJobId = job.job_id;
         this.updateStageHeader();
@@ -505,6 +529,58 @@ class KaraokeStageManager {
         }
         this.syncVocalButtons();
         this.loadLyricsForJob(job.job_id);
+        this.triggerIntroSplash(job, autoPlay);
+    }
+
+    triggerIntroSplash(job, autoPlay = true) {
+        this.clearIntroSplash();
+        if (!job || !this.introSplash) return;
+
+        const duration = (typeof this.config.introSplashDuration !== 'undefined') ? parseInt(this.config.introSplashDuration, 10) : 3;
+        if (duration <= 0 || !autoPlay) {
+            this.hideIntroSplash();
+            return;
+        }
+
+        // Delay audio playback while intro splash is active
+        if (window.flexiokePlayer) {
+            window.flexiokePlayer.autoPlayPending = false;
+            window.flexiokePlayer.pause();
+        }
+
+        if (this.introSplashTitle) this.introSplashTitle.textContent = job.title || "Unknown Title";
+        if (this.introSplashArtist) this.introSplashArtist.textContent = job.artist || "Unknown Artist";
+        if (this.introSplashTimer) this.introSplashTimer.textContent = duration;
+
+        this.introSplash.classList.remove('hidden');
+
+        let remaining = duration;
+        this.introSplashInterval = setInterval(() => {
+            remaining--;
+            if (remaining > 0) {
+                if (this.introSplashTimer) this.introSplashTimer.textContent = remaining;
+            } else {
+                this.clearIntroSplash();
+                this.hideIntroSplash();
+                if (window.flexiokePlayer && autoPlay) {
+                    window.flexiokePlayer.play();
+                }
+            }
+        }, 1000);
+    }
+
+    clearIntroSplash() {
+        if (this.introSplashInterval) {
+            clearInterval(this.introSplashInterval);
+            this.introSplashInterval = null;
+        }
+    }
+
+    hideIntroSplash() {
+        this.clearIntroSplash();
+        if (this.introSplash) {
+            this.introSplash.classList.add('hidden');
+        }
     }
 
     syncVocalButtons() {
