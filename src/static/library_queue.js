@@ -407,7 +407,6 @@ class SongLibraryManager {
             this.catalogSongsList.appendChild(row);
         });
     }
-    }
 
     async openLyricsModal(job) {
         this.activeLyricsJobId = job.job_id;

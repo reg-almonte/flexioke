@@ -75,6 +75,23 @@ def test_expanded_song_catalog_modal():
     assert "renderCatalog" in resp_js.text
     assert "openCatalogModal" in resp_js.text or "catalogModal" in resp_js.text
 
+def test_javascript_static_files_syntax():
+    import subprocess
+    import shutil
+    from pathlib import Path
+
+    node_path = shutil.which("node")
+    if not node_path:
+        return  # skip if node not in test environment
+
+    static_dir = Path("src/static")
+    js_files = list(static_dir.glob("*.js"))
+    assert len(js_files) > 0
+    for js_file in js_files:
+        proc = subprocess.run([node_path, "-c", str(js_file)], capture_output=True, text=True)
+        assert proc.returncode == 0, f"JS Syntax error in {js_file}: {proc.stderr}"
+
+
 
 
 
