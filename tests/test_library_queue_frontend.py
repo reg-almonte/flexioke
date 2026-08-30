@@ -46,6 +46,36 @@ def test_search_clear_button_and_queue_count_badges():
     assert "searchClearBtns" in resp_js.text or "library-search-clear-btn" in resp_js.text
     assert "queueCountBadges" in resp_js.text or "queue-count-badge" in resp_js.text
 
+def test_sidebar_fixed_heights_and_badge_cleanup():
+    resp_html = client.get("/")
+    assert resp_html.status_code == 200
+    assert "h-[196px]" in resp_html.text
+    assert "h-[210px]" in resp_html.text
+
+    resp_js = client.get("/static/library_queue.js")
+    assert resp_js.status_code == 200
+    assert "Stems ready" not in resp_js.text
+
+def test_scoped_edit_lyrics_button_visibility():
+    resp_js = client.get("/static/library_queue.js")
+    assert resp_js.status_code == 200
+    assert "isStudio" in resp_js.text or "view-studio" in resp_js.text or "studio-library-list" in resp_js.text
+
+def test_expanded_song_catalog_modal():
+    resp_html = client.get("/")
+    assert resp_html.status_code == 200
+    assert 'id="song-catalog-modal"' in resp_html.text
+    assert 'id="open-catalog-modal-btn"' in resp_html.text
+    assert 'id="catalog-search-input"' in resp_html.text
+    assert 'id="catalog-sort-select"' in resp_html.text
+    assert 'id="catalog-songs-list"' in resp_html.text
+
+    resp_js = client.get("/static/library_queue.js")
+    assert resp_js.status_code == 200
+    assert "renderCatalog" in resp_js.text
+    assert "openCatalogModal" in resp_js.text or "catalogModal" in resp_js.text
+
+
 
 
 

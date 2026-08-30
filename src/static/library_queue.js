@@ -30,10 +30,63 @@ class SongLibraryManager {
         this.confirmCancelBtn = document.getElementById('confirm-cancel-btn');
         this.pendingPlayJob = null;
 
+        // Expanded Song Catalog Modal elements
+        this.catalogModal = document.getElementById('song-catalog-modal');
+        this.openCatalogModalBtn = document.getElementById('open-catalog-modal-btn');
+        this.closeCatalogModalBtn = document.getElementById('close-catalog-modal-btn');
+        this.catalogSearchInput = document.getElementById('catalog-search-input');
+        this.catalogSearchClearBtn = document.getElementById('catalog-search-clear-btn');
+        this.catalogSortSelect = document.getElementById('catalog-sort-select');
+        this.catalogSongsList = document.getElementById('catalog-songs-list');
+        this.catalogTotalCount = document.getElementById('catalog-total-count');
+
         this.init();
     }
 
     init() {
+        // Expanded catalog modal listeners
+        if (this.openCatalogModalBtn) {
+            this.openCatalogModalBtn.addEventListener('click', () => this.openCatalogModal());
+        }
+        if (this.closeCatalogModalBtn) {
+            this.closeCatalogModalBtn.addEventListener('click', () => this.closeCatalogModal());
+        }
+        if (this.catalogModal) {
+            this.catalogModal.addEventListener('click', (e) => {
+                if (e.target === this.catalogModal) this.closeCatalogModal();
+            });
+        }
+        if (this.catalogSearchInput) {
+            this.catalogSearchInput.addEventListener('input', (e) => {
+                const query = e.target.value;
+                if (this.catalogSearchClearBtn) {
+                    if (query.trim().length > 0) {
+                        this.catalogSearchClearBtn.classList.remove('hidden');
+                    } else {
+                        this.catalogSearchClearBtn.classList.add('hidden');
+                    }
+                }
+                clearTimeout(this.debounceTimeout);
+                this.debounceTimeout = setTimeout(() => {
+                    this.renderCatalog();
+                }, 150);
+            });
+        }
+        if (this.catalogSearchClearBtn) {
+            this.catalogSearchClearBtn.addEventListener('click', () => {
+                if (this.catalogSearchInput) {
+                    this.catalogSearchInput.value = '';
+                    this.catalogSearchInput.focus();
+                }
+                this.catalogSearchClearBtn.classList.add('hidden');
+                this.renderCatalog();
+            });
+        }
+        if (this.catalogSortSelect) {
+            this.catalogSortSelect.addEventListener('change', () => {
+                this.renderCatalog();
+            });
+        }
         this.searchInputs.forEach(input => {
             input.addEventListener('input', (e) => {
                 const query = e.target.value;
@@ -163,13 +216,32 @@ class SongLibraryManager {
             }
 
             container.innerHTML = '';
+            const isStudio = container.closest('#view-studio') !== null || container.id === 'studio-library-list';
+
             currentJobs.forEach(job => {
                 const card = document.createElement('div');
                 card.className = "p-3 bg-surface-950/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-3 group";
 
                 const sourceIcon = job.source_type === 'youtube' ? '▶️' : '📁';
                 const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
+                const durationSnippet = durationFmt ? `<span>${durationFmt}</span><span>•</span>` : '';
                 const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
+
+                let buttonsHtml = `
+                    <button class="play-now-btn px-2.5 py-1 rounded-lg bg-brand-600/90 hover:bg-brand-500 text-white text-[10px] font-semibold transition flex items-center gap-1 shadow-sm" data-job-id="${job.job_id}">
+                        <span>▶</span> Play
+                    </button>
+                    <button class="add-queue-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" data-job-id="${job.job_id}">
+                        + Queue
+                    </button>
+                `;
+                if (isStudio) {
+                    buttonsHtml += `
+                        <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
+                            📝
+                        </button>
+                    `;
+                }
 
                 card.innerHTML = `
                     <div class="flex items-center gap-2.5 min-w-0 flex-1">
@@ -178,42 +250,19 @@ class SongLibraryManager {
                             <h4 class="text-xs font-semibold text-slate-200 truncate group-hover:text-brand-300 transition">${escapeHtml(job.title)}</h4>
                             <div class="text-[11px] text-slate-400 truncate">${artistHtml}</div>
                             <div class="flex items-center gap-2 text-[10px] text-slate-500">
-                                <span>${durationFmt || 'Stems ready'}</span>
-                                <span>•</span>
+                                ${durationSnippet}
                                 <span class="truncate">${escapeHtml(job.source_name)}</span>
                             </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
-                        <button class="play-now-btn px-2.5 py-1 rounded-lg bg-brand-600/90 hover:bg-brand-500 text-white text-[10px] font-semibold transition flex items-center gap-1 shadow-sm" data-job-id="${job.job_id}">
-                            <span>▶</span> Play
-                        </button>
-                        <button class="add-queue-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" data-job-id="${job.job_id}">
-                            + Queue
-                        </button>
-                        <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
-                            📝
-                        </button>
+                        ${buttonsHtml}
                     </div>
                 `;
 
                 // Bind card actions
                 const playBtn = card.querySelector('.play-now-btn');
-                playBtn.addEventListener('click', () => {
-                    // Check for active playback interruption
-                    if (window.flexiokePlayer && window.flexiokePlayer.isPlaying && window.flexiokePlayer.currentJob && window.flexiokePlayer.currentJob.job_id !== job.job_id) {
-                        window.flexiokePlayer.pause();
-                        this.pendingPlayJob = job;
-                        if (this.confirmSongTitle) this.confirmSongTitle.textContent = `"${job.title}"`;
-                        if (this.playConfirmModal) this.playConfirmModal.classList.remove('hidden');
-                    } else {
-                        if (window.flexiokeQueue) {
-                            window.flexiokeQueue.playNow(job.job_id);
-                        } else if (window.flexiokePlayer) {
-                            window.flexiokePlayer.loadSong(job, true);
-                        }
-                    }
-                });
+                playBtn.addEventListener('click', () => this.handlePlay(job));
 
                 const queueBtn = card.querySelector('.add-queue-btn');
                 queueBtn.addEventListener('click', () => {
@@ -223,13 +272,141 @@ class SongLibraryManager {
                 });
 
                 const lyricsBtn = card.querySelector('.lyrics-btn');
-                lyricsBtn.addEventListener('click', () => {
-                    this.openLyricsModal(job);
-                });
+                if (lyricsBtn) {
+                    lyricsBtn.addEventListener('click', () => {
+                        this.openLyricsModal(job);
+                    });
+                }
 
                 container.appendChild(card);
             });
         });
+
+        this.renderCatalog();
+    }
+
+    handlePlay(job) {
+        if (window.flexiokePlayer && window.flexiokePlayer.isPlaying && window.flexiokePlayer.currentJob && window.flexiokePlayer.currentJob.job_id !== job.job_id) {
+            window.flexiokePlayer.pause();
+            this.pendingPlayJob = job;
+            if (this.confirmSongTitle) this.confirmSongTitle.textContent = `"${job.title}"`;
+            if (this.playConfirmModal) this.playConfirmModal.classList.remove('hidden');
+        } else {
+            if (window.flexiokeQueue) {
+                window.flexiokeQueue.playNow(job.job_id);
+            } else if (window.flexiokePlayer) {
+                window.flexiokePlayer.loadSong(job, true);
+            }
+        }
+    }
+
+    openCatalogModal() {
+        if (!this.catalogModal) return;
+        this.catalogModal.classList.remove('hidden');
+        if (this.catalogSearchInput) {
+            this.catalogSearchInput.focus();
+        }
+        this.renderCatalog();
+    }
+
+    closeCatalogModal() {
+        if (!this.catalogModal) return;
+        this.catalogModal.classList.add('hidden');
+    }
+
+    renderCatalog() {
+        if (!this.catalogSongsList) return;
+        const rawJobs = [...(this.jobs || [])];
+        const query = this.catalogSearchInput ? this.catalogSearchInput.value.trim().toLowerCase() : '';
+        const sortOrder = this.catalogSortSelect ? this.catalogSortSelect.value : 'title_asc';
+
+        let filtered = rawJobs;
+        if (query) {
+            filtered = filtered.filter(j => {
+                const t = (j.title || '').toLowerCase();
+                const a = (j.artist || '').toLowerCase();
+                return t.includes(query) || a.includes(query);
+            });
+        }
+
+        // Sort catalog jobs
+        if (sortOrder === 'title_asc') {
+            filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        } else if (sortOrder === 'title_desc') {
+            filtered.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+        } else if (sortOrder === 'artist_asc') {
+            filtered.sort((a, b) => (a.artist || '').localeCompare(b.artist || ''));
+        } else if (sortOrder === 'recent') {
+            filtered.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+        }
+
+        if (this.catalogTotalCount) {
+            this.catalogTotalCount.textContent = `${filtered.length} ${filtered.length === 1 ? 'song' : 'songs'}`;
+        }
+
+        if (filtered.length === 0) {
+            this.catalogSongsList.innerHTML = `
+                <div class="text-center py-12 text-slate-500 text-xs">
+                    No songs found matching "${escapeHtml(query)}".
+                </div>
+            `;
+            return;
+        }
+
+        this.catalogSongsList.innerHTML = '';
+        filtered.forEach(job => {
+            const row = document.createElement('div');
+            row.className = "p-3 bg-surface-950/90 hover:bg-slate-800/80 border border-slate-800/90 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-3 group";
+
+            const sourceIcon = job.source_type === 'youtube' ? '▶️' : '📁';
+            const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
+            const durationSnippet = durationFmt ? `<span>${durationFmt}</span><span>•</span>` : '';
+            const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
+
+            row.innerHTML = `
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <span class="text-lg">${sourceIcon}</span>
+                    <div class="truncate">
+                        <h4 class="text-xs sm:text-sm font-semibold text-slate-100 truncate group-hover:text-brand-300 transition">${escapeHtml(job.title)}</h4>
+                        <div class="text-xs text-slate-400 truncate">${artistHtml}</div>
+                        <div class="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
+                            ${durationSnippet}
+                            <span class="truncate">${escapeHtml(job.source_name)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button class="catalog-play-btn px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-sm" data-job-id="${job.job_id}">
+                        <span>▶</span> Play Now
+                    </button>
+                    <button class="catalog-queue-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-medium transition" data-job-id="${job.job_id}">
+                        + Add to Queue
+                    </button>
+                </div>
+            `;
+
+            const playBtn = row.querySelector('.catalog-play-btn');
+            playBtn.addEventListener('click', () => {
+                this.closeCatalogModal();
+                this.handlePlay(job);
+            });
+
+            const queueBtn = row.querySelector('.catalog-queue-btn');
+            queueBtn.addEventListener('click', () => {
+                if (window.flexiokeQueue) {
+                    window.flexiokeQueue.addToQueue(job.job_id);
+                    queueBtn.textContent = '✓ Queued';
+                    queueBtn.classList.add('text-brand-400');
+                    setTimeout(() => {
+                        queueBtn.textContent = '+ Add to Queue';
+                        queueBtn.classList.remove('text-brand-400');
+                    }, 1200);
+                }
+            });
+
+            this.catalogSongsList.appendChild(row);
+        });
+    }
     }
 
     async openLyricsModal(job) {
