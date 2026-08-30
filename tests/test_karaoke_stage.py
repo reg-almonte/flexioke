@@ -24,7 +24,8 @@ def test_karaoke_stage_markup_structure():
     assert 'id="karaoke-up-next-text"' in html
     assert 'id="karaoke-countdown-cue"' in html
     assert 'id="karaoke-settings-modal"' in html
-    assert 'id="settings-highlight-color"' in html
+    assert 'id="settings-highlight-glow-color"' in html
+    assert 'id="settings-highlight-fill-color"' in html
     assert 'id="settings-font-size"' in html
     assert 'id="settings-active-font-size"' in html
     assert 'id="karaoke-intro-splash"' in html
@@ -121,6 +122,29 @@ def test_up_next_header_right_alignment():
     assert resp.status_code == 200
     assert "karaoke-up-next-container" in resp.text
     assert "justify-end" in resp.text
+
+def test_stage_restart_lyrics_reset_and_keyboard_shortcuts():
+    resp_js = client.get("/static/karaoke.js")
+    assert resp_js.status_code == 200
+    assert "restartSong" in resp_js.text
+    assert "scrollTop = 0" in resp_js.text or "scrollTop" in resp_js.text
+    assert "Home" in resp_js.text
+    assert "'r'" in resp_js.text or "'R'" in resp_js.text or "key === 'r'" in resp_js.text.lower()
+
+def test_dual_highlight_color_controls_in_html_and_js():
+    resp_html = client.get("/")
+    assert resp_html.status_code == 200
+    assert 'id="settings-highlight-glow-color"' in resp_html.text
+    assert 'id="settings-highlight-fill-color"' in resp_html.text
+    assert 'id="settings-glow-color-display"' in resp_html.text
+    assert 'id="settings-fill-color-display"' in resp_html.text
+
+    resp_js = client.get("/static/karaoke.js")
+    assert resp_js.status_code == 200
+    assert "activeHighlightGlowColor" in resp_js.text
+    assert "activeHighlightFillColor" in resp_js.text
+    assert "--karaoke-highlight-fill" in resp_js.text
+
 
 
 
