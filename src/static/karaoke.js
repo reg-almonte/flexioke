@@ -19,16 +19,19 @@ class LrcParser {
             const matches = [...trimmed.matchAll(timestampRegex)];
             if (matches.length > 0) {
                 // Extract lyric text after removing all [mm:ss.xx] tags
-                let text = trimmed.replace(timestampRegex, '').trim();
+                const rawText = trimmed.replace(timestampRegex, '').trim();
+                let text = rawText;
+                let isInstrumental = false;
                 if (!text) {
                     text = "♪ ♪ ♪ (Instrumental)";
+                    isInstrumental = true;
                 }
 
                 matches.forEach(m => {
                     const mins = parseInt(m[1], 10);
                     const secs = parseFloat(m[2]);
                     const time = mins * 60 + secs;
-                    parsedLines.push({ time, text });
+                    parsedLines.push({ time, text, rawText, isInstrumental });
                 });
             }
         });
@@ -38,8 +41,9 @@ class LrcParser {
 
             // If the final line is an empty timestamp or instrumental placeholder, label it as "End"
             const lastLine = parsedLines[parsedLines.length - 1];
-            if (lastLine.text === "♪ ♪ ♪ (Instrumental)" || !lastLine.text.trim()) {
+            if (lastLine.isInstrumental || lastLine.text === "♪ ♪ ♪ (Instrumental)" || !lastLine.rawText) {
                 lastLine.text = "♪  End  ♪";
+                lastLine.isInstrumental = true;
             }
 
             return {
@@ -848,28 +852,33 @@ class KaraokeStageManager {
             return;
         }
 
-        // Find next upcoming lyric line
-        let nextIndex = -1;
+        // Find next upcoming sung lyric line (non-instrumental with text)
+        let targetIndex = -1;
         for (let i = 0; i < this.lyricsData.lines.length; i++) {
-            if (this.lyricsData.lines[i].time > currentTime) {
-                nextIndex = i;
+            const line = this.lyricsData.lines[i];
+            if (line.time > currentTime && !line.isInstrumental && line.rawText && line.rawText.length > 0) {
+                targetIndex = i;
                 break;
             }
         }
 
-        if (nextIndex === -1) {
+        if (targetIndex === -1) {
             this.hideCountdownCue();
             return;
         }
 
-        const nextLine = this.lyricsData.lines[nextIndex];
-        const delta = nextLine.time - currentTime;
-
-        // Check if intro or musical interlude meets or exceeds the configured countdownThreshold (3s - 5s, default 3s)
+        const targetLine = this.lyricsData.lines[targetIndex];
+        const delta = targetLine.time - currentTime;
         const threshold = (typeof this.config.countdownThreshold !== 'undefined') ? parseFloat(this.config.countdownThreshold) : 3.0;
-        const isIntro = (nextIndex === 0 && nextLine.time >= threshold);
-        const prevLineTime = nextIndex > 0 ? this.lyricsData.lines[nextIndex - 1].time : 0;
-        const isInterlude = !isIntro && ((nextLine.time - prevLineTime) >= threshold);
+
+        // Check if all lines before targetIndex are non-lyric / intro
+        const hasPrevSungLine = this.lyricsData.lines.slice(0, targetIndex).some(l => !l.isInstrumental && l.rawText && l.rawText.length > 0);
+        const isIntro = !hasPrevSungLine && (targetLine.time >= threshold);
+
+        // Check if there is an explicit empty line / instrumental break preceding targetLine
+        const prevLine = targetIndex > 0 ? this.lyricsData.lines[targetIndex - 1] : null;
+        const isPrevInstrumental = prevLine && (prevLine.isInstrumental || !prevLine.rawText || prevLine.rawText.length === 0);
+        const isInterlude = hasPrevSungLine && isPrevInstrumental && ((targetLine.time - prevLine.time) >= threshold) && (currentTime >= prevLine.time);
 
         if ((isIntro || isInterlude) && delta > 0.05 && delta <= 3.0) {
             this.countdownCue.classList.remove('hidden');
