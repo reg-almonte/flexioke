@@ -109,3 +109,7 @@ made while building the template itself.
 - artifact: docs/design/ADR-0006-karaoke-stage-ux-and-catalog-modal.md
 - approved_by: reg
 - notes: Approved Option 1 (Unified Client-Side State Machine & Reactive Song Catalog) delivering Title/Artist Intro Splash screen with configurable audio delay (0–5s), configurable countdown cue gap threshold (3–5s), stage restart lyrics scroll & highlight reset, dual highlight color properties, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), expanded song catalog modal, and keyboard shortcuts (R/Home/Esc).
+## 2026-08-31 — Approved Ticket Breakdown: EPIC-0005 Karaoke Stage UX Refinements, Intro Delay Engine & Song Catalog Modal
+- artifact: docs/tickets/EPIC-0005-karaoke-stage-ux-and-song-catalog.md
+- approved_by: reg
+- notes: Approved EPIC-0005 work breakdown comprising STORY-0014 to STORY-0016 and TASK-0033 to TASK-0039 covering Title/Artist Intro Splash with delayed audio start (0–5s), configurable countdown cue gap threshold (3–5s), stage restart lyrics scroll & highlight reset, dual highlight color controls, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), and expanded song catalog modal with search/sort and 1-click play/queue. Previous tickets archived to docs/tickets/archive/.
