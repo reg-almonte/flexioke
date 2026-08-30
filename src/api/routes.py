@@ -66,7 +66,7 @@ def health_check():
     return {
         "status": "ok",
         "app": "flexioke",
-        "version": "0.2.2",
+        "version": "0.2.3",
     }
 
 @router.get("/jobs", response_model=JobListResponse)
