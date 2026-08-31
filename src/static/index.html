@@ -269,6 +269,9 @@
                             <h2 id="player-song-title" class="text-lg font-bold text-white tracking-tight truncate">No Track Loaded</h2>
                         </div>
                         <div class="flex items-center gap-3">
+                            <button id="export-stems-zip-btn" class="hidden px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-200 hover:text-white border border-slate-700/80 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="Download all stems and lyrics as a single .zip">
+                                <span>📦</span> Export Stems (.zip)
+                            </button>
                             <span id="player-timecode" class="text-xs font-mono text-slate-300 bg-surface-950 px-3 py-1.5 rounded-lg border border-slate-800">
                                 00:00 / 00:00
                             </span>
@@ -581,12 +584,17 @@
             <div id="lyrics-save-status" class="text-xs text-slate-400"></div>
 
             <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-                <button id="cancel-lyrics-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
-                    Cancel
+                <button id="delete-track-btn" class="px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-200 border border-rose-800/50 text-xs font-semibold flex items-center gap-1.5 transition" title="Permanently delete this song and all its stems">
+                    <span>🗑</span> Delete Track
                 </button>
-                <button id="save-lyrics-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold transition shadow-lg shadow-brand-500/20 flex items-center gap-1.5">
-                    <span>💾</span> Save Changes
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="cancel-lyrics-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                        Cancel
+                    </button>
+                    <button id="save-lyrics-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold transition shadow-lg shadow-brand-500/20 flex items-center gap-1.5">
+                        <span>💾</span> Save Changes
+                    </button>
+                </div>
             </div>
         </div>
     </div>

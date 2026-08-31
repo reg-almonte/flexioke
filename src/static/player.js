@@ -56,6 +56,15 @@ class FlexiokePlayer {
         this.masterVolSlider = document.getElementById('master-volume-slider');
         this.songTitleEl = document.getElementById('player-song-title');
         this.timecodeEl = document.getElementById('player-timecode');
+        this.exportZipBtn = document.getElementById('export-stems-zip-btn');
+
+        if (this.exportZipBtn) {
+            this.exportZipBtn.addEventListener('click', () => {
+                if (this.currentJob && this.currentJob.job_id) {
+                    window.location.href = `/api/jobs/${this.currentJob.job_id}/export/zip`;
+                }
+            });
+        }
 
         if (this.playBtn) {
             this.playBtn.addEventListener('click', () => this.togglePlay());
@@ -104,6 +113,13 @@ class FlexiokePlayer {
                 this.loadSong(e.detail, true);
             }
         });
+
+        // Listen for deleted job events
+        window.addEventListener('flexioke:job-deleted', (e) => {
+            if (this.currentJob && e.detail && e.detail.job_id === this.currentJob.job_id) {
+                this.resetToDefault();
+            }
+        });
     }
 
     loadSong(job, autoPlay = false) {
@@ -116,6 +132,9 @@ class FlexiokePlayer {
         this.finishedFired = false;
         if (this.songTitleEl) {
             this.songTitleEl.textContent = job.title || "Untitled Song";
+        }
+        if (this.exportZipBtn) {
+            this.exportZipBtn.classList.remove('hidden');
         }
         this.isPlaying = false;
         this.updatePlayBtnUI();
@@ -273,6 +292,9 @@ class FlexiokePlayer {
 
         if (this.songTitleEl) {
             this.songTitleEl.textContent = "No Track Loaded";
+        }
+        if (this.exportZipBtn) {
+            this.exportZipBtn.classList.add('hidden');
         }
         this.updateTimecode(0, 0);
         this.updatePlayBtnUI();

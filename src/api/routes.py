@@ -296,6 +296,79 @@ def get_stem_audio(job_id: str, stem_type: str):
         filename=f"{stem_type_clean}.mp3"
     )
 
+@router.get("/jobs/{job_id}/export/zip")
+@router.get("/jobs/{job_id}/download-all.zip")
+def export_job_stems_zip(job_id: str):
+    """Packages the 3 isolated stems and lyrics.lrc (if present) into a single downloadable .zip archive."""
+    job = job_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found."
+        )
+    if job.status != JobStatus.COMPLETED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Job '{job_id}' is not completed yet (current status: {job.status})."
+        )
+
+    job_dir = job_manager.get_job_dir(job_id)
+    stem_files = {
+        "instrumental.mp3": job_dir / "instrumental.mp3",
+        "lead_vocals.mp3": job_dir / "lead_vocals.mp3",
+        "backing_vocals.mp3": job_dir / "backing_vocals.mp3"
+    }
+
+    for name, path in stem_files.items():
+        if not path.exists():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Stem '{name}' is missing on disk for job '{job_id}'."
+            )
+
+    import io
+    import zipfile
+    import re
+    from fastapi.responses import Response
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        for name, path in stem_files.items():
+            zf.write(path, arcname=name)
+        lyrics_file = job_dir / "lyrics.lrc"
+        if lyrics_file.exists() and lyrics_file.stat().st_size > 0:
+            zf.write(lyrics_file, arcname="lyrics.lrc")
+
+    zip_buffer.seek(0)
+    clean_title = re.sub(r'[^\w\-_.]', '_', job.title or "flexioke")
+    zip_filename = f"{clean_title}_stems.zip"
+
+    return Response(
+        content=zip_buffer.getvalue(),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="{zip_filename}"'
+        }
+    )
+
+@router.delete("/jobs/{job_id}")
+def delete_job(job_id: str):
+    """Permanently deletes a song, its stems, archives, and removes it from playback queues."""
+    job = job_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found."
+        )
+
+    # Purge from playback queue
+    queue_manager.remove_jobs_from_queue(job_id)
+
+    # Delete storage and metadata
+    job_manager.delete_job(job_id)
+
+    return {"message": "Job deleted successfully", "job_id": job_id}
+
 # --- Lyrics Endpoints ---
 
 @router.get("/jobs/{job_id}/lyrics", response_model=LyricsResponse)

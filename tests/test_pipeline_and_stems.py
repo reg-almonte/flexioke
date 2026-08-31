@@ -73,6 +73,12 @@ def test_pipeline_execution_and_stem_streaming(mock_job_environment, monkeypatch
     assert updated_job.progress == 100
     assert len(updated_job.stems) == 3
 
+    # Verify input audio was moved to data/archive
+    archive_dir = mock_job_environment.data_dir.parent / "archive"
+    archived_file = archive_dir / f"{job.job_id}_test_song.mp3"
+    assert archived_file.exists()
+    assert not input_file.exists()
+
     # Test stem streaming endpoint
     for stem_type in ["instrumental", "lead_vocals", "backing_vocals"]:
         resp = client.get(f"/api/jobs/{job.job_id}/stems/{stem_type}")

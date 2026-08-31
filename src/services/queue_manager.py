@@ -67,6 +67,15 @@ class QueueManager:
             self.queue = [item for item in self.queue if item.queue_id != queue_id]
             return len(self.queue) < initial_len
 
+    def remove_jobs_from_queue(self, job_id: str) -> int:
+        """Removes all queue items referencing job_id and resets current_track if it matches."""
+        with self._lock:
+            initial_len = len(self.queue)
+            self.queue = [item for item in self.queue if item.job_id != job_id]
+            if self.current_track and self.current_track.job_id == job_id:
+                self.current_track = None
+            return initial_len - len(self.queue)
+
     def clear_queue(self):
         """Clears all queued tracks."""
         with self._lock:

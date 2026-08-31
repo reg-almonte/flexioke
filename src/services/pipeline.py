@@ -98,6 +98,18 @@ def run_separation_pipeline(job_id: str):
             "backing_vocals": f"/api/jobs/{job_id}/stems/backing_vocals",
         }
 
+        # Post-separation archiving: Move raw input audio to ./data/archive/{job_id}_{clean_source_name}
+        try:
+            archive_dir = job_manager.data_dir.parent / "archive"
+            archive_dir.mkdir(parents=True, exist_ok=True)
+            clean_source = (job.source_name or "audio").replace(" ", "_")
+            dest_archive_path = archive_dir / f"{job_id}_{clean_source}"
+            if input_file.exists():
+                shutil.move(str(input_file), str(dest_archive_path))
+                logger.info(f"[{job_id}] Archived raw input audio to {dest_archive_path}")
+        except Exception as archive_err:
+            logger.warning(f"[{job_id}] Failed to archive input audio: {archive_err}")
+
         job_manager.update_job(
             job_id,
             status=JobStatus.COMPLETED,

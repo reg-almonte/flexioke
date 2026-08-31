@@ -22,6 +22,8 @@ def test_index_page_structure():
     assert "open-notes-modal-btn" in html
     assert "studio-notes-modal" in html
     assert "studio-notes-textarea" in html
+    assert "export-stems-zip-btn" in html
+    assert "delete-track-btn" in html
     assert "/static/app.js" in html
     assert "/static/styles.css" in html
 

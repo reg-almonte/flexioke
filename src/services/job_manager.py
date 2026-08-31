@@ -152,6 +152,28 @@ class JobManager:
         jobs.sort(key=lambda j: j.created_at, reverse=True)
         return jobs
 
+    def delete_job(self, job_id: str) -> bool:
+        """Deletes a job from memory cache, disk directory, and archive storage."""
+        with self._lock:
+            if job_id in self._cache:
+                del self._cache[job_id]
+
+        job_dir = self.data_dir / job_id
+        if job_dir.exists():
+            import shutil
+            shutil.rmtree(job_dir, ignore_errors=True)
+
+        # Cleanup matching archived audio files
+        archive_dir = self.data_dir.parent / "archive"
+        if archive_dir.exists():
+            for f in archive_dir.glob(f"{job_id}_*"):
+                try:
+                    f.unlink(missing_ok=True)
+                except Exception:
+                    pass
+
+        return True
+
     def get_lyrics(self, job_id: str) -> LyricsResponse:
         """Retrieves the lyrics for a specific job."""
         job_dir = self.get_job_dir(job_id)

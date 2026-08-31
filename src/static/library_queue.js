@@ -21,6 +21,7 @@ class SongLibraryManager {
         this.closeLyricsModalBtn = document.getElementById('close-lyrics-modal-btn');
         this.cancelLyricsBtn = document.getElementById('cancel-lyrics-btn');
         this.saveLyricsBtn = document.getElementById('save-lyrics-btn');
+        this.deleteTrackBtn = document.getElementById('delete-track-btn');
         this.activeLyricsJobId = null;
 
         // Play interruption confirmation modal
@@ -133,6 +134,9 @@ class SongLibraryManager {
         }
         if (this.saveLyricsBtn) {
             this.saveLyricsBtn.addEventListener('click', () => this.saveLyrics());
+        }
+        if (this.deleteTrackBtn) {
+            this.deleteTrackBtn.addEventListener('click', () => this.handleDeleteTrack());
         }
 
         // Play confirmation modal handlers
@@ -533,6 +537,37 @@ class SongLibraryManager {
             if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Error saving";
         } finally {
             if (this.saveLyricsBtn) this.saveLyricsBtn.disabled = false;
+        }
+    }
+
+    async handleDeleteTrack() {
+        if (!this.activeLyricsJobId) return;
+        const job = this.jobs.find(j => j.job_id === this.activeLyricsJobId);
+        const title = job ? (job.title || "this song") : "this song";
+        
+        const confirmed = window.confirm(`Are you sure you want to permanently delete "${title}" and all its separated stems? This action cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+            const resp = await fetch(`/api/jobs/${this.activeLyricsJobId}`, {
+                method: 'DELETE'
+            });
+            if (resp.ok) {
+                const deletedId = this.activeLyricsJobId;
+                this.closeLyricsModal();
+                this.jobs = this.jobs.filter(j => j.job_id !== deletedId);
+                this.render(this.jobs);
+                if (window.flexiokeQueue) {
+                    window.flexiokeQueue.loadState();
+                }
+                window.dispatchEvent(new CustomEvent('flexioke:job-deleted', { detail: { job_id: deletedId } }));
+            } else {
+                const err = await resp.json();
+                alert(`Failed to delete track: ${err.detail || 'Unknown error'}`);
+            }
+        } catch (err) {
+            console.error("Error deleting track:", err);
+            alert("Network error occurred while deleting track.");
         }
     }
 }
