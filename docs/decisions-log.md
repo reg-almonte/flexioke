@@ -113,3 +113,9 @@ made while building the template itself.
 - artifact: docs/tickets/EPIC-0005-karaoke-stage-ux-and-song-catalog.md
 - approved_by: reg
 - notes: Approved EPIC-0005 work breakdown comprising STORY-0014 to STORY-0016 and TASK-0033 to TASK-0039 covering Title/Artist Intro Splash with delayed audio start (0–5s), configurable countdown cue gap threshold (3–5s), stage restart lyrics scroll & highlight reset, dual highlight color controls, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), and expanded song catalog modal with search/sort and 1-click play/queue. Previous tickets archived to docs/tickets/archive/.
+
+## 2026-08-31 — Approved Release v0.2.3: Karaoke Stage UX Refinements, Intro Splash & Song Catalog Modal
+- artifact: docs/releases/v0.2.3.md
+- approved_by: reg
+- notes: Version 0.2.3 fully approved and released. Includes Title & Artist Intro Splash overlay with audio pre-buffering delay, configurable Intro Splash duration (0–5s) and Countdown Cue Gap threshold (3–5s) sliders in Stage Settings, stage restart lyrics scroll-to-top (scrollTop = 0) and active highlight reset, global keyboard shortcuts (R/Home for Restart, Esc for dismissals), dual highlight color controls (--karaoke-highlight-color for border glow, --karaoke-highlight-fill for background tint), fixed 3-card Playback Queue (h-[196px]) and compact Song Library (h-[210px]) sidebars, "Stems ready" badge removal, mode-scoped Edit Details/Lyrics button visibility (strictly Stem Studio), full-screen Song Catalog Modal with real-time search, sorting, and 1-click Play Now & Add to Queue actions, and bugfixes for countdown cue active lyric suppression (BUG-0004) and Stem Studio edit button selector scoping (BUG-0005).
+
