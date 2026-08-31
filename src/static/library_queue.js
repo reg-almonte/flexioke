@@ -216,7 +216,7 @@ class SongLibraryManager {
             }
 
             container.innerHTML = '';
-            const isStudio = container.closest('#view-studio') !== null || container.id === 'studio-library-list';
+            const isStudio = container.closest('#view-stem-studio') !== null || container.id === 'studio-library-list';
 
             currentJobs.forEach(job => {
                 const card = document.createElement('div');
@@ -237,7 +237,7 @@ class SongLibraryManager {
                 `;
                 if (isStudio) {
                     buttonsHtml += `
-                        <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
+                        <button class="lyrics-btn edit-lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
                             📝
                         </button>
                     `;
