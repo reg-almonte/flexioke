@@ -14,3 +14,10 @@ def test_karaoke_js_contains_fullscreen_logic():
     resp = client.get("/static/karaoke.js")
     assert resp.status_code == 200
     assert "fullscreen" in resp.text.lower()
+
+def test_fullscreen_css_rules():
+    resp = client.get("/static/styles.css")
+    assert resp.status_code == 200
+    assert "stage-fullscreen" in resp.text
+    assert "var(--karaoke-font-size" in resp.text
+

@@ -37,8 +37,11 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body class="bg-surface-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
+    <!-- Top Nav Sensor for Auto-Hiding Header in Karaoke Mode -->
+    <div id="top-nav-sensor" class="fixed top-0 left-0 right-0 h-4 z-50 pointer-events-auto"></div>
+
     <!-- Header -->
-    <header class="border-b border-slate-800/80 bg-surface-900/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+    <header id="app-header" class="border-b border-slate-800/80 bg-surface-900/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 shadow-sm transition-all duration-300">
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-violet-500 flex items-center justify-center shadow-md shadow-brand-500/20 text-lg">
                 🎤
@@ -187,9 +190,10 @@
                     </div>
 
                     <!-- Search Input -->
-                    <div class="relative">
-                        <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title...">
+                    <div class="relative flex items-center">
                         <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
+                        <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title or artist...">
+                        <button class="library-search-clear-btn hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-200 text-xs transition select-none" title="Clear search">✕</button>
                     </div>
 
                     <!-- Library List Container -->
@@ -207,8 +211,8 @@
                             <span>📋</span> Studio Queue
                         </h2>
                         <div class="flex items-center gap-2">
+                            <span class="queue-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
                             <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
-                            <button class="play-next-queue-btn text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded font-medium transition">Skip Next ⏭</button>
                         </div>
                     </div>
 
@@ -340,44 +344,45 @@
             <!-- Left Column: Karaoke Library + Karaoke Queue (4 cols) -->
             <aside class="lg:col-span-4 space-y-6 flex flex-col">
                 
-                <!-- Karaoke Song Library Card -->
-                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex flex-col">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <span>🎤</span> Karaoke Song Library
-                        </h2>
-                        <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
-                    </div>
-
-                    <!-- Search Input -->
-                    <div class="relative">
-                        <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-3.5 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search karaoke catalog...">
-                        <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
-                    </div>
-
-                    <!-- Library List Container -->
-                    <div class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[340px]">
-                        <div class="library-empty-state text-center py-6 text-slate-500 text-xs">
-                            No songs available.<br>Process songs in Stem Studio!
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Karaoke Playback Queue Card -->
+                <!-- Karaoke Playback Queue Card (Top) -->
                 <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <span>📋</span> Karaoke Queue
+                            <span>📋</span> Playback Queue
                         </h2>
                         <div class="flex items-center gap-2">
+                            <span class="queue-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
                             <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
-                            <button class="play-next-queue-btn text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded font-medium transition">Skip Next ⏭</button>
                         </div>
                     </div>
 
                     <div class="queue-list-container space-y-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
                         <div class="queue-empty-state text-center py-4 text-slate-500 text-xs">
                             Karaoke queue is empty.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Karaoke Song Library Card (Bottom) -->
+                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex flex-col">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                            <span>🎤</span> Song Library
+                        </h2>
+                        <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="relative flex items-center">
+                        <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
+                        <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title or artist...">
+                        <button class="library-search-clear-btn hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-200 text-xs transition select-none" title="Clear search">✕</button>
+                    </div>
+
+                    <!-- Library List Container -->
+                    <div class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[340px]">
+                        <div class="library-empty-state text-center py-6 text-slate-500 text-xs">
+                            No songs available.<br>Process songs in Stem Studio!
                         </div>
                     </div>
                 </section>
@@ -391,19 +396,52 @@
                 <section id="karaoke-stage-card" class="bg-surface-900 border border-slate-800/90 rounded-2xl p-6 shadow-2xl space-y-4 min-h-[560px] flex flex-col justify-between relative overflow-hidden transition-all">
                     
                     <!-- Karaoke Track Info Header -->
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <div class="truncate">
-                            <span class="text-[10px] uppercase font-bold tracking-widest text-brand-400">Now Singing</span>
-                            <h2 id="karaoke-song-title" class="text-xl font-extrabold text-white tracking-tight truncate">No Track Selected</h2>
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 gap-6">
+                        <!-- Left: Now Singing -->
+                        <div id="karaoke-now-singing-container" class="min-w-0 max-w-[60%] flex items-center gap-2 overflow-hidden shrink">
+                            <span class="text-[10px] uppercase font-bold tracking-widest text-brand-400 shrink-0">Now Singing:</span>
+                            <div class="marquee-wrapper overflow-hidden min-w-0">
+                                <span id="karaoke-now-singing-text" class="text-xs sm:text-sm font-bold text-white tracking-tight inline-block whitespace-nowrap">No Track Selected</span>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2.5">
-                            <span id="karaoke-timecode" class="text-xs font-mono text-slate-300 bg-surface-950 px-3 py-1.5 rounded-lg border border-slate-800">
-                                00:00 / 00:00
+
+                        <!-- Right: Up Next -->
+                        <div id="karaoke-up-next-container" class="min-w-0 max-w-[60%] flex items-center justify-end gap-2 text-right overflow-hidden ml-auto shrink">
+                            <span class="text-[10px] uppercase font-bold tracking-widest text-violet-400 shrink-0">Up Next:</span>
+                            <div class="marquee-wrapper overflow-hidden text-right min-w-0">
+                                <span id="karaoke-up-next-text" class="text-xs sm:text-sm font-medium text-slate-300 tracking-tight inline-block whitespace-nowrap">— (Queue Empty)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Countdown Cue Badge -->
+                    <div id="karaoke-countdown-cue" class="hidden absolute top-20 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5 bg-surface-950/90 border border-brand-500/60 px-4 py-1.5 rounded-full shadow-2xl backdrop-blur-md transition-all">
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-brand-300">Ready</span>
+                        <div id="countdown-dots" class="flex items-center gap-1.5 text-xs text-brand-400">
+                            <span>●</span>
+                            <span>○</span>
+                            <span>○</span>
+                        </div>
+                        <span id="countdown-number" class="text-xs font-mono font-extrabold text-white">3</span>
+                    </div>
+
+                    <!-- Song Title & Artist Intro Splash Overlay -->
+                    <div id="karaoke-intro-splash" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-surface-950/95 backdrop-blur-md p-6 text-center transition-all duration-300">
+                        <div class="space-y-3.5 max-w-lg">
+                            <span class="inline-block text-[10px] uppercase font-extrabold tracking-widest text-brand-400 bg-brand-500/10 border border-brand-500/30 px-3.5 py-1 rounded-full shadow-inner">
+                                Get Ready to Sing
                             </span>
-                            <button id="karaoke-fullscreen-btn" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5" title="Toggle Fullscreen Stage">
-                                <span id="fullscreen-icon">⛶</span>
-                                <span id="fullscreen-btn-text">Expand</span>
-                            </button>
+                            <h1 id="intro-splash-title" class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug drop-shadow-lg">
+                                Song Title
+                            </h1>
+                            <p id="intro-splash-artist" class="text-sm sm:text-base font-semibold text-brand-300 tracking-wide">
+                                Artist Name
+                            </p>
+                            <div class="pt-4 flex items-center justify-center">
+                                <div id="intro-splash-timer" class="w-9 h-9 rounded-full border-2 border-brand-400 bg-surface-900 flex items-center justify-center text-sm font-mono font-extrabold text-brand-300 shadow-lg shadow-brand-500/30">
+                                    3
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -415,39 +453,54 @@
                     </div>
 
                     <!-- Karaoke Quick Vocal Toggles & Transport Bar -->
-                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-4">
+                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-4">
                         
-                        <!-- Play / Pause & Skip -->
-                        <div class="flex items-center gap-2">
-                            <button id="karaoke-play-btn" class="w-10 h-10 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-bold flex items-center justify-center transition shadow-lg shadow-brand-500/30">
+                        <!-- Left Cluster: Play/Pause, Expanding Volume, Timecode -->
+                        <div class="flex items-center gap-3">
+                            <button id="karaoke-play-btn" class="w-10 h-10 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-bold flex items-center justify-center transition shadow-lg shadow-brand-500/30 text-base" title="Play / Pause (Space)">
                                 ▶
                             </button>
-                            <button id="karaoke-skip-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition font-semibold" title="Skip to Next Track">
+
+                            <div id="karaoke-volume-control" class="karaoke-volume-wrapper flex items-center bg-surface-900 border border-slate-800/90 rounded-xl px-2.5 py-2 gap-1.5 group transition-all hover:border-slate-700">
+                                <span class="text-sm cursor-pointer select-none text-slate-400 group-hover:text-white" title="Master Volume">🔊</span>
+                                <input type="range" id="karaoke-volume-slider" min="0" max="1" step="0.01" value="0.8" class="karaoke-hover-volume-slider w-0 opacity-0 group-hover:w-20 group-hover:opacity-100 transition-all duration-300 accent-brand-500 cursor-pointer">
+                            </div>
+
+                            <span id="karaoke-timecode" class="font-mono text-xs text-slate-300 bg-surface-900 px-3 py-2 rounded-xl border border-slate-800 cursor-pointer select-none hover:border-brand-500/50 hover:text-white transition flex items-center gap-1" title="Click to toggle Elapsed / Remaining Time">
+                                00:00 / 00:00
+                            </span>
+                        </div>
+
+                        <!-- Center: Quick Vocal Toggles for Singers -->
+                        <div id="karaoke-center-controls" class="flex items-center gap-3">
+                            <button id="karaoke-toggle-lead-btn" class="karaoke-vocal-toggle rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-sm font-semibold transition flex items-center justify-center hover:bg-brand-600/50 hover:text-white" title="Lead Vocals: ON (Click to Mute)">
+                                <span class="text-base">🎤</span>
+                                <span id="karaoke-lead-status-text" class="text-xs">Lead Vocals: ON</span>
+                            </button>
+                            <button id="karaoke-toggle-backing-btn" class="karaoke-vocal-toggle rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-sm font-semibold transition flex items-center justify-center hover:bg-violet-600/50 hover:text-white" title="Backing Vocals: ON (Click to Mute)">
+                                <span class="text-base">👥</span>
+                                <span id="karaoke-backing-status-text" class="text-xs">Backing: ON</span>
+                            </button>
+                        </div>
+
+                        <!-- Right Cluster: Transport Controls & Settings -->
+                        <div class="flex items-center gap-2 text-xs text-slate-400">
+                            <button id="karaoke-restart-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition font-semibold" title="Restart Song (0:00)">
+                                🔄
+                            </button>
+                            <button id="karaoke-skip-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition font-semibold" title="Skip to Next Track">
                                 ⏭
                             </button>
-                        </div>
-
-                        <!-- Quick Vocal Toggles for Singers -->
-                        <div class="flex items-center gap-2">
-                            <button id="karaoke-toggle-lead-btn" class="px-3.5 py-1.5 rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-xs font-semibold transition flex items-center gap-1.5">
-                                <span>🎤</span>
-                                <span id="karaoke-lead-status-text">Lead Vocals: ON</span>
-                            </button>
-                            <button id="karaoke-toggle-backing-btn" class="px-3.5 py-1.5 rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-xs font-semibold transition flex items-center gap-1.5">
-                                <span>👥</span>
-                                <span id="karaoke-backing-status-text">Backing: ON</span>
-                            </button>
-                        </div>
-
-                        <!-- Stop Button & Master Volume -->
-                        <div class="flex items-center gap-3 text-xs text-slate-400">
-                            <button id="karaoke-stop-btn" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Stop & Cue Next">
+                            <button id="karaoke-stop-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Stop & Cue Next">
                                 ⏹
                             </button>
-                            <div class="flex items-center gap-1.5">
-                                <span>🔊</span>
-                                <input type="range" id="karaoke-volume-slider" min="0" max="1" step="0.01" value="0.8" class="w-20 accent-brand-500 cursor-pointer">
-                            </div>
+                            <button id="karaoke-settings-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Karaoke Stage Settings">
+                                ⚙
+                            </button>
+                            <button id="karaoke-fullscreen-btn" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition" title="Toggle Fullscreen Stage">
+                                <span id="fullscreen-icon">⛶</span>
+                                <span id="fullscreen-btn-text" class="hidden">Expand</span>
+                            </button>
                         </div>
 
                     </div>
@@ -465,18 +518,29 @@
         <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div class="truncate">
-                    <span class="text-[10px] uppercase font-bold text-brand-400 tracking-wider">Lyrics Editor</span>
-                    <h3 id="lyrics-modal-title" class="text-sm font-semibold text-white truncate">Song Title</h3>
+                    <span class="text-[10px] uppercase font-bold text-brand-400 tracking-wider">Song Details & Lyrics</span>
+                    <h3 id="lyrics-modal-title" class="text-sm font-semibold text-white truncate">Edit Song</h3>
                 </div>
                 <button id="close-lyrics-modal-btn" class="text-slate-400 hover:text-slate-200 p-1">✕</button>
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label for="lyrics-edit-title" class="text-xs text-slate-300 font-medium">Song Title</label>
+                    <input type="text" id="lyrics-edit-title" placeholder="Song Title" class="w-full bg-surface-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500 transition">
+                </div>
+                <div class="space-y-1">
+                    <label for="lyrics-edit-artist" class="text-xs text-slate-300 font-medium">Artist Name</label>
+                    <input type="text" id="lyrics-edit-artist" placeholder="e.g. Queen, Adele, etc." class="w-full bg-surface-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500 transition">
+                </div>
+            </div>
+
             <div class="space-y-2">
                 <label for="lyrics-textarea" class="text-xs text-slate-300 flex items-center justify-between">
-                    <span>Paste Timestamped (.lrc) or Plain Text Lyrics</span>
+                    <span>Synchronized (.lrc) or Plain Text Lyrics</span>
                     <span class="text-[10px] text-slate-500">e.g. [00:05.12] Lyric line</span>
                 </label>
-                <textarea id="lyrics-textarea" rows="10" placeholder="[00:00.00] Song starts&#10;[00:05.20] First line of lyrics&#10;[00:10.50] Second line of lyrics" class="w-full bg-surface-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-brand-500 transition resize-none custom-scrollbar"></textarea>
+                <textarea id="lyrics-textarea" rows="8" placeholder="[00:00.00] Song starts&#10;[00:05.20] First line of lyrics&#10;[00:10.50] Second line of lyrics" class="w-full bg-surface-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-brand-500 transition resize-none custom-scrollbar"></textarea>
             </div>
 
             <div class="flex items-center justify-between pt-2 border-t border-slate-800">
@@ -486,7 +550,7 @@
                         Cancel
                     </button>
                     <button id="save-lyrics-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition shadow-md shadow-brand-500/20 flex items-center gap-1.5">
-                        <span>💾</span> Save Lyrics
+                        <span>💾</span> Save Changes
                     </button>
                 </div>
             </div>
@@ -502,15 +566,92 @@
             </div>
 
             <p class="text-xs text-slate-300 leading-relaxed">
-                A track is currently playing. Starting <span id="confirm-song-title" class="font-semibold text-brand-300"></span> will stop current playback. Your existing playback queue will remain preserved.
+                A track is currently playing. What would you like to do with <span id="confirm-song-title" class="font-semibold text-brand-300"></span>?
             </p>
 
             <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
                 <button id="confirm-cancel-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
                     Cancel
                 </button>
+                <button id="confirm-queue-btn" class="px-3.5 py-1.5 rounded-xl bg-violet-600/30 hover:bg-violet-600/50 border border-violet-500/50 text-violet-300 text-xs font-semibold transition flex items-center gap-1.5">
+                    <span>➕</span> Add to Queue
+                </button>
                 <button id="confirm-play-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition shadow-md shadow-brand-500/20">
                     Play Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Karaoke Stage Settings Modal -->
+    <div id="karaoke-settings-modal" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
+        <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">⚙</span>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Stage Settings</h3>
+                </div>
+                <button id="close-settings-modal-btn" class="text-slate-400 hover:text-white text-lg transition">✕</button>
+            </div>
+            
+            <div class="space-y-4 text-xs">
+                <!-- Intro Splash Duration -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <label for="settings-intro-splash" class="font-medium">Intro Splash Duration</label>
+                        <span id="settings-intro-splash-display" class="font-mono text-brand-400 font-semibold">3s</span>
+                    </div>
+                    <input type="range" id="settings-intro-splash" min="0" max="5" step="1" value="3" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                    <p class="text-[10px] text-slate-500">Shows Title and Artist before starting playback (0s = off, 1s - 5s delay).</p>
+                </div>
+
+                <!-- Countdown Cue Gap Threshold -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <label for="settings-countdown-threshold" class="font-medium">Countdown Cue Threshold</label>
+                        <span id="settings-countdown-threshold-display" class="font-mono text-brand-400 font-semibold">3s</span>
+                    </div>
+                    <input type="range" id="settings-countdown-threshold" min="3" max="5" step="1" value="3" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                    <p class="text-[10px] text-slate-500">Minimum non-lyric gap to trigger 3-beat countdown cue (3s - 5s, default 3s).</p>
+                </div>
+
+                <!-- Active Lyric Highlight Glow Color -->
+                <div class="space-y-1.5">
+                    <label for="settings-highlight-color" class="block font-medium text-slate-300">Active Lyric Highlight Color</label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="settings-highlight-color" value="#06b6d4" class="w-10 h-8 rounded border border-slate-700 bg-surface-950 cursor-pointer">
+                        <span id="settings-color-display" class="font-mono text-slate-400">#06b6d4</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500">Custom glow and accent color for the currently active lyric line.</p>
+                </div>
+
+                <!-- Lyrics Base Font Size -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <label for="settings-font-size" class="font-medium">Base Lyric Font Size</label>
+                        <span id="settings-font-size-display" class="font-mono text-brand-400 font-semibold">20px</span>
+                    </div>
+                    <input type="range" id="settings-font-size" min="14" max="28" step="1" value="20" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                    <p class="text-[10px] text-slate-500">Base font size for all inactive lyrics lines on the stage (14px - 28px).</p>
+                </div>
+
+                <!-- Highlighted Lyric Font Size -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <label for="settings-active-font-size" class="font-medium">Highlighted Lyric Font Size</label>
+                        <span id="settings-active-font-size-display" class="font-mono text-brand-400 font-semibold">24px</span>
+                    </div>
+                    <input type="range" id="settings-active-font-size" min="16" max="28" step="1" value="24" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                    <p class="text-[10px] text-slate-500">Font size for the currently active/sung lyric line (16px - 28px).</p>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+                <button id="settings-reset-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition">
+                    Reset Defaults
+                </button>
+                <button id="save-settings-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition shadow-lg shadow-brand-500/20">
+                    Done
                 </button>
             </div>
         </div>

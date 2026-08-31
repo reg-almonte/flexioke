@@ -56,3 +56,60 @@ made while building the template itself.
 - artifact: docs/releases/v0.2.0.md
 - approved_by: reg
 - notes: Version 2 fully approved and released. Includes independent page systems for Stem Studio and Karaoke Mode, synchronized LRC lyrics engine with glowing active-line auto-scroll, fullscreen expand mode, quick vocal mutes, and cue-stop controls.
+## 2026-08-28 — Approved Requirements: Version 0.2.1 Karaoke Mode Enhancements & Metadata Separation
+- artifact: docs/requirements/karaoke-mode-enhancements.md
+- approved_by: reg
+- notes: Approved requirements covering structured artist/title separation with backwards-compatible migration, unified dual-field search, song & lyrics editor modal, configurable stage settings (transition interval, highlight color, font size), remaining time badge, and visual countdown intro/interlude cues.
+## 2026-08-28 — Approved Functional Spec: Version 0.2.1 Karaoke Mode Enhancements & Metadata Separation
+- artifact: docs/specs/karaoke-mode-enhancements.md
+- approved_by: reg
+- notes: Functional spec approved detailing backward-compatible job model schema migration, atomic metadata/lyrics update endpoints, dual-field client-side search, CSS-animated alternating header transitions, intro/interlude visual countdown cues, and client-persisted stage settings.
+## 2026-08-28 — Approved ADR-0004: Unified Song Metadata Model Extension & Reactive Karaoke Stage Enhancements
+- artifact: docs/design/ADR-0004-karaoke-metadata-and-stage-enhancements.md
+- approved_by: reg
+- notes: Approved Option 1 (Unified REST Model Extension with Client-Side Reactive Stage Coordinator & LocalStorage Preferences) for zero external dependencies, robust backwards-compatible job.json migration, and real-time client-side stage controls.
+## 2026-08-28 — Approved Ticket Breakdown: EPIC-0003 Karaoke Mode Enhancements & Metadata Separation
+- artifact: docs/tickets/EPIC-0003-karaoke-metadata-and-stage-enhancements.md
+- approved_by: reg
+- notes: Approved ticket breakdown comprising STORY-0008 to STORY-0010 and TASK-0019 to TASK-0025 covering backend model/store/API metadata extensions, song & lyrics editor modal, dual-field library search, alternating stage header, visual countdown cues, and stage customization controls.
+## 2026-08-29 — Approved Release v0.2.1: Karaoke Mode Enhancements & Metadata Separation
+- artifact: docs/releases/v0.2.1.md
+- approved_by: reg
+- notes: Version 0.2.1 fully approved and released. Includes Song Title and Artist metadata separation with backwards compatibility, unified song details & lyrics modal, dual-field search, auto-sort by song title, alternating stage banner ("Now Singing" ⟷ "Up Next"), timecode countdown badge, visual 3-beat countdown cues, and customizable stage settings modal.
+## 2026-08-29 — Approved Requirements: Version 0.2.2 Karaoke UI Refinements & Stage Controls
+- artifact: docs/requirements/karaoke-ui-refinements.md
+- approved_by: reg
+- notes: Requirements approved for Version 0.2.2 covering simultaneous Now Singing & Up Next header, modernized transport bar with expanding volume slider and restart button, click-to-play on stage background, queue reordering (up/down) with top position in sidebar, and auto-hiding navbar.
+## 2026-08-29 — Approved Functional Spec: Version 0.2.2 Karaoke UI Refinements & Stage Controls
+- artifact: docs/specs/karaoke-ui-refinements.md
+- approved_by: reg
+- notes: Functional spec approved detailing simultaneous dual stage header with marquee, bottom transport bar (expanding volume, toggleable timecode, restart, settings, expand/collapse), stage background click-to-play with bounded lyric pills, queue reorder endpoint (POST /api/queue/reorder), and auto-hiding navbar.
+## 2026-08-29 — Approved ADR-0005: Directional Queue Reordering API with Reactive Stage Transport & CSS Marquee Engine
+- artifact: docs/design/ADR-0005-karaoke-stage-transport-queue-reordering.md
+- approved_by: reg
+- notes: Approved Option 1 (Directional Queue Reordering API with Reactive DOM Event Bus & CSS Marquee Engine) providing atomic thread-safe queue mutation, simultaneous dual stage header with marquee, modernized transport bar with expanding volume and restart, stage click-to-play, and auto-hiding navbar.
+## 2026-08-29 — Approved Ticket Breakdown: EPIC-0004 Karaoke Stage Transport, Queue Reordering & Responsive UI Refinements
+- artifact: docs/tickets/EPIC-0004-karaoke-stage-transport-and-queue-refinements.md
+- approved_by: reg
+- notes: Approved ticket breakdown comprising STORY-0011 to STORY-0013 and TASK-0026 to TASK-0032 covering simultaneous dual stage header with marquee, stage background click-to-play, modernized bottom transport bar with expanding volume and restart, backend queue reorder endpoint (POST /api/queue/reorder), sidebar reorganization with up/down controls, and auto-hiding navbar.
+
+## 2026-08-29 — Approved Release v0.2.2: Karaoke Stage Transport, Queue Reordering & Responsive UI Refinements
+- artifact: docs/releases/v0.2.2.md
+- approved_by: reg
+- notes: Version 0.2.2 fully approved and released. Includes simultaneous dual stage headers ("Now Singing" and "Up Next") with auto-scrolling CSS marquee, stage background click-to-play with bounded lyric pills, modernized bottom transport bar with expanding hover volume slider, dedicated restart song button, interactive click-toggleable timecode modes, compact vocal toggles in default view, backend atomic queue reorder endpoint (POST /api/queue/reorder), sidebar reorganization with live up/down reordering and song count badges, search bar clear (✕) button, 3-choice playback interruption modal, and auto-hiding navbar.
+## 2026-08-31 — Approved Requirements: Version 0.2.3 Karaoke Stage UX Refinements, Intro Splash & Song Catalog Modal
+- artifact: docs/requirements/version0.2.3.md
+- approved_by: reg
+- notes: Requirements approved for Version 0.2.3 covering configurable Title/Artist Intro Splash screen with delayed audio start (0–5s), visual countdown cue gap threshold setting (3–5s, default 3s), stage restart lyrics scroll & highlight reset, dual highlight color controls, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), expanded song catalog modal, and keyboard shortcuts (R/Home/Esc).
+## 2026-08-31 — Approved Functional Spec: Version 0.2.3 Karaoke Stage UX Refinements, Intro Splash & Song Catalog Modal
+- artifact: docs/specs/version0.2.3.md
+- approved_by: reg
+- notes: Functional spec approved detailing 7 behavioral flows: Title/Artist Intro Splash card with configurable audio delay (0–5s, default 3s), visual countdown cue gap threshold (3–5s, default 3s), stage restart lyrics scroll & highlight reset, dual highlight color controls, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), and expanded song catalog modal with search/sort and 1-click play/queue.
+## 2026-08-31 — Approved ADR-0006: Reactive Stage UX Coordinator, Intro Delay Engine & Client-Side Song Catalog Modal
+- artifact: docs/design/ADR-0006-karaoke-stage-ux-and-catalog-modal.md
+- approved_by: reg
+- notes: Approved Option 1 (Unified Client-Side State Machine & Reactive Song Catalog) delivering Title/Artist Intro Splash screen with configurable audio delay (0–5s), configurable countdown cue gap threshold (3–5s), stage restart lyrics scroll & highlight reset, dual highlight color properties, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), expanded song catalog modal, and keyboard shortcuts (R/Home/Esc).
+## 2026-08-31 — Approved Ticket Breakdown: EPIC-0005 Karaoke Stage UX Refinements, Intro Delay Engine & Song Catalog Modal
+- artifact: docs/tickets/EPIC-0005-karaoke-stage-ux-and-song-catalog.md
+- approved_by: reg
+- notes: Approved EPIC-0005 work breakdown comprising STORY-0014 to STORY-0016 and TASK-0033 to TASK-0039 covering Title/Artist Intro Splash with delayed audio start (0–5s), configurable countdown cue gap threshold (3–5s), stage restart lyrics scroll & highlight reset, dual highlight color controls, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), and expanded song catalog modal with search/sort and 1-click play/queue. Previous tickets archived to docs/tickets/archive/.

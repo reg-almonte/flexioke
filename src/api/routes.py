@@ -12,8 +12,10 @@ from src.services.pipeline import run_separation_pipeline, VALID_STEM_TYPES
 from src.models import (
     JobRecord,
     JobListResponse,
+    JobUpdateMetadataRequest,
     QueueItem,
     QueueResponse,
+    QueueReorderRequest,
     LyricsResponse,
     LyricsUpdateRequest,
     SourceType,
@@ -64,7 +66,7 @@ def health_check():
     return {
         "status": "ok",
         "app": "flexioke",
-        "version": "0.1.0",
+        "version": "0.2.2",
     }
 
 @router.get("/jobs", response_model=JobListResponse)
@@ -142,6 +144,26 @@ def get_job_status(job_id: str):
         )
     return job
 
+@router.patch("/jobs/{job_id}", response_model=JobRecord)
+def update_job_metadata(job_id: str, req: JobUpdateMetadataRequest):
+    """Update song title and artist metadata for a job."""
+    job = job_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found."
+        )
+
+    updates = {}
+    if req.title is not None:
+        updates["title"] = req.title.strip()
+    if req.artist is not None:
+        updates["artist"] = req.artist.strip() if req.artist.strip() else None
+
+    updated_job = job_manager.update_job(job_id, **updates)
+    return updated_job
+
+
 @router.get("/jobs/{job_id}/stems/{stem_type}")
 def get_stem_audio(job_id: str, stem_type: str):
     """Streams an isolated MP3 stem track (instrumental, lead_vocals, backing_vocals)."""
@@ -213,7 +235,7 @@ def add_to_queue(req: QueueActionRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Job '{req.job_id}' is not ready for playback."
         )
-    queue_manager.add_to_queue(job.job_id, job.title, job.duration_seconds, job.stems)
+    queue_manager.add_to_queue(job.job_id, job.title, job.artist, job.duration_seconds, job.stems)
     return queue_manager.get_state()
 
 @router.post("/queue/play-now", response_model=QueueResponse)
@@ -225,7 +247,7 @@ def play_now(req: QueueActionRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Job '{req.job_id}' is not ready for playback."
         )
-    queue_manager.play_now(job.job_id, job.title, job.duration_seconds, job.stems)
+    queue_manager.play_now(job.job_id, job.title, job.artist, job.duration_seconds, job.stems)
     return queue_manager.get_state()
 
 @router.post("/queue/next", response_model=QueueResponse)
@@ -245,3 +267,26 @@ def clear_queue():
     """Clear all songs from the playback queue."""
     queue_manager.clear_queue()
     return queue_manager.get_state()
+
+@router.post("/queue/reorder", response_model=QueueResponse)
+def reorder_queue(req: QueueReorderRequest):
+    """Reorder a queued track up or down."""
+    if req.direction not in ("up", "down"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Direction must be 'up' or 'down'."
+        )
+    try:
+        res = queue_manager.reorder_queue(req.queue_id, req.direction)
+        if not res:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Queue item '{req.queue_id}' not found."
+            )
+        return res
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+

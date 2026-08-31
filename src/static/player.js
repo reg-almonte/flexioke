@@ -120,6 +120,8 @@ class FlexiokePlayer {
         this.isPlaying = false;
         this.updatePlayBtnUI();
 
+        window.dispatchEvent(new CustomEvent('flexioke:song-loaded', { detail: { job, autoPlay } }));
+
         // Track how many stems need to load
         const expectedStems = Object.keys(this.tracks).filter(key => !!job.stems[key]);
         let readyCount = 0;
@@ -193,15 +195,21 @@ class FlexiokePlayer {
 
             ws.on('timeupdate', (currentTime) => {
                 if (trackKey === 'instrumental' || (!this.tracks.instrumental.ws && track.isReady)) {
-                    this.updateTimecode(currentTime, this.duration || ws.getDuration());
+                    if (!this.isSyncingSeek) {
+                        this.updateTimecode(currentTime, this.duration || ws.getDuration());
+                    }
                 }
             });
 
             ws.on('seeking', (currentTime) => {
                 if (this.isSyncingSeek) return;
                 this.isSyncingSeek = true;
+                if (this.seekTimeout) clearTimeout(this.seekTimeout);
+
                 this.syncSeek(currentTime, trackKey);
-                setTimeout(() => { this.isSyncingSeek = false; }, 50);
+                this.seekTimeout = setTimeout(() => {
+                    this.isSyncingSeek = false;
+                }, 150);
             });
 
             ws.on('finish', () => {
@@ -211,6 +219,30 @@ class FlexiokePlayer {
                 }
             });
         });
+    }
+
+    seekTo(time) {
+        if (!this.currentJob || time === null || isNaN(time)) return;
+        const targetTime = Math.max(0, Math.min(time, this.duration || 999999));
+
+        this.isSyncingSeek = true;
+        if (this.seekTimeout) clearTimeout(this.seekTimeout);
+
+        Object.values(this.tracks).forEach(track => {
+            if (track.ws && track.isReady) {
+                try {
+                    track.ws.setTime(targetTime);
+                } catch (e) {
+                    console.warn(`Error seeking track ${track.id}:`, e);
+                }
+            }
+        });
+
+        this.updateTimecode(targetTime, this.duration);
+
+        this.seekTimeout = setTimeout(() => {
+            this.isSyncingSeek = false;
+        }, 150);
     }
 
     resetToDefault() {
@@ -252,7 +284,9 @@ class FlexiokePlayer {
     syncSeek(time, sourceTrackKey) {
         Object.keys(this.tracks).forEach((key) => {
             if (key !== sourceTrackKey && this.tracks[key].ws && this.tracks[key].isReady) {
-                this.tracks[key].ws.setTime(time);
+                try {
+                    this.tracks[key].ws.setTime(time);
+                } catch (e) {}
             }
         });
     }
@@ -268,22 +302,58 @@ class FlexiokePlayer {
     }
 
     play() {
+        if (!this.currentJob) return;
         this.isPlaying = true;
         this.updatePlayBtnUI();
 
-        // Find primary timestamp
-        let primaryTime = 0;
-        const firstReady = Object.values(this.tracks).find(t => t.ws && t.isReady);
-        if (firstReady) {
-            primaryTime = firstReady.ws.getCurrentTime();
-        }
+        // Primary sync anchor: instrumental preferred, or first ready stem
+        const anchorTrack = (this.tracks.instrumental && this.tracks.instrumental.ws && this.tracks.instrumental.isReady) 
+            ? this.tracks.instrumental 
+            : Object.values(this.tracks).find(t => t.ws && t.isReady);
+            
+        const anchorTime = (anchorTrack && anchorTrack.ws) ? (anchorTrack.ws.getCurrentTime() || 0) : 0;
 
         Object.values(this.tracks).forEach(track => {
             if (track.ws && track.isReady) {
-                track.ws.setTime(primaryTime);
+                const diff = Math.abs(track.ws.getCurrentTime() - anchorTime);
+                if (diff > 0.04) {
+                    try { track.ws.setTime(anchorTime); } catch (e) {}
+                }
                 track.ws.play().catch(err => console.warn(`Autoplay restriction or error on ${track.id}:`, err));
             }
         });
+    }
+
+    restart(autoPlay = true) {
+        if (!this.currentJob) return;
+        this.isSyncingSeek = true;
+        this.finishedFired = false;
+
+        // 1. Pause all stems first to prevent buffering race conditions
+        Object.values(this.tracks).forEach(track => {
+            if (track.ws) {
+                try { track.ws.pause(); } catch (e) {}
+            }
+        });
+        this.isPlaying = false;
+        this.updatePlayBtnUI();
+
+        // 2. Phase-lock all stem playheads to 0.0s
+        Object.values(this.tracks).forEach(track => {
+            if (track.ws && track.isReady) {
+                try { track.ws.setTime(0.0); } catch (e) {}
+            }
+        });
+
+        this.updateTimecode(0.0, this.duration);
+
+        // 3. Clean transition before resuming playback
+        setTimeout(() => {
+            this.isSyncingSeek = false;
+            if (autoPlay) {
+                this.play();
+            }
+        }, 60);
     }
 
     pause() {
@@ -292,20 +362,13 @@ class FlexiokePlayer {
 
         Object.values(this.tracks).forEach(track => {
             if (track.ws) {
-                track.ws.pause();
+                try { track.ws.pause(); } catch (e) {}
             }
         });
     }
 
     stop() {
-        this.pause();
-        this.finishedFired = false;
-        Object.values(this.tracks).forEach(track => {
-            if (track.ws && track.isReady) {
-                track.ws.setTime(0);
-            }
-        });
-        this.updateTimecode(0, this.duration);
+        this.restart(false);
     }
 
     toggleMute(trackKey) {

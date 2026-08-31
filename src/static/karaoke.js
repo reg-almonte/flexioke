@@ -35,6 +35,13 @@ class LrcParser {
 
         if (parsedLines.length > 0) {
             parsedLines.sort((a, b) => a.time - b.time);
+
+            // If the final line is an empty timestamp or instrumental placeholder, label it as "End"
+            const lastLine = parsedLines[parsedLines.length - 1];
+            if (lastLine.text === "♪ ♪ ♪ (Instrumental)" || !lastLine.text.trim()) {
+                lastLine.text = "♪  End  ♪";
+            }
+
             return {
                 lines: parsedLines,
                 hasTimestamps: true,
@@ -56,8 +63,54 @@ class KaraokeStageManager {
     constructor() {
         this.stageContainer = document.getElementById('karaoke-lyrics-stage');
         this.stageCard = document.getElementById('karaoke-stage-card');
-        this.songTitleEl = document.getElementById('karaoke-song-title');
+        this.nowSingingTextEl = document.getElementById('karaoke-now-singing-text');
+        this.upNextTextEl = document.getElementById('karaoke-up-next-text');
         this.timecodeEl = document.getElementById('karaoke-timecode');
+
+        // Countdown cue elements
+        this.countdownCue = document.getElementById('karaoke-countdown-cue');
+        this.countdownDots = document.getElementById('countdown-dots');
+        this.countdownNumber = document.getElementById('countdown-number');
+
+        // Stage Toolbar Controls
+        this.fontDecBtn = document.getElementById('karaoke-font-dec-btn');
+        this.fontIncBtn = document.getElementById('karaoke-font-inc-btn');
+        this.settingsBtn = document.getElementById('karaoke-settings-btn');
+
+        // Stage Settings Modal Elements
+        this.settingsModal = document.getElementById('karaoke-settings-modal');
+        this.closeSettingsModalBtn = document.getElementById('close-settings-modal-btn');
+        this.saveSettingsBtn = document.getElementById('save-settings-btn');
+        this.resetSettingsBtn = document.getElementById('settings-reset-btn');
+        this.settingColorInput = document.getElementById('settings-highlight-color');
+        this.settingColorDisplay = document.getElementById('settings-color-display');
+        this.settingFontSizeInput = document.getElementById('settings-font-size');
+        this.settingFontSizeDisplay = document.getElementById('settings-font-size-display');
+        this.settingActiveFontSizeInput = document.getElementById('settings-active-font-size');
+        this.settingActiveFontSizeDisplay = document.getElementById('settings-active-font-size-display');
+
+        // Intro Splash Screen Elements
+        this.introSplash = document.getElementById('karaoke-intro-splash');
+        this.introSplashTitle = document.getElementById('intro-splash-title');
+        this.introSplashArtist = document.getElementById('intro-splash-artist');
+        this.introSplashTimer = document.getElementById('intro-splash-timer');
+        this.settingIntroSplashInput = document.getElementById('settings-intro-splash');
+        this.settingIntroSplashDisplay = document.getElementById('settings-intro-splash-display');
+        this.introSplashInterval = null;
+
+        // Countdown Threshold Setting Elements
+        this.settingCountdownThresholdInput = document.getElementById('settings-countdown-threshold');
+        this.settingCountdownThresholdDisplay = document.getElementById('settings-countdown-threshold-display');
+
+        // Default Config & State
+        this.defaultConfig = {
+            introSplashDuration: 3,
+            countdownThreshold: 3,
+            activeHighlightColor: '#06b6d4',
+            baseFontSizePx: 20,
+            activeFontSizePx: 24
+        };
+        this.config = { ...this.defaultConfig };
 
         // Fullscreen elements
         this.fullscreenBtn = document.getElementById('karaoke-fullscreen-btn');
@@ -67,6 +120,7 @@ class KaraokeStageManager {
 
         // Karaoke Transport Elements
         this.playBtn = document.getElementById('karaoke-play-btn');
+        this.restartBtn = document.getElementById('karaoke-restart-btn');
         this.skipBtn = document.getElementById('karaoke-skip-btn');
         this.stopBtn = document.getElementById('karaoke-stop-btn');
         this.toggleLeadBtn = document.getElementById('karaoke-toggle-lead-btn');
@@ -75,15 +129,84 @@ class KaraokeStageManager {
         this.backingStatusText = document.getElementById('karaoke-backing-status-text');
         this.volumeSlider = document.getElementById('karaoke-volume-slider');
 
+        this.currentJob = null;
         this.currentJobId = null;
         this.lyricsData = null;
         this.activeLineIndex = -1;
         this.lineElements = [];
 
+        this.timecodeMode = localStorage.getItem('flexioke_timecode_mode') || 'elapsed';
+
+        this.loadSettings();
         this.init();
     }
 
     init() {
+        // Settings Modal Bindings
+        if (this.settingsBtn) {
+            this.settingsBtn.addEventListener('click', () => this.openSettingsModal());
+        }
+        if (this.closeSettingsModalBtn) {
+            this.closeSettingsModalBtn.addEventListener('click', () => this.closeSettingsModal());
+        }
+        if (this.saveSettingsBtn) {
+            this.saveSettingsBtn.addEventListener('click', () => this.closeSettingsModal());
+        }
+        if (this.resetSettingsBtn) {
+            this.resetSettingsBtn.addEventListener('click', () => {
+                this.saveSettings(this.defaultConfig);
+            });
+        }
+
+        // Real-time Settings Input Handlers
+        if (this.settingColorInput) {
+            this.settingColorInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (this.settingColorDisplay) this.settingColorDisplay.textContent = val;
+                this.saveSettings({ activeHighlightColor: val });
+            });
+        }
+        if (this.settingFontSizeInput) {
+            this.settingFontSizeInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10) || 20;
+                if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${val}px`;
+                this.saveSettings({ baseFontSizePx: val });
+            });
+        }
+        if (this.settingActiveFontSizeInput) {
+            this.settingActiveFontSizeInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10) || 24;
+                if (this.settingActiveFontSizeDisplay) this.settingActiveFontSizeDisplay.textContent = `${val}px`;
+                this.saveSettings({ activeFontSizePx: val });
+            });
+        }
+        if (this.settingIntroSplashInput) {
+            this.settingIntroSplashInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                const safeVal = isNaN(val) ? 3 : Math.max(0, Math.min(5, val));
+                if (this.settingIntroSplashDisplay) this.settingIntroSplashDisplay.textContent = `${safeVal}s`;
+                this.saveSettings({ introSplashDuration: safeVal });
+            });
+        }
+        if (this.settingCountdownThresholdInput) {
+            this.settingCountdownThresholdInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                const safeVal = isNaN(val) ? 3 : Math.max(3, Math.min(5, val));
+                if (this.settingCountdownThresholdDisplay) this.settingCountdownThresholdDisplay.textContent = `${safeVal}s`;
+                this.saveSettings({ countdownThreshold: safeVal });
+            });
+        }
+
+        // Stage Background Click-to-Play/Pause
+        if (this.stageContainer) {
+            this.stageContainer.style.cursor = 'pointer';
+            this.stageContainer.addEventListener('click', (e) => {
+                if (!e.target.closest('.karaoke-line')) {
+                    this.togglePlayPause();
+                }
+            });
+        }
+
         // Fullscreen Toggle
         if (this.fullscreenBtn) {
             this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
@@ -100,6 +223,15 @@ class KaraokeStageManager {
             this.playBtn.addEventListener('click', () => {
                 if (window.flexiokePlayer) {
                     window.flexiokePlayer.togglePlay();
+                    this.updatePlayBtnUI();
+                }
+            });
+        }
+
+        if (this.restartBtn) {
+            this.restartBtn.addEventListener('click', () => {
+                if (window.flexiokePlayer && this.currentJob) {
+                    window.flexiokePlayer.restart(true);
                     this.updatePlayBtnUI();
                 }
             });
@@ -124,14 +256,30 @@ class KaraokeStageManager {
         }
 
         if (this.volumeSlider) {
+            const savedVol = parseFloat(localStorage.getItem('flexioke_master_volume') || '0.8');
+            this.volumeSlider.value = savedVol;
+            if (window.flexiokePlayer) {
+                window.flexiokePlayer.masterVolume = savedVol;
+            }
+
             this.volumeSlider.addEventListener('input', (e) => {
                 const val = parseFloat(e.target.value);
                 if (window.flexiokePlayer) {
                     window.flexiokePlayer.masterVolume = val;
                     window.flexiokePlayer.applyGainMatrix();
                 }
+                try {
+                    localStorage.setItem('flexioke_master_volume', String(val));
+                } catch(err) {}
                 const masterSlider = document.getElementById('master-volume-slider');
                 if (masterSlider) masterSlider.value = val;
+            });
+        }
+
+        // Timecode Click-to-Toggle Mode
+        if (this.timecodeEl) {
+            this.timecodeEl.addEventListener('click', () => {
+                this.toggleTimecodeMode();
             });
         }
 
@@ -161,34 +309,196 @@ class KaraokeStageManager {
             }
         });
 
+        // Listen for metadata updates from editor
+        window.addEventListener('flexioke:metadata-updated', (e) => {
+            if (e.detail && this.currentJob && e.detail.job_id === this.currentJob.job_id) {
+                this.currentJob = e.detail;
+                this.updateStageHeader();
+            }
+        });
+
+        // Listen for queue updates to dynamically update Up Next header
+        window.addEventListener('flexioke:queue-updated', (e) => {
+            this.updateStageHeader();
+        });
+
         // Listen for player reset (when queue finishes or stop clicked without queue)
         window.addEventListener('flexioke:player-reset', () => {
+            this.clearIntroSplash();
+            this.hideIntroSplash();
+            this.currentJob = null;
             this.currentJobId = null;
             this.lyricsData = null;
             this.activeLineIndex = -1;
-            if (this.songTitleEl) {
-                this.songTitleEl.textContent = "No Track Selected";
-            }
+            this.updateStageHeader();
             if (this.timecodeEl) {
-                this.timecodeEl.textContent = "00:00 / 00:00";
+                this.timecodeEl.textContent = (this.timecodeMode === 'remaining') ? "-00:00 / 00:00" : "00:00 / 00:00";
             }
             this.renderDefaultState();
             this.updatePlayBtnUI();
         });
 
-        // Hook into FlexiokePlayer loadSong
+        // Listen for song loaded event from FlexiokePlayer
+        window.addEventListener('flexioke:song-loaded', (e) => {
+            if (e.detail && e.detail.job) {
+                this.onSongLoaded(e.detail.job, e.detail.autoPlay);
+            }
+        });
+
+        // Hook into FlexiokePlayer loadSong as fallback
         const originalLoadSong = window.flexiokePlayer ? window.flexiokePlayer.loadSong.bind(window.flexiokePlayer) : null;
         if (window.flexiokePlayer && originalLoadSong) {
             window.flexiokePlayer.loadSong = (job, autoPlay = false) => {
                 originalLoadSong(job, autoPlay);
                 if (job) {
-                    this.onSongLoaded(job);
+                    this.onSongLoaded(job, autoPlay);
                 }
             };
         }
 
+        // If player already has a job loaded on initialization
+        if (window.flexiokePlayer && window.flexiokePlayer.currentJob) {
+            this.onSongLoaded(window.flexiokePlayer.currentJob);
+        }
+
+        // Setup dynamic observer for Stage Header Marquee
+        if (window.ResizeObserver && this.stageCard) {
+            const resizeObs = new ResizeObserver(() => {
+                this.updateStageHeader();
+            });
+            resizeObs.observe(this.stageCard);
+        }
+
+        window.addEventListener('resize', () => {
+            this.updateStageHeader();
+        });
+
         // Time & Transport state check
         setInterval(() => this.onTimeCheck(), 100);
+    }
+
+    loadSettings() {
+        try {
+            const raw = localStorage.getItem('flexioke_stage_config');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                this.config = { ...this.defaultConfig, ...parsed };
+            }
+        } catch (err) {
+            console.error("Error loading stage settings:", err);
+            this.config = { ...this.defaultConfig };
+        }
+        this.applySettings();
+    }
+
+    applySettings() {
+        const basePx = parseInt(this.config.baseFontSizePx, 10) || 20;
+        const activePx = parseInt(this.config.activeFontSizePx, 10) || 24;
+        const color = this.config.activeHighlightColor || '#06b6d4';
+
+        document.documentElement.style.setProperty('--karaoke-font-size', `${basePx}px`);
+        document.documentElement.style.setProperty('--karaoke-active-font-size', `${activePx}px`);
+        document.documentElement.style.setProperty('--karaoke-highlight-color', color);
+
+        if (this.settingColorInput) this.settingColorInput.value = color;
+        if (this.settingColorDisplay) this.settingColorDisplay.textContent = color;
+        if (this.settingFontSizeInput) this.settingFontSizeInput.value = basePx;
+        if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${basePx}px`;
+        if (this.settingActiveFontSizeInput) this.settingActiveFontSizeInput.value = activePx;
+        if (this.settingActiveFontSizeDisplay) this.settingActiveFontSizeDisplay.textContent = `${activePx}px`;
+
+        const introSplashSec = (typeof this.config.introSplashDuration !== 'undefined') ? parseInt(this.config.introSplashDuration, 10) : 3;
+        if (this.settingIntroSplashInput) this.settingIntroSplashInput.value = introSplashSec;
+        if (this.settingIntroSplashDisplay) this.settingIntroSplashDisplay.textContent = `${introSplashSec}s`;
+
+        const countdownThresh = (typeof this.config.countdownThreshold !== 'undefined') ? parseInt(this.config.countdownThreshold, 10) : 3;
+        if (this.settingCountdownThresholdInput) this.settingCountdownThresholdInput.value = countdownThresh;
+        if (this.settingCountdownThresholdDisplay) this.settingCountdownThresholdDisplay.textContent = `${countdownThresh}s`;
+
+        if (this.lineElements && this.lineElements.length > 0) {
+            this.lineElements.forEach((el, idx) => {
+                if (idx !== this.activeLineIndex) {
+                    el.style.fontSize = `var(--karaoke-font-size, ${basePx}px)`;
+                }
+            });
+        }
+
+        if (this.activeLineIndex >= 0) {
+            this.highlightLine(this.activeLineIndex);
+        }
+    }
+
+    saveSettings(newConfig) {
+        this.config = { ...this.config, ...newConfig };
+        try {
+            localStorage.setItem('flexioke_stage_config', JSON.stringify(this.config));
+        } catch (err) {
+            console.error("Error persisting stage settings:", err);
+        }
+        this.applySettings();
+    }
+
+    openSettingsModal() {
+        if (this.settingsModal) {
+            this.applySettings();
+            this.settingsModal.classList.remove('hidden');
+        }
+    }
+
+    closeSettingsModal() {
+        if (this.settingsModal) {
+            this.settingsModal.classList.add('hidden');
+        }
+    }
+
+    updateStageHeader() {
+        if (this.nowSingingTextEl) {
+            if (this.currentJob) {
+                const title = this.currentJob.title || "Untitled Song";
+                const artist = this.currentJob.artist ? ` - ${this.currentJob.artist}` : "";
+                this.nowSingingTextEl.textContent = `${title}${artist}`;
+            } else {
+                this.nowSingingTextEl.textContent = "No Track Selected";
+            }
+            this.checkMarquee(this.nowSingingTextEl);
+        }
+
+        if (this.upNextTextEl) {
+            const queue = (window.flexiokeQueue && window.flexiokeQueue.queue) ? window.flexiokeQueue.queue : [];
+            if (queue.length > 0) {
+                const next = queue[0];
+                const title = next.title || "Untitled Song";
+                const artist = next.artist ? ` - ${next.artist}` : "";
+                this.upNextTextEl.textContent = `${title}${artist}`;
+                this.upNextTextEl.className = "text-xs sm:text-sm font-semibold text-violet-200 tracking-tight inline-block whitespace-nowrap";
+            } else {
+                this.upNextTextEl.textContent = "— (Queue Empty)";
+                this.upNextTextEl.className = "text-xs sm:text-sm font-medium text-slate-500 italic tracking-tight inline-block whitespace-nowrap";
+            }
+            this.checkMarquee(this.upNextTextEl);
+        }
+    }
+
+    checkMarquee(el) {
+        if (!el || !el.parentElement) return;
+        const parent = el.parentElement;
+        const evaluate = () => {
+            if (!el || !el.parentElement) return;
+            const wasScrolling = el.classList.contains('marquee-scroll');
+            if (wasScrolling) {
+                el.classList.remove('marquee-scroll');
+            }
+            const isOverflowing = el.scrollWidth > parent.clientWidth + 4;
+            if (isOverflowing) {
+                el.classList.add('marquee-scroll');
+            } else {
+                el.classList.remove('marquee-scroll');
+            }
+        };
+
+        evaluate();
+        setTimeout(evaluate, 60);
+        setTimeout(evaluate, 350);
     }
 
     toggleFullscreen() {
@@ -204,9 +514,13 @@ class KaraokeStageManager {
         if (this.stageCard) {
             this.stageCard.classList.add('stage-fullscreen');
         }
-        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '🗗';
+        // Fullscreen Active: button toggles to Collapse View
+        // NOTE: Customize collapse icon here (e.g. '⤡', '🗕', '↙', '✕', '⛶')
+        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '↙';
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Collapse';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Exit Fullscreen Stage (Esc)";
+        this.updateStageHeader();
+        setTimeout(() => this.updateStageHeader(), 350);
     }
 
     exitFullscreen() {
@@ -214,21 +528,76 @@ class KaraokeStageManager {
         if (this.stageCard) {
             this.stageCard.classList.remove('stage-fullscreen');
         }
+        // Default View: button toggles to Expand View
+        // NOTE: Customize expand icon here (e.g. '⛶', '⤢', '⤧', '↗')
         if (this.fullscreenIcon) this.fullscreenIcon.textContent = '⛶';
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Expand';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Toggle Fullscreen Stage";
+        this.updateStageHeader();
+        setTimeout(() => this.updateStageHeader(), 350);
     }
 
-    onSongLoaded(job) {
+    onSongLoaded(job, autoPlay = true) {
+        this.currentJob = job;
         this.currentJobId = job.job_id;
-        if (this.songTitleEl) {
-            this.songTitleEl.textContent = job.title || "Untitled Song";
-        }
+        this.updateStageHeader();
         if (this.stageContainer) {
             this.stageContainer.scrollTop = 0;
         }
         this.syncVocalButtons();
         this.loadLyricsForJob(job.job_id);
+        this.triggerIntroSplash(job, autoPlay);
+    }
+
+    triggerIntroSplash(job, autoPlay = true) {
+        this.clearIntroSplash();
+        if (!job || !this.introSplash) return;
+
+        const duration = (typeof this.config.introSplashDuration !== 'undefined') ? parseInt(this.config.introSplashDuration, 10) : 3;
+        if (duration <= 0 || !autoPlay) {
+            this.hideIntroSplash();
+            return;
+        }
+
+        // Delay audio playback while intro splash is active
+        if (window.flexiokePlayer) {
+            window.flexiokePlayer.autoPlayPending = false;
+            window.flexiokePlayer.pause();
+        }
+
+        if (this.introSplashTitle) this.introSplashTitle.textContent = job.title || "Unknown Title";
+        if (this.introSplashArtist) this.introSplashArtist.textContent = job.artist || "Unknown Artist";
+        if (this.introSplashTimer) this.introSplashTimer.textContent = duration;
+
+        this.introSplash.classList.remove('hidden');
+
+        let remaining = duration;
+        this.introSplashInterval = setInterval(() => {
+            remaining--;
+            if (remaining > 0) {
+                if (this.introSplashTimer) this.introSplashTimer.textContent = remaining;
+            } else {
+                this.clearIntroSplash();
+                this.hideIntroSplash();
+                if (window.flexiokePlayer && autoPlay) {
+                    window.flexiokePlayer.play();
+                }
+            }
+        }, 1000);
+    }
+
+    clearIntroSplash() {
+        if (this.introSplashInterval) {
+            clearInterval(this.introSplashInterval);
+            this.introSplashInterval = null;
+        }
+    }
+
+    hideIntroSplash() {
+        this.clearIntroSplash();
+        if (this.introSplash) {
+            this.introSplash.classList.add('hidden');
+        }
     }
 
     syncVocalButtons() {
@@ -238,22 +607,33 @@ class KaraokeStageManager {
 
         if (this.toggleLeadBtn && this.leadStatusText && leadTrack) {
             if (leadTrack.muted) {
-                this.toggleLeadBtn.className = "px-3.5 py-1.5 rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-rose-600/50 hover:text-white";
                 this.leadStatusText.textContent = "Lead Vocals: MUTED";
+                this.toggleLeadBtn.title = "Lead Vocals: MUTED (Click to Unmute)";
             } else {
-                this.toggleLeadBtn.className = "px-3.5 py-1.5 rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-brand-600/50 hover:text-white";
                 this.leadStatusText.textContent = "Lead Vocals: ON";
+                this.toggleLeadBtn.title = "Lead Vocals: ON (Click to Mute)";
             }
         }
 
         if (this.toggleBackingBtn && this.backingStatusText && backingTrack) {
             if (backingTrack.muted) {
-                this.toggleBackingBtn.className = "px-3.5 py-1.5 rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.toggleBackingBtn.className = "karaoke-vocal-toggle rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-rose-600/50 hover:text-white";
                 this.backingStatusText.textContent = "Backing: MUTED";
+                this.toggleBackingBtn.title = "Backing Vocals: MUTED (Click to Unmute)";
             } else {
-                this.toggleBackingBtn.className = "px-3.5 py-1.5 rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-xs font-semibold transition flex items-center gap-1.5";
+                this.toggleBackingBtn.className = "karaoke-vocal-toggle rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-violet-600/50 hover:text-white";
                 this.backingStatusText.textContent = "Backing: ON";
+                this.toggleBackingBtn.title = "Backing Vocals: ON (Click to Mute)";
             }
+        }
+    }
+
+    togglePlayPause() {
+        if (window.flexiokePlayer && this.currentJob) {
+            window.flexiokePlayer.togglePlay();
+            this.updatePlayBtnUI();
         }
     }
 
@@ -316,26 +696,28 @@ class KaraokeStageManager {
 
         // Timestamped LRC mode
         const wrapper = document.createElement('div');
-        wrapper.className = "space-y-4 py-32 max-w-3xl mx-auto w-full text-center";
+        wrapper.className = "space-y-3 py-32 max-w-3xl mx-auto w-full text-center";
 
         this.lyricsData.lines.forEach((line, index) => {
-            const lineEl = document.createElement('div');
-            lineEl.className = "karaoke-line text-slate-400 font-semibold text-base sm:text-lg transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
+            const rowWrapper = document.createElement('div');
+            rowWrapper.className = "karaoke-line-row py-1 text-center";
+
+            const lineEl = document.createElement('span');
+            lineEl.className = "karaoke-line inline-block text-slate-400 font-semibold transition-all duration-300 py-1.5 px-5 rounded-full cursor-pointer hover:text-white hover:bg-slate-800/60";
+            lineEl.style.fontSize = "var(--karaoke-font-size, 20px)";
             lineEl.textContent = line.text;
             lineEl.dataset.index = index;
 
-            // Click to seek to line
-            lineEl.addEventListener('click', () => {
+            // Click to seek directly to line with stopPropagation
+            lineEl.addEventListener('click', (e) => {
+                e.stopPropagation();
                 if (window.flexiokePlayer && line.time !== null) {
-                    window.flexiokePlayer.syncSeek(line.time, 'none');
-                    const primary = Object.values(window.flexiokePlayer.tracks).find(t => t.ws && t.isReady);
-                    if (primary) {
-                        primary.ws.setTime(line.time);
-                    }
+                    window.flexiokePlayer.seekTo(line.time);
                 }
             });
 
-            wrapper.appendChild(lineEl);
+            rowWrapper.appendChild(lineEl);
+            wrapper.appendChild(rowWrapper);
             this.lineElements.push(lineEl);
         });
 
@@ -365,12 +747,23 @@ class KaraokeStageManager {
         this.stageContainer.scrollTop = 0;
     }
 
+    toggleTimecodeMode() {
+        this.timecodeMode = (this.timecodeMode === 'elapsed') ? 'remaining' : 'elapsed';
+        try {
+            localStorage.setItem('flexioke_timecode_mode', this.timecodeMode);
+        } catch(err) {}
+        this.onTimeCheck();
+    }
+
     onTimeCheck() {
         if (!window.flexiokePlayer) return;
 
         this.updatePlayBtnUI();
 
-        if (!this.currentJobId || !this.lyricsData || !this.lyricsData.hasTimestamps) {
+        if (!this.currentJobId) {
+            if (this.timecodeEl) {
+                this.timecodeEl.textContent = (this.timecodeMode === 'remaining') ? "-00:00 / 00:00" : "00:00 / 00:00";
+            }
             return;
         }
 
@@ -386,8 +779,17 @@ class KaraokeStageManager {
                     const sc = Math.floor(s % 60);
                     return `${String(m).padStart(2, '0')}:${String(sc).padStart(2, '0')}`;
                 };
-                this.timecodeEl.textContent = `${fmt(currentTime)} / ${fmt(dur || 0)}`;
+                const remaining = Math.max(0, (dur || 0) - currentTime);
+                if (this.timecodeMode === 'remaining') {
+                    this.timecodeEl.textContent = `-${fmt(remaining)} / ${fmt(dur || 0)}`;
+                } else {
+                    this.timecodeEl.textContent = `${fmt(currentTime)} / ${fmt(dur || 0)}`;
+                }
             }
+        }
+
+        if (!this.lyricsData || !this.lyricsData.hasTimestamps) {
+            return;
         }
 
         // Find active line
@@ -403,17 +805,89 @@ class KaraokeStageManager {
         if (newIndex !== this.activeLineIndex && newIndex >= 0) {
             this.highlightLine(newIndex);
         }
+
+        // Update 3-beat countdown cue
+        this.updateCountdownCue(currentTime);
+    }
+
+    updateCountdownCue(currentTime) {
+        if (!this.countdownCue || !this.lyricsData || !this.lyricsData.hasTimestamps || !this.lyricsData.lines.length) {
+            this.hideCountdownCue();
+            return;
+        }
+
+        // Find next upcoming lyric line
+        let nextIndex = -1;
+        for (let i = 0; i < this.lyricsData.lines.length; i++) {
+            if (this.lyricsData.lines[i].time > currentTime) {
+                nextIndex = i;
+                break;
+            }
+        }
+
+        if (nextIndex === -1) {
+            this.hideCountdownCue();
+            return;
+        }
+
+        const nextLine = this.lyricsData.lines[nextIndex];
+        const delta = nextLine.time - currentTime;
+
+        // Check if intro or musical interlude meets or exceeds the configured countdownThreshold (3s - 5s, default 3s)
+        const threshold = (typeof this.config.countdownThreshold !== 'undefined') ? parseFloat(this.config.countdownThreshold) : 3.0;
+        const isIntro = (nextIndex === 0 && nextLine.time >= threshold);
+        const prevLineTime = nextIndex > 0 ? this.lyricsData.lines[nextIndex - 1].time : 0;
+        const isInterlude = !isIntro && ((nextLine.time - prevLineTime) >= threshold);
+
+        if ((isIntro || isInterlude) && delta > 0.05 && delta <= 3.0) {
+            this.countdownCue.classList.remove('hidden');
+            let num = Math.ceil(delta);
+            if (num > 3) num = 3;
+            if (num < 1) num = 1;
+
+            if (this.countdownNumber) {
+                this.countdownNumber.textContent = String(num);
+            }
+
+            if (this.countdownDots) {
+                if (num === 3) {
+                    this.countdownDots.innerHTML = `<span>●</span><span>○</span><span>○</span>`;
+                } else if (num === 2) {
+                    this.countdownDots.innerHTML = `<span>●</span><span>●</span><span>○</span>`;
+                } else {
+                    this.countdownDots.innerHTML = `<span>●</span><span>●</span><span>●</span>`;
+                }
+            }
+        } else {
+            this.hideCountdownCue();
+        }
+    }
+
+    hideCountdownCue() {
+        if (this.countdownCue && !this.countdownCue.classList.contains('hidden')) {
+            this.countdownCue.classList.add('hidden');
+        }
     }
 
     highlightLine(index) {
         if (this.activeLineIndex >= 0 && this.lineElements[this.activeLineIndex]) {
-            this.lineElements[this.activeLineIndex].className = "karaoke-line text-slate-400 font-semibold text-base sm:text-lg transition-all duration-300 py-2.5 px-4 rounded-xl cursor-pointer hover:text-white hover:bg-slate-800/40";
+            const prevEl = this.lineElements[this.activeLineIndex];
+            prevEl.className = "karaoke-line inline-block text-slate-400 font-semibold transition-all duration-300 py-1.5 px-5 rounded-full cursor-pointer hover:text-white hover:bg-slate-800/60";
+            prevEl.style.fontSize = "var(--karaoke-font-size, 20px)";
+            prevEl.style.borderColor = "transparent";
+            prevEl.style.backgroundColor = "transparent";
+            prevEl.style.boxShadow = "none";
         }
 
         this.activeLineIndex = index;
         const activeEl = this.lineElements[index];
         if (activeEl) {
-            activeEl.className = "karaoke-line text-white font-extrabold text-xl sm:text-2xl bg-brand-600/30 border border-brand-500/60 rounded-2xl py-3.5 px-6 shadow-xl shadow-brand-500/25 scale-105 transition-all duration-300 cursor-pointer";
+            const highlightColor = this.config.activeHighlightColor || '#06b6d4';
+            activeEl.className = "karaoke-line inline-block text-white font-extrabold rounded-full py-2.5 px-7 scale-105 transition-all duration-300 cursor-pointer border";
+            activeEl.style.fontSize = "var(--karaoke-active-font-size, 24px)";
+            activeEl.style.borderColor = "var(--karaoke-highlight-color, " + highlightColor + ")";
+            activeEl.style.backgroundColor = "rgba(6, 182, 212, 0.18)";
+            activeEl.style.boxShadow = `0 10px 25px -5px ${highlightColor}40`;
             activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }

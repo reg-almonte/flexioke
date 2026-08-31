@@ -9,8 +9,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewKaraoke = document.getElementById('view-karaoke');
     const headerModeBadge = document.getElementById('header-mode-badge');
 
+    const topNavSensor = document.getElementById('top-nav-sensor');
+    const appHeader = document.getElementById('app-header');
+    let headerHideTimeout = null;
+
+    const revealHeader = () => {
+        if (headerHideTimeout) clearTimeout(headerHideTimeout);
+        if (appHeader) {
+            appHeader.classList.add('header-revealed');
+            if (document.body.classList.contains('karaoke-active')) {
+                appHeader.style.marginTop = '0px';
+            }
+        }
+    };
+
+    const scheduleHideHeader = () => {
+        if (headerHideTimeout) clearTimeout(headerHideTimeout);
+        headerHideTimeout = setTimeout(() => {
+            if (appHeader && !appHeader.matches(':hover')) {
+                appHeader.classList.remove('header-revealed');
+                if (document.body.classList.contains('karaoke-active')) {
+                    const h = appHeader.offsetHeight || 66;
+                    appHeader.style.marginTop = `-${h}px`;
+                }
+            }
+        }, 1200);
+    };
+
+    if (topNavSensor && appHeader) {
+        topNavSensor.addEventListener('mouseenter', revealHeader);
+        appHeader.addEventListener('mouseenter', revealHeader);
+        appHeader.addEventListener('mouseleave', scheduleHideHeader);
+
+        document.addEventListener('mousemove', (e) => {
+            if (document.body.classList.contains('karaoke-active')) {
+                if (e.clientY <= 25) {
+                    revealHeader();
+                } else if (e.clientY > 85 && !appHeader.matches(':hover')) {
+                    scheduleHideHeader();
+                }
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (document.body.classList.contains('karaoke-active') && !appHeader.classList.contains('header-revealed')) {
+                const h = appHeader.offsetHeight || 66;
+                appHeader.style.marginTop = `-${h}px`;
+            }
+        });
+    }
+
     if (navTabStudio && navTabKaraoke) {
         navTabStudio.addEventListener('click', () => {
+            document.body.classList.remove('karaoke-active');
+            if (appHeader) {
+                appHeader.classList.remove('header-revealed');
+                appHeader.style.marginTop = '';
+            }
             navTabStudio.className = "px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5";
             navTabKaraoke.className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
             if (headerModeBadge) headerModeBadge.textContent = "Stem Studio";
@@ -19,11 +74,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         navTabKaraoke.addEventListener('click', () => {
+            document.body.classList.add('karaoke-active');
             navTabKaraoke.className = "px-4 py-1.5 rounded-lg bg-brand-600 text-white shadow-sm transition flex items-center gap-1.5";
             navTabStudio.className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
             if (headerModeBadge) headerModeBadge.textContent = "Karaoke Mode";
             if (viewKaraoke) viewKaraoke.classList.remove('hidden');
             if (viewStemStudio) viewStemStudio.classList.add('hidden');
+            // Auto hide on switching to karaoke
+            scheduleHideHeader();
         });
     }
 

@@ -77,3 +77,48 @@ def test_add_nonexistent_or_incomplete_job(mock_queue_environment):
     resp = client.post("/api/queue/add", json={"job_id": j_pending.job_id})
     assert resp.status_code == 400
     assert "not ready" in resp.json()["detail"].lower()
+
+def test_queue_reorder_operations(mock_queue_environment):
+    job_mgr, queue_mgr, j1, j2 = mock_queue_environment
+
+    # Seed a third job
+    j3 = job_mgr.create_job(SourceType.UPLOAD, "track3.mp3", "Track Three")
+    job_mgr.update_job(j3.job_id, status=JobStatus.COMPLETED, progress=100, duration_seconds=150.0, stems={"instrumental": "url3"})
+
+    # Add 3 jobs to queue
+    client.post("/api/queue/add", json={"job_id": j1.job_id})
+    client.post("/api/queue/add", json={"job_id": j2.job_id})
+    resp = client.post("/api/queue/add", json={"job_id": j3.job_id})
+    queue_data = resp.json()["queue"]
+    assert [item["title"] for item in queue_data] == ["Track One", "Track Two", "Track Three"]
+
+    id1 = queue_data[0]["queue_id"]
+    id2 = queue_data[1]["queue_id"]
+    id3 = queue_data[2]["queue_id"]
+
+    # Reorder middle item up (Track Two moves to index 0)
+    resp = client.post("/api/queue/reorder", json={"queue_id": id2, "direction": "up"})
+    assert resp.status_code == 200
+    assert [item["title"] for item in resp.json()["queue"]] == ["Track Two", "Track One", "Track Three"]
+
+    # Reorder first item down (Track Two moves back to index 1)
+    resp = client.post("/api/queue/reorder", json={"queue_id": id2, "direction": "down"})
+    assert resp.status_code == 200
+    assert [item["title"] for item in resp.json()["queue"]] == ["Track One", "Track Two", "Track Three"]
+
+    # Boundary edge cases: moving top item up -> 400
+    resp = client.post("/api/queue/reorder", json={"queue_id": id1, "direction": "up"})
+    assert resp.status_code == 400
+
+    # Boundary edge cases: moving bottom item down -> 400
+    resp = client.post("/api/queue/reorder", json={"queue_id": id3, "direction": "down"})
+    assert resp.status_code == 400
+
+    # Invalid queue_id -> 404 or 400
+    resp = client.post("/api/queue/reorder", json={"queue_id": "non-existent-id", "direction": "up"})
+    assert resp.status_code in (400, 404)
+
+    # Invalid direction -> 400
+    resp = client.post("/api/queue/reorder", json={"queue_id": id2, "direction": "sideways"})
+    assert resp.status_code == 400
+

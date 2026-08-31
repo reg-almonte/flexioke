@@ -4,13 +4,17 @@
 class SongLibraryManager {
     constructor() {
         this.searchInputs = document.querySelectorAll('.library-search-input');
+        this.searchClearBtns = document.querySelectorAll('.library-search-clear-btn');
         this.listContainers = document.querySelectorAll('.library-list-container');
         this.countBadges = document.querySelectorAll('.library-count-badge');
         this.debounceTimeout = null;
+        this.jobs = [];
 
         // Lyrics modal elements
         this.lyricsModal = document.getElementById('lyrics-modal');
         this.lyricsModalTitle = document.getElementById('lyrics-modal-title');
+        this.lyricsEditTitle = document.getElementById('lyrics-edit-title');
+        this.lyricsEditArtist = document.getElementById('lyrics-edit-artist');
         this.lyricsTextarea = document.getElementById('lyrics-textarea');
         this.lyricsSaveStatus = document.getElementById('lyrics-save-status');
         this.closeLyricsModalBtn = document.getElementById('close-lyrics-modal-btn');
@@ -22,6 +26,7 @@ class SongLibraryManager {
         this.playConfirmModal = document.getElementById('play-confirm-modal');
         this.confirmSongTitle = document.getElementById('confirm-song-title');
         this.confirmPlayBtn = document.getElementById('confirm-play-btn');
+        this.confirmQueueBtn = document.getElementById('confirm-queue-btn');
         this.confirmCancelBtn = document.getElementById('confirm-cancel-btn');
         this.pendingPlayJob = null;
 
@@ -36,10 +41,28 @@ class SongLibraryManager {
                 this.searchInputs.forEach(other => {
                     if (other !== e.target) other.value = query;
                 });
+                // Toggle clear buttons
+                this.searchClearBtns.forEach(btn => {
+                    if (query.trim().length > 0) {
+                        btn.classList.remove('hidden');
+                    } else {
+                        btn.classList.add('hidden');
+                    }
+                });
                 clearTimeout(this.debounceTimeout);
                 this.debounceTimeout = setTimeout(() => {
                     this.fetchLibrary(query.trim());
                 }, 250);
+            });
+        });
+
+        this.searchClearBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.searchInputs.forEach(input => {
+                    input.value = '';
+                });
+                this.searchClearBtns.forEach(b => b.classList.add('hidden'));
+                this.fetchLibrary('');
             });
         });
 
@@ -62,6 +85,20 @@ class SongLibraryManager {
                     window.flexiokeQueue.playNow(this.pendingPlayJob.job_id);
                 }
                 this.pendingPlayJob = null;
+            });
+        }
+
+        if (this.confirmQueueBtn) {
+            this.confirmQueueBtn.addEventListener('click', () => {
+                if (this.playConfirmModal) this.playConfirmModal.classList.add('hidden');
+                if (this.pendingPlayJob && window.flexiokeQueue) {
+                    window.flexiokeQueue.addToQueue(this.pendingPlayJob.job_id);
+                }
+                this.pendingPlayJob = null;
+                // Resume previous music
+                if (window.flexiokePlayer) {
+                    window.flexiokePlayer.play();
+                }
             });
         }
 
@@ -91,40 +128,55 @@ class SongLibraryManager {
             const resp = await fetch(url);
             if (!resp.ok) return;
             const data = await resp.json();
-            this.render(data.jobs || []);
+            this.jobs = data.jobs || [];
+            this.render(this.jobs);
         } catch (err) {
             console.error("Error fetching library:", err);
         }
     }
 
-    render(jobs) {
+    render(jobs = null) {
+        if (jobs !== null) {
+            this.jobs = jobs;
+        }
+        const currentJobs = this.jobs || [];
+
+        // Auto-sort songs alphabetically by title
+        currentJobs.sort((a, b) => {
+            const titleA = (a.title || "").toLowerCase();
+            const titleB = (b.title || "").toLowerCase();
+            return titleA.localeCompare(titleB);
+        });
+
         this.countBadges.forEach(badge => {
-            badge.textContent = `${jobs.length} ${jobs.length === 1 ? 'song' : 'songs'}`;
+            badge.textContent = `${currentJobs.length} ${currentJobs.length === 1 ? 'song' : 'songs'}`;
         });
 
         this.listContainers.forEach(container => {
-            if (jobs.length === 0) {
+            if (currentJobs.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8 text-slate-500 text-xs">
-                        No songs found.<br>Upload or extract audio in Stem Studio!
+                        No matching songs found.<br>Upload or extract audio in Stem Studio!
                     </div>
                 `;
                 return;
             }
 
             container.innerHTML = '';
-            jobs.forEach(job => {
+            currentJobs.forEach(job => {
                 const card = document.createElement('div');
                 card.className = "p-3 bg-surface-950/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-3 group";
 
                 const sourceIcon = job.source_type === 'youtube' ? '▶️' : '📁';
                 const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
+                const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
 
                 card.innerHTML = `
                     <div class="flex items-center gap-2.5 min-w-0 flex-1">
                         <span class="text-base">${sourceIcon}</span>
                         <div class="truncate">
                             <h4 class="text-xs font-semibold text-slate-200 truncate group-hover:text-brand-300 transition">${escapeHtml(job.title)}</h4>
+                            <div class="text-[11px] text-slate-400 truncate">${artistHtml}</div>
                             <div class="flex items-center gap-2 text-[10px] text-slate-500">
                                 <span>${durationFmt || 'Stems ready'}</span>
                                 <span>•</span>
@@ -139,7 +191,7 @@ class SongLibraryManager {
                         <button class="add-queue-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" data-job-id="${job.job_id}">
                             + Queue
                         </button>
-                        <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Add / Edit Lyrics" data-job-id="${job.job_id}">
+                        <button class="lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
                             📝
                         </button>
                     </div>
@@ -185,6 +237,12 @@ class SongLibraryManager {
         if (this.lyricsModalTitle) {
             this.lyricsModalTitle.textContent = job.title || "Untitled Song";
         }
+        if (this.lyricsEditTitle) {
+            this.lyricsEditTitle.value = job.title || "";
+        }
+        if (this.lyricsEditArtist) {
+            this.lyricsEditArtist.value = job.artist || "";
+        }
         if (this.lyricsTextarea) {
             this.lyricsTextarea.value = "Loading lyrics...";
         }
@@ -221,11 +279,39 @@ class SongLibraryManager {
     async saveLyrics() {
         if (!this.activeLyricsJobId || !this.lyricsTextarea) return;
         const text = this.lyricsTextarea.value;
+        const newTitle = this.lyricsEditTitle ? this.lyricsEditTitle.value.trim() : "";
+        const newArtist = this.lyricsEditArtist ? this.lyricsEditArtist.value.trim() : "";
 
         if (this.saveLyricsBtn) this.saveLyricsBtn.disabled = true;
         if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saving...";
 
         try {
+            // Save metadata (title & artist) if title is provided
+            let updatedJob = null;
+            if (newTitle) {
+                const metaResp = await fetch(`/api/jobs/${this.activeLyricsJobId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: newTitle,
+                        artist: newArtist || null
+                    })
+                });
+                if (metaResp.ok) {
+                    updatedJob = await metaResp.json();
+                    if (this.jobs && Array.isArray(this.jobs)) {
+                        const idx = this.jobs.findIndex(j => j.job_id === this.activeLyricsJobId);
+                        if (idx !== -1 && updatedJob) {
+                            this.jobs[idx] = updatedJob;
+                            this.render(this.jobs);
+                        }
+                    }
+                    window.dispatchEvent(new CustomEvent('flexioke:metadata-updated', {
+                        detail: updatedJob
+                    }));
+                }
+            }
+
             const resp = await fetch(`/api/jobs/${this.activeLyricsJobId}/lyrics`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -236,7 +322,13 @@ class SongLibraryManager {
                 const data = await resp.json();
                 if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saved!";
                 window.dispatchEvent(new CustomEvent('flexioke:lyrics-updated', {
-                    detail: { job_id: this.activeLyricsJobId, lyrics: text, has_timestamps: data.has_timestamps }
+                    detail: {
+                        job_id: this.activeLyricsJobId,
+                        lyrics: text,
+                        has_timestamps: data.has_timestamps,
+                        title: newTitle,
+                        artist: newArtist
+                    }
                 }));
                 setTimeout(() => this.closeLyricsModal(), 600);
             } else {
@@ -254,9 +346,12 @@ class SongLibraryManager {
 class PlaybackQueueManager {
     constructor() {
         this.queueContainers = document.querySelectorAll('.queue-list-container');
+        this.queueCountBadges = document.querySelectorAll('.queue-count-badge');
         this.clearBtns = document.querySelectorAll('.clear-queue-btn');
         this.playNextBtns = document.querySelectorAll('.play-next-queue-btn');
         this.isAdvancing = false;
+        this.queue = [];
+        this.state = { queue: [], current_track: null, history: [] };
 
         this.init();
     }
@@ -372,6 +467,22 @@ class PlaybackQueueManager {
         }
     }
 
+    async reorderItem(queueId, direction) {
+        try {
+            const resp = await fetch('/api/queue/reorder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ queue_id: queueId, direction })
+            });
+            if (resp.ok) {
+                const state = await resp.json();
+                this.render(state);
+            }
+        } catch (err) {
+            console.error("Error reordering queue:", err);
+        }
+    }
+
     async clearQueue() {
         try {
             const resp = await fetch('/api/queue', { method: 'DELETE' });
@@ -385,7 +496,16 @@ class PlaybackQueueManager {
     }
 
     render(state) {
-        const queue = state.queue || [];
+        this.state = state || { queue: [], current_track: null, history: [] };
+        this.queue = this.state.queue || [];
+        const queue = this.queue;
+
+        window.dispatchEvent(new CustomEvent('flexioke:queue-updated', { detail: this.state }));
+
+        const count = queue.length;
+        this.queueCountBadges.forEach(badge => {
+            badge.textContent = `${count} ${count === 1 ? 'song' : 'songs'}`;
+        });
 
         this.queueContainers.forEach(container => {
             if (queue.length === 0) {
@@ -402,17 +522,38 @@ class PlaybackQueueManager {
                 const row = document.createElement('div');
                 row.className = "p-2.5 bg-surface-950/70 border border-slate-800/80 rounded-xl flex items-center justify-between gap-3 text-xs";
 
+                const isFirst = index === 0;
+                const isLast = index === queue.length - 1;
+
                 row.innerHTML = `
-                    <div class="flex items-center gap-2.5 truncate min-w-0">
+                    <div class="flex items-center gap-2.5 truncate min-w-0 flex-1">
                         <span class="w-5 h-5 rounded-full bg-slate-800 text-[10px] text-slate-400 font-bold flex items-center justify-center shrink-0">
                             ${index + 1}
                         </span>
                         <span class="font-medium text-slate-200 truncate">${escapeHtml(item.title)}</span>
                     </div>
-                    <button class="remove-queue-btn text-slate-500 hover:text-rose-400 p-1 text-xs shrink-0 transition" data-queue-id="${item.queue_id}">
-                        ✕
-                    </button>
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button class="reorder-up-btn p-1 text-[10px] rounded hover:bg-slate-800 ${isFirst ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Up" ${isFirst ? 'disabled' : ''}>
+                            ▲
+                        </button>
+                        <button class="reorder-down-btn p-1 text-[10px] rounded hover:bg-slate-800 ${isLast ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Down" ${isLast ? 'disabled' : ''}>
+                            ▼
+                        </button>
+                        <button class="remove-queue-btn text-slate-500 hover:text-rose-400 p-1 text-xs transition" title="Remove from Queue" data-queue-id="${item.queue_id}">
+                            ✕
+                        </button>
+                    </div>
                 `;
+
+                const upBtn = row.querySelector('.reorder-up-btn');
+                if (!isFirst && upBtn) {
+                    upBtn.addEventListener('click', () => this.reorderItem(item.queue_id, 'up'));
+                }
+
+                const downBtn = row.querySelector('.reorder-down-btn');
+                if (!isLast && downBtn) {
+                    downBtn.addEventListener('click', () => this.reorderItem(item.queue_id, 'down'));
+                }
 
                 const removeBtn = row.querySelector('.remove-queue-btn');
                 removeBtn.addEventListener('click', () => this.removeFromQueue(item.queue_id));
