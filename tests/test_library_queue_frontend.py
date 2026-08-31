@@ -59,7 +59,17 @@ def test_sidebar_fixed_heights_and_badge_cleanup():
 def test_scoped_edit_lyrics_button_visibility():
     resp_js = client.get("/static/library_queue.js")
     assert resp_js.status_code == 200
-    assert "isStudio" in resp_js.text or "view-studio" in resp_js.text or "studio-library-list" in resp_js.text
+    assert "isStudio" in resp_js.text
+    assert "view-stem-studio" in resp_js.text
+    assert "view-studio" not in resp_js.text  # ensure old typo is not present
+    assert "lyrics-btn" in resp_js.text
+    assert "edit-lyrics-btn" in resp_js.text
+
+    resp_html = client.get("/")
+    assert resp_html.status_code == 200
+    assert 'id="view-stem-studio"' in resp_html.text
+    assert 'id="studio-library-list"' in resp_html.text
+    assert 'id="karaoke-library-list"' in resp_html.text
 
 def test_expanded_song_catalog_modal():
     resp_html = client.get("/")
