@@ -488,16 +488,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const matches = text.match(urlRegex) || [];
         const uniqueUrls = Array.from(new Set(matches));
 
+        notesLinksList.innerHTML = '';
         if (uniqueUrls.length > 0) {
             notesLinksSection.classList.remove('hidden');
-            notesLinksList.innerHTML = uniqueUrls.map(url => `
-                <a href="${url}" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline truncate block transition flex items-center gap-1">
-                    <span>🔗</span> <span class="truncate">${url}</span>
-                </a>
-            `).join('');
+            uniqueUrls.forEach(url => {
+                const link = document.createElement('a');
+                link.href = url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.className = 'text-brand-400 hover:text-brand-300 underline truncate block transition flex items-center gap-1';
+
+                const icon = document.createElement('span');
+                icon.textContent = '🔗';
+                const label = document.createElement('span');
+                label.className = 'truncate';
+                label.textContent = url;
+
+                link.appendChild(icon);
+                link.appendChild(label);
+                notesLinksList.appendChild(link);
+            });
         } else {
             notesLinksSection.classList.add('hidden');
-            notesLinksList.innerHTML = '';
         }
     }
 

@@ -89,12 +89,12 @@
                 
                 <!-- Ingestion Card (Accordion 1) -->
                 <section id="studio-card-add-song" class="bg-surface-900 border border-slate-800/90 rounded-2xl shadow-xl overflow-hidden transition">
-                    <button id="accordion-header-add-song" class="accordion-toggle w-full p-4 flex items-center justify-between border-b border-slate-800/80 hover:bg-slate-800/40 transition text-left cursor-pointer select-none">
+                    <div id="accordion-header-add-song" role="button" tabindex="0" class="accordion-toggle w-full p-4 flex items-center justify-between border-b border-slate-800/80 hover:bg-slate-800/40 transition text-left cursor-pointer select-none">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
                             <span>✨</span> Add Song for Separation
                         </h2>
                         <span id="accordion-chevron-add-song" class="accordion-chevron text-slate-400 text-xs font-bold transition-transform duration-200">▾</span>
-                    </button>
+                    </div>
 
                     <div id="accordion-body-add-song" class="accordion-body p-5 space-y-4">
                         <!-- Source Tabs -->
@@ -183,76 +183,76 @@
                             <!-- Queued Jobs List -->
                             <div id="queued-jobs-section" class="hidden pt-2 border-t border-slate-800/80 space-y-1.5">
                                 <div class="flex items-center justify-between text-[10px] font-semibold text-slate-400">
-                                <span>WAITING IN QUEUE</span>
-                                <span id="queued-jobs-count" class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300">0 queued</span>
+                                    <span>WAITING IN QUEUE</span>
+                                    <span id="queued-jobs-count" class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300">0 queued</span>
+                                </div>
+                                <div id="queued-jobs-list" class="space-y-1 max-h-[140px] overflow-y-auto custom-scrollbar"></div>
                             </div>
-                            <div id="queued-jobs-list" class="space-y-1 max-h-[140px] overflow-y-auto custom-scrollbar"></div>
+                        </div>
+
+                        <!-- Error Alert -->
+                        <div id="error-card" class="hidden border border-rose-500/40 bg-rose-950/20 rounded-xl p-3.5 space-y-2">
+                            <div class="flex items-center justify-between text-rose-400 text-xs font-semibold">
+                                <span class="flex items-center gap-1.5">⚠️ Processing Error</span>
+                                <button id="dismiss-error-btn" class="text-slate-400 hover:text-slate-200">✕</button>
+                            </div>
+                            <p id="error-message-text" class="text-[11px] text-rose-300/90 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Studio Song Library Card (Accordion 2) -->
+                <section id="studio-card-library" class="bg-surface-900 border border-slate-800/90 rounded-2xl shadow-xl overflow-hidden transition flex flex-col">
+                    <div id="accordion-header-library" role="button" tabindex="0" class="accordion-toggle w-full p-4 flex items-center justify-between border-b border-slate-800/80 hover:bg-slate-800/40 transition text-left cursor-pointer select-none">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                                <span>📚</span> Studio Song Library
+                            </h2>
+                            <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
+                        </div>
+                        <span id="accordion-chevron-library" class="accordion-chevron text-slate-400 text-xs font-bold transition-transform duration-200">▾</span>
+                    </div>
+
+                    <div id="accordion-body-library" class="accordion-body p-5 space-y-3.5 flex flex-col">
+                        <!-- Search Input -->
+                        <div class="relative flex items-center">
+                            <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
+                            <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title or artist...">
+                            <button class="library-search-clear-btn hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-200 text-xs transition select-none" title="Clear search">✕</button>
+                        </div>
+
+                        <!-- Library List Container -->
+                        <div id="studio-library-list" class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[300px]">
+                            <div class="library-empty-state text-center py-6 text-slate-500 text-xs">
+                                No songs in library yet.<br>Upload or extract a track above!
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Studio Playback Queue Card (Accordion 3) -->
+                <section id="studio-card-queue" class="bg-surface-900 border border-slate-800/90 rounded-2xl shadow-xl overflow-hidden transition">
+                    <div id="accordion-header-queue" role="button" tabindex="0" class="accordion-toggle w-full p-4 flex items-center justify-between border-b border-slate-800/80 hover:bg-slate-800/40 transition text-left cursor-pointer select-none">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                                <span>📋</span> Studio Queue
+                            </h2>
+                            <span class="queue-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-0.5 rounded transition">Clear</button>
+                            <span id="accordion-chevron-queue" class="accordion-chevron text-slate-400 text-xs font-bold transition-transform duration-200">▾</span>
                         </div>
                     </div>
 
-                    <!-- Error Alert -->
-                    <div id="error-card" class="hidden border border-rose-500/40 bg-rose-950/20 rounded-xl p-3.5 space-y-2">
-                        <div class="flex items-center justify-between text-rose-400 text-xs font-semibold">
-                            <span class="flex items-center gap-1.5">⚠️ Processing Error</span>
-                            <button id="dismiss-error-btn" class="text-slate-400 hover:text-slate-200">✕</button>
-                        </div>
-                        <p id="error-message-text" class="text-[11px] text-rose-300/90 leading-relaxed"></p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Studio Song Library Card (Accordion 2) -->
-            <section id="studio-card-library" class="bg-surface-900 border border-slate-800/90 rounded-2xl shadow-xl overflow-hidden transition flex flex-col">
-                <button id="accordion-header-library" class="accordion-toggle w-full p-4 flex items-center justify-between border-b border-slate-800/80 hover:bg-slate-800/40 transition text-left cursor-pointer select-none">
-                    <div class="flex items-center gap-2">
-                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <span>📚</span> Studio Song Library
-                        </h2>
-                        <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
-                    </div>
-                    <span id="accordion-chevron-library" class="accordion-chevron text-slate-400 text-xs font-bold transition-transform duration-200">▾</span>
-                </button>
-
-                <div id="accordion-body-library" class="accordion-body p-5 space-y-3.5 flex flex-col">
-                    <!-- Search Input -->
-                    <div class="relative flex items-center">
-                        <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
-                        <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title or artist...">
-                        <button class="library-search-clear-btn hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-200 text-xs transition select-none" title="Clear search">✕</button>
-                    </div>
-
-                    <!-- Library List Container -->
-                    <div id="studio-library-list" class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[300px]">
-                        <div class="library-empty-state text-center py-6 text-slate-500 text-xs">
-                            No songs in library yet.<br>Upload or extract a track above!
+                    <div id="accordion-body-queue" class="accordion-body p-5 space-y-3.5">
+                        <div class="queue-list-container space-y-2 max-h-[180px] overflow-y-auto pr-1 custom-scrollbar">
+                            <div class="queue-empty-state text-center py-4 text-slate-500 text-xs">
+                                Playback queue is empty.
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            <!-- Studio Playback Queue Card (Accordion 3) -->
-            <section id="studio-card-queue" class="bg-surface-900 border border-slate-800/90 rounded-2xl shadow-xl overflow-hidden transition">
-                <button id="accordion-header-queue" class="accordion-toggle w-full p-4 flex items-center justify-between border-b border-slate-800/80 hover:bg-slate-800/40 transition text-left cursor-pointer select-none">
-                    <div class="flex items-center gap-2">
-                        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                            <span>📋</span> Studio Queue
-                        </h2>
-                        <span class="queue-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-0.5 rounded transition">Clear</button>
-                        <span id="accordion-chevron-queue" class="accordion-chevron text-slate-400 text-xs font-bold transition-transform duration-200">▾</span>
-                    </div>
-                </button>
-
-                <div id="accordion-body-queue" class="accordion-body p-5 space-y-3.5">
-                    <div class="queue-list-container space-y-2 max-h-[180px] overflow-y-auto pr-1 custom-scrollbar">
-                        <div class="queue-empty-state text-center py-4 text-slate-500 text-xs">
-                            Playback queue is empty.
-                        </div>
-                    </div>
-                </div>
-            </section>
+                </section>
 
             </aside>
 
