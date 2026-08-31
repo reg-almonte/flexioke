@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-08-31
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0037: Fixed 3-Card Height Playback Queue & Compact Library with "Stems Ready" Removal
@@ -14,9 +14,17 @@ implementation: pending
 Set the Playback Queue container to a fixed height (`h-[196px]`) accommodating 3 visible songs with a centered empty state when empty and custom scrollbar for overflow. Adjust the Song Library container height to `h-[210px]` (3 cards tall). Remove the `"Stems ready"` badge from library song cards.
 
 ## Acceptance Criteria
-- [ ] Playback Queue container maintains a fixed height of 3 songs regardless of item count.
-- [ ] Song Library container displays 3 visible cards tall.
-- [ ] Song cards display Title and Artist without the `"Stems ready"` text.
+- [x] Playback Queue container maintains a fixed height of 3 songs regardless of item count.
+- [x] Song Library container displays 3 visible cards tall.
+- [x] Song cards display Title and Artist without the `"Stems ready"` text.
 
 ## Blocked by
 - None (can start immediately in parallel)
+
+## Implementation
+- Branch: `story/STORY-0016-fixed-sidebar-and-song-catalog-modal`
+- Set Playback Queue list height to `h-[196px]` with centered empty state.
+- Set Song Library list height to `h-[210px]`.
+- Stripped `"Stems ready"` text from library card rendering in `src/static/library_queue.js`.
+- Automated regression tests added in `tests/test_library_queue_frontend.py` (81/81 tests passing).
+

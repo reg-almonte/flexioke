@@ -356,8 +356,8 @@
                         </div>
                     </div>
 
-                    <div class="queue-list-container space-y-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-                        <div class="queue-empty-state text-center py-4 text-slate-500 text-xs">
+                    <div class="queue-list-container space-y-2 h-[196px] overflow-y-auto pr-1 custom-scrollbar">
+                        <div class="queue-empty-state h-full flex items-center justify-center text-center py-4 text-slate-500 text-xs">
                             Karaoke queue is empty.
                         </div>
                     </div>
@@ -369,7 +369,10 @@
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
                             <span>🎤</span> Song Library
                         </h2>
-                        <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
+                        <div class="flex items-center gap-2">
+                            <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
+                            <button id="open-catalog-modal-btn" class="text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800 transition text-sm flex items-center gap-1" title="Open Full Song Catalog">⛶</button>
+                        </div>
                     </div>
 
                     <!-- Search Input -->
@@ -380,8 +383,8 @@
                     </div>
 
                     <!-- Library List Container -->
-                    <div class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar max-h-[340px]">
-                        <div class="library-empty-state text-center py-6 text-slate-500 text-xs">
+                    <div class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar h-[210px]">
+                        <div class="library-empty-state h-full flex items-center justify-center text-center py-6 text-slate-500 text-xs">
                             No songs available.<br>Process songs in Stem Studio!
                         </div>
                     </div>
@@ -579,6 +582,47 @@
                 <button id="confirm-play-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition shadow-md shadow-brand-500/20">
                     Play Now
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expanded Song Catalog Modal -->
+    <div id="song-catalog-modal" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
+        <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📚</span>
+                    <h3 class="text-base font-bold text-white tracking-tight">Song Catalog</h3>
+                    <span id="catalog-total-count" class="text-xs bg-slate-800 px-2.5 py-0.5 rounded-full text-brand-400 font-semibold">0 songs</span>
+                </div>
+                <button id="close-catalog-modal-btn" class="text-slate-400 hover:text-white text-lg transition">✕</button>
+            </div>
+
+            <!-- Search & Sort Toolbar -->
+            <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                <!-- Search Bar with Clear Button -->
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500 text-sm">🔍</span>
+                    <input type="text" id="catalog-search-input" placeholder="Search by title or artist..." class="w-full bg-surface-950 border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
+                    <button id="catalog-search-clear-btn" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-white text-xs hidden" title="Clear Search">✕</button>
+                </div>
+
+                <!-- Sort Dropdown -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-xs text-slate-400 font-medium">Sort:</span>
+                    <select id="catalog-sort-select" class="bg-surface-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500 cursor-pointer">
+                        <option value="title_asc">Title (A-Z)</option>
+                        <option value="title_desc">Title (Z-A)</option>
+                        <option value="artist_asc">Artist (A-Z)</option>
+                        <option value="recent">Recently Added</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Catalog Song List Container -->
+            <div id="catalog-songs-list" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1 min-h-[250px] max-h-[450px]">
+                <!-- Populated dynamically via JS -->
             </div>
         </div>
     </div>
