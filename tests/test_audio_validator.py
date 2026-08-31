@@ -20,6 +20,10 @@ def test_parse_song_and_artist_without_delimiter():
     assert title == "Imagine Track"
     assert artist == "Unknown Artist"
 
+    title2, artist2 = parse_song_and_artist("03. Imagine.wav")
+    assert title2 == "Imagine"
+    assert artist2 == "Unknown Artist"
+
 def test_validate_audio_file_supported():
     is_valid, msg = validate_audio_file("song.mp3", 1024 * 1024)
     assert is_valid is True

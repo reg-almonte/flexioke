@@ -26,7 +26,7 @@ def parse_song_and_artist(filename: str) -> Tuple[str, str]:
         artist = re.sub(r"_+", " ", parts[1]).strip()
         return (title or "Untitled Track", artist or "Unknown Artist")
     
-    title = re.sub(r"[_\-]+", " ", stem).strip()
+    title = re.sub(r"[_\-]+", " ", stem_cleaned).strip()
     return (title or "Untitled Track", "Unknown Artist")
 
 def clean_song_title(filename: str) -> str:

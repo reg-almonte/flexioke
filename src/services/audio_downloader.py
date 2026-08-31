@@ -1,4 +1,3 @@
-import re
 import urllib.request
 import urllib.parse
 from pathlib import Path
@@ -7,6 +6,30 @@ from typing import Tuple, Optional, Callable, Dict, Any
 from src.services.audio_validator import parse_song_and_artist, MAX_FILE_SIZE_BYTES
 
 ALLOWED_SCHEMES = {"http", "https"}
+
+def is_valid_audio_magic_bytes(header: bytes) -> bool:
+    """Checks whether the first bytes match known audio file formats (MP3, WAV, FLAC, OGG, M4A/AAC)."""
+    if not header or len(header) < 4:
+        return False
+    # MP3 with ID3 tag
+    if header.startswith(b"ID3"):
+        return True
+    # MP3 sync frame (0xFF with sync bits 0xE0 set in next byte)
+    if header[0] == 0xFF and (header[1] & 0xE0) == 0xE0:
+        return True
+    # WAV: RIFF....WAVE
+    if header.startswith(b"RIFF") and len(header) >= 12 and header[8:12] == b"WAVE":
+        return True
+    # FLAC: fLaC
+    if header.startswith(b"fLaC"):
+        return True
+    # OGG: OggS
+    if header.startswith(b"OggS"):
+        return True
+    # M4A / MP4 / AAC (ftyp box in first 16 bytes or ADTS sync 0xFF 0xF0)
+    if b"ftyp" in header[:16] or (header[0] == 0xFF and (header[1] & 0xF6) == 0xF0):
+        return True
+    return False
 
 def validate_audio_url(url: str) -> Tuple[bool, str]:
     """Validates that a URL is a well-formed HTTP/HTTPS URL."""
@@ -48,42 +71,57 @@ def download_audio_url(
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     total_downloaded = 0
+    first_chunk = b""
 
     if progress_callback:
         progress_callback(5, "Connecting to audio URL...")
 
-    with urllib.request.urlopen(req, timeout=30) as response:
-        content_length = response.headers.get("Content-Length")
-        total_size = int(content_length) if content_length and content_length.isdigit() else None
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            content_type = (response.headers.get("Content-Type") or "").lower()
+            if any(t in content_type for t in ("text/html", "application/json", "application/xml", "text/xml")):
+                raise ValueError(f"URL does not point to an audio file (returned content-type '{content_type}').")
 
-        if total_size and total_size > MAX_FILE_SIZE_BYTES:
-            max_mb = MAX_FILE_SIZE_BYTES / (1024 * 1024)
-            raise ValueError(f"File size exceeds maximum allowed limit of {max_mb:.0f}MB.")
+            content_length = response.headers.get("Content-Length")
+            total_size = int(content_length) if content_length and content_length.isdigit() else None
 
-        with open(output_path, "wb") as f_out:
-            while True:
-                chunk = response.read(65536)
-                if not chunk:
-                    break
-                total_downloaded += len(chunk)
-                if total_downloaded > MAX_FILE_SIZE_BYTES:
-                    max_mb = MAX_FILE_SIZE_BYTES / (1024 * 1024)
-                    raise ValueError(f"Downloaded stream exceeded maximum size of {max_mb:.0f}MB.")
-                
-                f_out.write(chunk)
-                if progress_callback and total_size:
-                    pct = int(5 + (total_downloaded / total_size) * 10)
-                    progress_callback(min(pct, 15), f"Downloading audio ({total_downloaded // 1024} KB)...")
+            if total_size and total_size > MAX_FILE_SIZE_BYTES:
+                max_mb = MAX_FILE_SIZE_BYTES / (1024 * 1024)
+                raise ValueError(f"File size exceeds maximum allowed limit of {max_mb:.0f}MB.")
 
-    if total_downloaded == 0:
-        raise ValueError("Downloaded file is empty (0 bytes).")
+            with open(output_path, "wb") as f_out:
+                while True:
+                    chunk = response.read(65536)
+                    if not chunk:
+                        break
+                    if not first_chunk:
+                        first_chunk = chunk
+                        is_audio_mime = "audio" in content_type or "octet-stream" in content_type or "ogg" in content_type
+                        if not is_valid_audio_magic_bytes(first_chunk[:32]) and not is_audio_mime:
+                            raise ValueError("Downloaded file is not a supported audio format (invalid audio header).")
+                    total_downloaded += len(chunk)
+                    if total_downloaded > MAX_FILE_SIZE_BYTES:
+                        max_mb = MAX_FILE_SIZE_BYTES / (1024 * 1024)
+                        raise ValueError(f"Downloaded stream exceeded maximum size of {max_mb:.0f}MB.")
+                    
+                    f_out.write(chunk)
+                    if progress_callback and total_size:
+                        pct = int(5 + (total_downloaded / total_size) * 10)
+                        progress_callback(min(pct, 15), f"Downloading audio ({total_downloaded // 1024} KB)...")
 
-    if progress_callback:
-        progress_callback(15, "Audio download completed.")
+        if total_downloaded == 0:
+            raise ValueError("Downloaded file is empty (0 bytes).")
 
-    return {
-        "title": title,
-        "artist": artist,
-        "filename": raw_filename,
-        "duration": None
-    }
+        if progress_callback:
+            progress_callback(15, "Audio download completed.")
+
+        return {
+            "title": title,
+            "artist": artist,
+            "filename": raw_filename,
+            "duration": None
+        }
+    except Exception:
+        if output_path.exists():
+            output_path.unlink(missing_ok=True)
+        raise

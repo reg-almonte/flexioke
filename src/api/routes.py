@@ -36,7 +36,12 @@ class QueueActionRequest(BaseModel):
 def _handle_audio_url_download_and_pipeline(job_id: str, url: str):
     """Background task handler for downloading audio from URL and triggering separation."""
     job_dir = job_manager.get_job_dir(job_id)
-    output_path = job_dir / "input.mp3"
+    parsed = urllib.parse.urlparse(url)
+    raw_filename = urllib.parse.unquote(Path(parsed.path).name)
+    ext = Path(raw_filename).suffix.lower() if ("." in raw_filename) else ".mp3"
+    if ext not in (".mp3", ".wav", ".flac", ".m4a", ".ogg", ".aac"):
+        ext = ".mp3"
+    output_path = job_dir / f"input{ext}"
     try:
         def on_progress(pct: int, msg: str):
             job_manager.update_job(

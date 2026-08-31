@@ -53,3 +53,21 @@ def test_download_audio_url_mock(monkeypatch, tmp_path):
     assert dest.stat().st_size == 100
     assert info["title"] == "Bohemian Rhapsody"
     assert info["artist"] == "Queen"
+
+def test_download_audio_url_rejects_html(monkeypatch, tmp_path):
+    import urllib.request
+    def mock_urlopen(req, timeout=30):
+        class MockUrlOpen:
+            headers = {"Content-Type": "text/html; charset=utf-8", "Content-Length": "150"}
+            def read(self, chunk_size=8192):
+                return b"<html><body>Not Found</body></html>"
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+        return MockUrlOpen()
+
+    monkeypatch.setattr(urllib.request, "urlopen", mock_urlopen)
+
+    dest = tmp_path / "invalid.mp3"
+    with pytest.raises(ValueError, match="does not point to an audio file"):
+        download_audio_url("https://example.com/page.html", dest)
+    assert not dest.exists()
