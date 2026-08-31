@@ -309,6 +309,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await resp.json();
             const allJobs = data.jobs || [];
 
+            // Check if any tracked job finished (completed, failed, or cancelled)
+            allJobs.forEach(j => {
+                if (trackedJobIds.has(j.job_id)) {
+                    if (j.status === 'completed') {
+                        trackedJobIds.delete(j.job_id);
+                        window.dispatchEvent(new CustomEvent('flexioke:job-completed', { detail: j }));
+                    } else if (j.status === 'failed') {
+                        trackedJobIds.delete(j.job_id);
+                        showError(`Separation failed for "${j.title}": ${j.error || 'Unknown error'}`);
+                    } else if (j.status === 'cancelled') {
+                        trackedJobIds.delete(j.job_id);
+                    }
+                }
+            });
+
             // Active or queued jobs
             const activeJobs = allJobs.filter(j => 
                 ['downloading', 'separating_stage_1', 'separating_stage_2'].includes(j.status)
@@ -319,14 +334,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalInFlight = activeJobs.length + queuedJobs.length;
 
             if (totalInFlight === 0) {
-                // If everything completed, clean up
+                // All separations completed/idle
                 if (activePollingInterval) {
                     clearInterval(activePollingInterval);
                     activePollingInterval = null;
                 }
-                setTimeout(() => {
-                    processingCard.classList.add('hidden');
-                }, 2000);
+                currentActiveJobId = null;
+                processingCard.classList.add('hidden');
+                queuedJobsSection.classList.add('hidden');
                 window.dispatchEvent(new CustomEvent('flexioke:library-updated'));
                 return;
             }
@@ -381,14 +396,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 queuedJobsSection.classList.add('hidden');
             }
-
-            // Check if any tracked job just completed
-            allJobs.forEach(j => {
-                if (trackedJobIds.has(j.job_id) && j.status === 'completed') {
-                    trackedJobIds.delete(j.job_id);
-                    window.dispatchEvent(new CustomEvent('flexioke:job-completed', { detail: j }));
-                }
-            });
         } catch (err) {
             console.error("Queue polling error:", err);
         }
