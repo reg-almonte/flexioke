@@ -139,7 +139,7 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved EPIC-0006 work breakdown comprising STORY-0017 to STORY-0021 and TASK-0040 to TASK-0050 covering direct audio URL downloader, smart Title/Artist filename parser, multi-file drag-and-drop batch upload with FIFO sequential separation worker, collapsible sidebar accordions with localStorage state, persistent header notes scratchpad modal, expanded Studio Song Catalog modal, default recently-added sort order, combined .zip stem export, in-library track deletion, and post-separation audio archiving. Previous tickets archived to docs/tickets/archive/v0.2.3/.
 
-
-
-
-
+## 2026-09-01 — Approved Release v0.2.4: Stem Studio Upgrade & Separation Job Queue
+- artifact: docs/releases/v0.2.4.md
+- approved_by: reg
+- notes: Version 0.2.4 fully approved and released. Includes streaming direct audio URL downloader (POST /api/jobs/download-url), smart Title/Artist delimiter parsing engine, multi-file drag-and-drop batch upload, asynchronous FIFO sequential separation queue worker (ThreadPoolExecutor) with live cancellation, collapsible sidebar accordions with localStorage persistence, persistent Studio Notes scratchpad modal with auto-save and clickable URL previews, expanded Studio Song Catalog modal with real-time search/sort and editing, default Recently Added sort for Stem Studio library, dynamic streaming stem & lyrics .zip bundler (GET /api/jobs/{job_id}/export/zip), permanent track deletion with cascading storage cleanup (DELETE /api/jobs/{job_id}), and automatic post-separation raw audio archiving to ./data/archive/.
