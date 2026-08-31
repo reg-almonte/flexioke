@@ -45,9 +45,13 @@ class SongLibraryManager {
 
     init() {
         // Expanded catalog modal listeners
-        if (this.openCatalogModalBtn) {
-            this.openCatalogModalBtn.addEventListener('click', () => this.openCatalogModal());
-        }
+        const catalogTriggers = document.querySelectorAll('.open-catalog-btn, #open-catalog-modal-btn, #open-studio-catalog-btn');
+        catalogTriggers.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openCatalogModal();
+            });
+        });
         if (this.closeCatalogModalBtn) {
             this.closeCatalogModalBtn.addEventListener('click', () => this.closeCatalogModal());
         }
@@ -194,13 +198,6 @@ class SongLibraryManager {
         }
         const currentJobs = this.jobs || [];
 
-        // Auto-sort songs alphabetically by title
-        currentJobs.sort((a, b) => {
-            const titleA = (a.title || "").toLowerCase();
-            const titleB = (b.title || "").toLowerCase();
-            return titleA.localeCompare(titleB);
-        });
-
         this.countBadges.forEach(badge => {
             badge.textContent = `${currentJobs.length} ${currentJobs.length === 1 ? 'song' : 'songs'}`;
         });
@@ -217,8 +214,17 @@ class SongLibraryManager {
 
             container.innerHTML = '';
             const isStudio = container.closest('#view-stem-studio') !== null || container.id === 'studio-library-list';
+            const displayJobs = [...currentJobs];
 
-            currentJobs.forEach(job => {
+            if (isStudio) {
+                // Stem Studio: default to Recently Added (descending created_at)
+                displayJobs.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            } else {
+                // Karaoke Mode: default to Alphabetical (Title A-Z)
+                displayJobs.sort((a, b) => (a.title || "").toLowerCase().localeCompare((b.title || "").toLowerCase()));
+            }
+
+            displayJobs.forEach(job => {
                 const card = document.createElement('div');
                 card.className = "p-3 bg-surface-950/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-3 group";
 
@@ -382,6 +388,9 @@ class SongLibraryManager {
                     <button class="catalog-queue-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-medium transition" data-job-id="${job.job_id}">
                         + Add to Queue
                     </button>
+                    <button class="catalog-edit-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-brand-300 text-xs font-medium transition flex items-center gap-1" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
+                        <span>📝</span> Edit
+                    </button>
                 </div>
             `;
 
@@ -403,6 +412,13 @@ class SongLibraryManager {
                     }, 1200);
                 }
             });
+
+            const editBtn = row.querySelector('.catalog-edit-btn');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    this.openLyricsModal(job);
+                });
+            }
 
             this.catalogSongsList.appendChild(row);
         });

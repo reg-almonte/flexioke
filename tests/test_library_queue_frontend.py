@@ -76,6 +76,7 @@ def test_expanded_song_catalog_modal():
     assert resp_html.status_code == 200
     assert 'id="song-catalog-modal"' in resp_html.text
     assert 'id="open-catalog-modal-btn"' in resp_html.text
+    assert 'id="open-studio-catalog-btn"' in resp_html.text
     assert 'id="catalog-search-input"' in resp_html.text
     assert 'id="catalog-sort-select"' in resp_html.text
     assert 'id="catalog-songs-list"' in resp_html.text
@@ -84,6 +85,15 @@ def test_expanded_song_catalog_modal():
     assert resp_js.status_code == 200
     assert "renderCatalog" in resp_js.text
     assert "openCatalogModal" in resp_js.text or "catalogModal" in resp_js.text
+    assert "catalog-edit-btn" in resp_js.text
+    assert "open-studio-catalog-btn" in resp_js.text
+
+def test_library_sorting_studio_recent_vs_karaoke_alpha():
+    resp_js = client.get("/static/library_queue.js")
+    assert resp_js.status_code == 200
+    assert "isStudio" in resp_js.text
+    assert "created_at" in resp_js.text
+    assert "localeCompare" in resp_js.text
 
 def test_javascript_static_files_syntax():
     import subprocess
