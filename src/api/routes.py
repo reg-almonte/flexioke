@@ -51,6 +51,9 @@ def _handle_audio_url_download_and_pipeline(job_id: str, url: str):
                 current_stage=msg
             )
         info = download_audio_url(url, output_path, progress_callback=on_progress)
+        if job_manager.get_job(job_id).status == JobStatus.CANCELLED:
+            return
+
         job_manager.update_job(
             job_id,
             title=info["title"],
@@ -63,6 +66,9 @@ def _handle_audio_url_download_and_pipeline(job_id: str, url: str):
         # Proceed straight to 2-stage separation pipeline
         run_separation_pipeline(job_id)
     except Exception as e:
+        current_j = job_manager.get_job(job_id)
+        if current_j and current_j.status == JobStatus.CANCELLED:
+            return
         job_manager.update_job(
             job_id,
             status=JobStatus.FAILED,
@@ -79,12 +85,25 @@ def _handle_youtube_download_and_pipeline(job_id: str, url: str):
             job_id,
             status=JobStatus.DOWNLOADING,
             progress=5,
-            current_stage="Downloading audio from YouTube..."
+            current_stage="Connecting to YouTube..."
         )
-        info = download_youtube_audio(url, output_path)
+        def on_progress(pct: int, msg: str):
+            if job_manager.get_job(job_id).status == JobStatus.CANCELLED:
+                return
+            job_manager.update_job(
+                job_id,
+                status=JobStatus.DOWNLOADING,
+                progress=pct,
+                current_stage=msg
+            )
+        info = download_youtube_audio(url, output_path, progress_callback=on_progress)
+        if job_manager.get_job(job_id).status == JobStatus.CANCELLED:
+            return
+
         job_manager.update_job(
             job_id,
             title=info["title"],
+            artist=info.get("artist"),
             duration_seconds=info["duration"],
             status=JobStatus.QUEUED,
             progress=15,
@@ -93,6 +112,9 @@ def _handle_youtube_download_and_pipeline(job_id: str, url: str):
         # Proceed straight to 2-stage separation pipeline
         run_separation_pipeline(job_id)
     except Exception as e:
+        current_j = job_manager.get_job(job_id)
+        if current_j and current_j.status == JobStatus.CANCELLED:
+            return
         job_manager.update_job(
             job_id,
             status=JobStatus.FAILED,
@@ -111,11 +133,12 @@ def health_check():
 
 @router.get("/jobs", response_model=JobListResponse)
 def list_jobs(
-    status: Optional[JobStatus] = Query(default=JobStatus.COMPLETED, description="Filter by job status"),
+    status: Optional[str] = Query(default=JobStatus.COMPLETED.value, description="Filter by job status ('all' for all jobs)"),
     q: Optional[str] = Query(default=None, description="Search query for title or source")
 ):
-    """List and search songs in the processed library."""
-    jobs = job_manager.list_jobs(status=status, query=q)
+    """List and search songs in the library or queue."""
+    filter_status = None if status in ("all", None, "") else JobStatus(status)
+    jobs = job_manager.list_jobs(status=filter_status, query=q)
     return JobListResponse(total=len(jobs), jobs=jobs)
 
 @router.post("/jobs/upload", status_code=status.HTTP_202_ACCEPTED, response_model=JobRecord)

@@ -71,6 +71,11 @@ def run_separation_pipeline(job_id: str):
         stage2_out = job_dir / "stage2_temp"
         stage2_res = separator.separate_stage_2(stage1_res.vocals_path, stage2_out)
 
+        if job_manager.get_job(job_id).status == JobStatus.CANCELLED:
+            shutil.rmtree(stage1_out, ignore_errors=True)
+            shutil.rmtree(stage2_out, ignore_errors=True)
+            return
+
         # MP3 Encoding & Normalization
         job_manager.update_job(
             job_id,
@@ -82,6 +87,9 @@ def run_separation_pipeline(job_id: str):
         # Cleanup intermediate WAV directories to save disk space
         shutil.rmtree(stage1_out, ignore_errors=True)
         shutil.rmtree(stage2_out, ignore_errors=True)
+
+        if job_manager.get_job(job_id).status == JobStatus.CANCELLED:
+            return
 
         # Register final stem streaming URLs
         stems_map = {

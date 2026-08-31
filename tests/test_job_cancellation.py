@@ -6,6 +6,13 @@ from src.models import SourceType, JobStatus
 
 client = TestClient(app)
 
+@pytest.fixture
+def mock_job_manager(monkeypatch, tmp_path):
+    manager = JobManager(data_dir=tmp_path / "jobs", max_workers=1)
+    from src.api import routes
+    monkeypatch.setattr(routes, "job_manager", manager)
+    return manager
+
 def test_cancel_queued_job(tmp_path):
     jm = JobManager(data_dir=tmp_path)
     job = jm.create_job(SourceType.UPLOAD, "test.mp3", "Test Song")
@@ -16,9 +23,8 @@ def test_cancel_queued_job(tmp_path):
     assert cancelled.status == JobStatus.CANCELLED
     assert cancelled.current_stage == "Cancelled by user"
 
-def test_cancel_job_endpoint(monkeypatch, tmp_path):
-    from src.services.job_manager import job_manager
-    job = job_manager.create_job(SourceType.UPLOAD, "test2.mp3", "Test Song 2")
+def test_cancel_job_endpoint(mock_job_manager):
+    job = mock_job_manager.create_job(SourceType.UPLOAD, "test2.mp3", "Test Song 2")
     
     resp = client.post(f"/api/jobs/{job.job_id}/cancel")
     assert resp.status_code == 200

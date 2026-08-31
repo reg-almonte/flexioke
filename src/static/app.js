@@ -208,8 +208,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset upload form immediately
         clearFileBtn.click();
 
-        try {
-            for (const file of filesToUpload) {
+        const errors = [];
+        let enqueuedCount = 0;
+
+        for (const file of filesToUpload) {
+            try {
                 const formData = new FormData();
                 formData.append('file', file);
 
@@ -224,14 +227,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 trackedJobIds.add(data.job_id);
+                enqueuedCount++;
+            } catch (err) {
+                errors.push(`${file.name}: ${err.message}`);
             }
-
-            startQueueTracking();
-        } catch (err) {
-            showError(err.message);
-        } finally {
-            submitUploadBtn.disabled = false;
         }
+
+        if (enqueuedCount > 0) {
+            startQueueTracking();
+        }
+
+        if (errors.length > 0) {
+            showError(`Upload issues: ${errors.join("; ")}`);
+        }
+
+        submitUploadBtn.disabled = false;
     });
 
     // --- Direct Audio URL Submission ---
@@ -294,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function pollSeparationQueue() {
         try {
-            const resp = await fetch('/api/jobs');
+            const resp = await fetch('/api/jobs?status=all');
             if (!resp.ok) return;
             const data = await resp.json();
             const allJobs = data.jobs || [];
