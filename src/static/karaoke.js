@@ -82,8 +82,10 @@ class KaraokeStageManager {
         this.closeSettingsModalBtn = document.getElementById('close-settings-modal-btn');
         this.saveSettingsBtn = document.getElementById('save-settings-btn');
         this.resetSettingsBtn = document.getElementById('settings-reset-btn');
-        this.settingColorInput = document.getElementById('settings-highlight-color');
-        this.settingColorDisplay = document.getElementById('settings-color-display');
+        this.settingGlowColorInput = document.getElementById('settings-highlight-glow-color');
+        this.settingGlowColorDisplay = document.getElementById('settings-glow-color-display');
+        this.settingFillColorInput = document.getElementById('settings-highlight-fill-color');
+        this.settingFillColorDisplay = document.getElementById('settings-fill-color-display');
         this.settingFontSizeInput = document.getElementById('settings-font-size');
         this.settingFontSizeDisplay = document.getElementById('settings-font-size-display');
         this.settingActiveFontSizeInput = document.getElementById('settings-active-font-size');
@@ -106,7 +108,8 @@ class KaraokeStageManager {
         this.defaultConfig = {
             introSplashDuration: 3,
             countdownThreshold: 3,
-            activeHighlightColor: '#06b6d4',
+            activeHighlightGlowColor: '#06b6d4',
+            activeHighlightFillColor: '#0891b2',
             baseFontSizePx: 20,
             activeFontSizePx: 24
         };
@@ -159,11 +162,18 @@ class KaraokeStageManager {
         }
 
         // Real-time Settings Input Handlers
-        if (this.settingColorInput) {
-            this.settingColorInput.addEventListener('input', (e) => {
+        if (this.settingGlowColorInput) {
+            this.settingGlowColorInput.addEventListener('input', (e) => {
                 const val = e.target.value;
-                if (this.settingColorDisplay) this.settingColorDisplay.textContent = val;
-                this.saveSettings({ activeHighlightColor: val });
+                if (this.settingGlowColorDisplay) this.settingGlowColorDisplay.textContent = val;
+                this.saveSettings({ activeHighlightGlowColor: val, activeHighlightColor: val });
+            });
+        }
+        if (this.settingFillColorInput) {
+            this.settingFillColorInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (this.settingFillColorDisplay) this.settingFillColorDisplay.textContent = val;
+                this.saveSettings({ activeHighlightFillColor: val });
             });
         }
         if (this.settingFontSizeInput) {
@@ -213,8 +223,29 @@ class KaraokeStageManager {
         }
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.isFullscreen) {
-                this.exitFullscreen();
+            // Dismiss Modals and Fullscreen on Escape
+            if (e.key === 'Escape') {
+                if (this.isFullscreen) {
+                    this.exitFullscreen();
+                }
+                this.closeSettingsModal();
+                const catalogModal = document.getElementById('song-catalog-modal');
+                if (catalogModal && !catalogModal.classList.contains('hidden')) {
+                    catalogModal.classList.add('hidden');
+                }
+            }
+
+            // Keyboard Shortcut: 'R' or 'Home' to restart song in Karaoke Mode
+            const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+            const isTyping = activeTag === 'input' || activeTag === 'textarea' || (document.activeElement && document.activeElement.isContentEditable);
+            if (!isTyping) {
+                if (e.key === 'r' || e.key === 'R' || e.key === 'Home') {
+                    const karaokeView = document.getElementById('view-karaoke');
+                    if (karaokeView && !karaokeView.classList.contains('hidden')) {
+                        e.preventDefault();
+                        this.restartSong();
+                    }
+                }
             }
         });
 
@@ -230,10 +261,7 @@ class KaraokeStageManager {
 
         if (this.restartBtn) {
             this.restartBtn.addEventListener('click', () => {
-                if (window.flexiokePlayer && this.currentJob) {
-                    window.flexiokePlayer.restart(true);
-                    this.updatePlayBtnUI();
-                }
+                this.restartSong();
             });
         }
 
@@ -394,14 +422,18 @@ class KaraokeStageManager {
     applySettings() {
         const basePx = parseInt(this.config.baseFontSizePx, 10) || 20;
         const activePx = parseInt(this.config.activeFontSizePx, 10) || 24;
-        const color = this.config.activeHighlightColor || '#06b6d4';
+        const glowColor = this.config.activeHighlightGlowColor || this.config.activeHighlightColor || '#06b6d4';
+        const fillColor = this.config.activeHighlightFillColor || '#0891b2';
 
         document.documentElement.style.setProperty('--karaoke-font-size', `${basePx}px`);
         document.documentElement.style.setProperty('--karaoke-active-font-size', `${activePx}px`);
-        document.documentElement.style.setProperty('--karaoke-highlight-color', color);
+        document.documentElement.style.setProperty('--karaoke-highlight-color', glowColor);
+        document.documentElement.style.setProperty('--karaoke-highlight-fill', fillColor);
 
-        if (this.settingColorInput) this.settingColorInput.value = color;
-        if (this.settingColorDisplay) this.settingColorDisplay.textContent = color;
+        if (this.settingGlowColorInput) this.settingGlowColorInput.value = glowColor;
+        if (this.settingGlowColorDisplay) this.settingGlowColorDisplay.textContent = glowColor;
+        if (this.settingFillColorInput) this.settingFillColorInput.value = fillColor;
+        if (this.settingFillColorDisplay) this.settingFillColorDisplay.textContent = fillColor;
         if (this.settingFontSizeInput) this.settingFontSizeInput.value = basePx;
         if (this.settingFontSizeDisplay) this.settingFontSizeDisplay.textContent = `${basePx}px`;
         if (this.settingActiveFontSizeInput) this.settingActiveFontSizeInput.value = activePx;
@@ -873,7 +905,7 @@ class KaraokeStageManager {
         if (this.activeLineIndex >= 0 && this.lineElements[this.activeLineIndex]) {
             const prevEl = this.lineElements[this.activeLineIndex];
             prevEl.className = "karaoke-line inline-block text-slate-400 font-semibold transition-all duration-300 py-1.5 px-5 rounded-full cursor-pointer hover:text-white hover:bg-slate-800/60";
-            prevEl.style.fontSize = "var(--karaoke-font-size, 20px)";
+            prevEl.style.fontSize = `var(--karaoke-font-size, ${this.config.baseFontSizePx || 20}px)`;
             prevEl.style.borderColor = "transparent";
             prevEl.style.backgroundColor = "transparent";
             prevEl.style.boxShadow = "none";
@@ -882,14 +914,54 @@ class KaraokeStageManager {
         this.activeLineIndex = index;
         const activeEl = this.lineElements[index];
         if (activeEl) {
-            const highlightColor = this.config.activeHighlightColor || '#06b6d4';
+            const glowColor = this.config.activeHighlightGlowColor || this.config.activeHighlightColor || '#06b6d4';
+            const fillColor = this.config.activeHighlightFillColor || '#0891b2';
             activeEl.className = "karaoke-line inline-block text-white font-extrabold rounded-full py-2.5 px-7 scale-105 transition-all duration-300 cursor-pointer border";
-            activeEl.style.fontSize = "var(--karaoke-active-font-size, 24px)";
-            activeEl.style.borderColor = "var(--karaoke-highlight-color, " + highlightColor + ")";
-            activeEl.style.backgroundColor = "rgba(6, 182, 212, 0.18)";
-            activeEl.style.boxShadow = `0 10px 25px -5px ${highlightColor}40`;
+            activeEl.style.fontSize = `var(--karaoke-active-font-size, ${this.config.activeFontSizePx || 24}px)`;
+            activeEl.style.borderColor = `var(--karaoke-highlight-color, ${glowColor})`;
+            activeEl.style.backgroundColor = `${fillColor}33`;
+            activeEl.style.boxShadow = `0 10px 25px -5px ${glowColor}40`;
             activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+    }
+
+    restartSong() {
+        if (!this.currentJob) return;
+
+        // 1. Reset stage lyrics scroll position immediately to the top
+        if (this.stageContainer) {
+            this.stageContainer.scrollTop = 0;
+        }
+
+        // 2. Reset active line index and clear active highlighted styling on all lines
+        this.activeLineIndex = -1;
+        if (this.lineElements && this.lineElements.length > 0) {
+            const basePx = parseInt(this.config.baseFontSizePx, 10) || 20;
+            this.lineElements.forEach((el) => {
+                el.className = "karaoke-line inline-block text-slate-400 font-semibold transition-all duration-300 py-1.5 px-5 rounded-full cursor-pointer hover:text-white hover:bg-slate-800/60";
+                el.style.fontSize = `var(--karaoke-font-size, ${basePx}px)`;
+                el.style.borderColor = "transparent";
+                el.style.backgroundColor = "transparent";
+                el.style.boxShadow = "none";
+            });
+        }
+
+        // 3. Clear and hide countdown cue
+        this.hideCountdownCue();
+
+        // 4. Trigger Intro Splash if duration > 0, otherwise restart audio playback immediately
+        const duration = (typeof this.config.introSplashDuration !== 'undefined') ? parseInt(this.config.introSplashDuration, 10) : 3;
+        if (duration > 0) {
+            if (window.flexiokePlayer) {
+                window.flexiokePlayer.restart(false);
+            }
+            this.triggerIntroSplash(this.currentJob, true);
+        } else {
+            if (window.flexiokePlayer) {
+                window.flexiokePlayer.restart(true);
+            }
+        }
+        this.updatePlayBtnUI();
     }
 }
 

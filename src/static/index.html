@@ -615,14 +615,24 @@
                     <p class="text-[10px] text-slate-500">Minimum non-lyric gap to trigger 3-beat countdown cue (3s - 5s, default 3s).</p>
                 </div>
 
-                <!-- Active Lyric Highlight Glow Color -->
+                <!-- Active Lyric Highlight Glow & Border Color -->
                 <div class="space-y-1.5">
-                    <label for="settings-highlight-color" class="block font-medium text-slate-300">Active Lyric Highlight Color</label>
+                    <label for="settings-highlight-glow-color" class="block font-medium text-slate-300">Highlight Glow & Border Color</label>
                     <div class="flex items-center gap-3">
-                        <input type="color" id="settings-highlight-color" value="#06b6d4" class="w-10 h-8 rounded border border-slate-700 bg-surface-950 cursor-pointer">
-                        <span id="settings-color-display" class="font-mono text-slate-400">#06b6d4</span>
+                        <input type="color" id="settings-highlight-glow-color" value="#06b6d4" class="w-10 h-8 rounded border border-slate-700 bg-surface-950 cursor-pointer">
+                        <span id="settings-glow-color-display" class="font-mono text-slate-400">#06b6d4</span>
                     </div>
-                    <p class="text-[10px] text-slate-500">Custom glow and accent color for the currently active lyric line.</p>
+                    <p class="text-[10px] text-slate-500">Outer glow and border accent for the currently active lyric line.</p>
+                </div>
+
+                <!-- Active Lyric Highlight Fill & Background Color -->
+                <div class="space-y-1.5">
+                    <label for="settings-highlight-fill-color" class="block font-medium text-slate-300">Highlight Fill & Background Color</label>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="settings-highlight-fill-color" value="#0891b2" class="w-10 h-8 rounded border border-slate-700 bg-surface-950 cursor-pointer">
+                        <span id="settings-fill-color-display" class="font-mono text-slate-400">#0891b2</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500">Pill background fill and accent tint for the active lyric line.</p>
                 </div>
 
                 <!-- Lyrics Base Font Size -->
