@@ -1,3 +1,4 @@
+import urllib.parse
 from typing import Optional
 from pathlib import Path
 from pydantic import BaseModel, Field
@@ -6,7 +7,8 @@ from fastapi.responses import FileResponse
 
 from src.services.job_manager import job_manager
 from src.services.queue_manager import queue_manager
-from src.services.audio_validator import validate_audio_file, clean_song_title
+from src.services.audio_validator import validate_audio_file, clean_song_title, parse_song_and_artist
+from src.services.audio_downloader import validate_audio_url, download_audio_url
 from src.services.youtube_downloader import validate_youtube_url, download_youtube_audio
 from src.services.pipeline import run_separation_pipeline, VALID_STEM_TYPES
 from src.models import (
@@ -18,6 +20,7 @@ from src.models import (
     QueueReorderRequest,
     LyricsResponse,
     LyricsUpdateRequest,
+    AudioUrlRequest,
     SourceType,
     JobStatus,
 )
@@ -29,6 +32,38 @@ class YouTubeRequest(BaseModel):
 
 class QueueActionRequest(BaseModel):
     job_id: str = Field(..., description="Target Job ID to add or play")
+
+def _handle_audio_url_download_and_pipeline(job_id: str, url: str):
+    """Background task handler for downloading audio from URL and triggering separation."""
+    job_dir = job_manager.get_job_dir(job_id)
+    output_path = job_dir / "input.mp3"
+    try:
+        def on_progress(pct: int, msg: str):
+            job_manager.update_job(
+                job_id,
+                status=JobStatus.DOWNLOADING,
+                progress=pct,
+                current_stage=msg
+            )
+        info = download_audio_url(url, output_path, progress_callback=on_progress)
+        job_manager.update_job(
+            job_id,
+            title=info["title"],
+            artist=info.get("artist"),
+            duration_seconds=info.get("duration"),
+            status=JobStatus.QUEUED,
+            progress=15,
+            current_stage="Audio downloaded, starting separation..."
+        )
+        # Proceed straight to 2-stage separation pipeline
+        run_separation_pipeline(job_id)
+    except Exception as e:
+        job_manager.update_job(
+            job_id,
+            status=JobStatus.FAILED,
+            error=str(e),
+            current_stage="Audio download failed"
+        )
 
 def _handle_youtube_download_and_pipeline(job_id: str, url: str):
     """Background task handler for downloading YouTube audio and triggering separation."""
@@ -94,11 +129,12 @@ async def upload_audio(file: UploadFile = File(...)):
             detail=error_msg
         )
 
-    title = clean_song_title(filename)
+    title, artist = parse_song_and_artist(filename)
     job = job_manager.create_job(
         source_type=SourceType.UPLOAD,
         source_name=filename,
-        title=title
+        title=title,
+        artist=artist
     )
 
     # Save uploaded audio file into job directory
@@ -109,6 +145,32 @@ async def upload_audio(file: UploadFile = File(...)):
 
     # Enqueue separation pipeline in worker pool
     job_manager.submit_task(run_separation_pipeline, job.job_id)
+
+    return job
+
+@router.post("/jobs/download-url", status_code=status.HTTP_202_ACCEPTED, response_model=JobRecord)
+def submit_audio_url(req: AudioUrlRequest):
+    """Submit a direct HTTP/HTTPS audio URL for downloading and stem separation."""
+    is_valid, error_msg = validate_audio_url(req.url)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg
+        )
+
+    parsed = urllib.parse.urlparse(req.url.strip())
+    raw_filename = urllib.parse.unquote(Path(parsed.path).name) or "downloaded_audio.mp3"
+    title, artist = parse_song_and_artist(raw_filename)
+
+    job = job_manager.create_job(
+        source_type=SourceType.URL,
+        source_name=req.url.strip(),
+        title=title,
+        artist=artist
+    )
+
+    # Dispatch background download and separation pipeline
+    job_manager.submit_task(_handle_audio_url_download_and_pipeline, job.job_id, req.url.strip())
 
     return job
 

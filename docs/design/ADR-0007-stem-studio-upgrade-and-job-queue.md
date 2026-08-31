@@ -1,7 +1,7 @@
 ---
-status: pending-approval
-approved_by:
-approved_at:
+status: approved
+approved_by: reg
+approved_at: 2026-08-31
 ---
 
 # ADR-0007: In-Process Async FIFO Separation Worker, Streaming Zip Engine & Reactive Studio UI

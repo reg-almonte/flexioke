@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-08-31
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0041: Smart Filename Delimiter (Title - Artist) Parser
@@ -17,9 +17,14 @@ Implement smart filename parser utility function that inspects incoming filename
 - Fallback to clean filename as `title` and `"Unknown Artist"` if no delimiter exists.
 
 ## Acceptance Criteria
-- [ ] `Title - Artist.mp3` parses cleanly to `title="Title"` and `artist="Artist"`.
-- [ ] Underscores and track prefixes (`01. `, `02 - `) are normalized.
-- [ ] Applied automatically across upload and URL download routes.
+- [x] `Title - Artist.mp3` parses cleanly to `title="Title"` and `artist="Artist"`.
+- [x] Underscores and track prefixes (`01. `, `02 - `) are normalized.
+- [x] Applied automatically across upload and URL download routes.
+
+## Implementation
+- Implemented `parse_song_and_artist()` in `src/services/audio_validator.py` with hyphen delimiter normalization and prefix stripping.
+- Wired into file upload route (`POST /api/jobs/upload`) and URL downloader route (`POST /api/jobs/download-url`).
+- Unit tests verified in `tests/test_audio_validator.py`.
 
 ## Blocked by
 - None (can start immediately)

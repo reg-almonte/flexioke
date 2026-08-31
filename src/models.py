@@ -14,6 +14,7 @@ class JobStatus(str, Enum):
 class SourceType(str, Enum):
     UPLOAD = "upload"
     YOUTUBE = "youtube"
+    URL = "url"
 
 class JobRecord(BaseModel):
     job_id: str
@@ -64,5 +65,8 @@ class JobUpdateMetadataRequest(BaseModel):
 class QueueReorderRequest(BaseModel):
     queue_id: str
     direction: str = Field(..., description="'up' or 'down'")
+
+class AudioUrlRequest(BaseModel):
+    url: str = Field(..., description="Direct HTTP or HTTPS URL to audio file")
 
 

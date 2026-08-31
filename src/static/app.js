@@ -87,9 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Elements ---
     const tabUploadBtn = document.getElementById('tab-upload-btn');
-    const tabYoutubeBtn = document.getElementById('tab-youtube-btn');
+    const tabUrlBtn = document.getElementById('tab-url-btn') || document.getElementById('tab-youtube-btn');
     const tabUploadContent = document.getElementById('tab-upload-content');
-    const tabYoutubeContent = document.getElementById('tab-youtube-content');
+    const tabUrlContent = document.getElementById('tab-url-content') || document.getElementById('tab-youtube-content');
 
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
@@ -99,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearFileBtn = document.getElementById('clear-file-btn');
     const submitUploadBtn = document.getElementById('submit-upload-btn');
 
-    const youtubeUrlInput = document.getElementById('youtube-url-input');
-    const submitYoutubeBtn = document.getElementById('submit-youtube-btn');
+    const audioUrlInput = document.getElementById('audio-url-input') || document.getElementById('youtube-url-input');
+    const submitAudioUrlBtn = document.getElementById('submit-audio-url-btn') || document.getElementById('submit-youtube-btn');
 
     const processingCard = document.getElementById('processing-card');
     const progressBarFill = document.getElementById('progress-bar-fill');
@@ -118,19 +118,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let activePollingInterval = null;
 
     // --- Tab Switching ---
-    tabUploadBtn.addEventListener('click', () => {
-        tabUploadBtn.className = "flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5";
-        tabYoutubeBtn.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5";
-        tabUploadContent.classList.remove('hidden');
-        tabYoutubeContent.classList.add('hidden');
-    });
+    if (tabUploadBtn && tabUrlBtn && tabUploadContent && tabUrlContent) {
+        tabUploadBtn.addEventListener('click', () => {
+            tabUploadBtn.className = "flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5";
+            tabUrlBtn.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5";
+            tabUploadContent.classList.remove('hidden');
+            tabUrlContent.classList.add('hidden');
+        });
 
-    tabYoutubeBtn.addEventListener('click', () => {
-        tabYoutubeBtn.className = "flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5";
-        tabUploadBtn.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5";
-        tabYoutubeContent.classList.remove('hidden');
-        tabUploadContent.classList.add('hidden');
-    });
+        tabUrlBtn.addEventListener('click', () => {
+            tabUrlBtn.className = "flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5";
+            tabUploadBtn.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5";
+            tabUrlContent.classList.remove('hidden');
+            tabUploadContent.classList.add('hidden');
+        });
+    }
 
     // --- Drag & Drop / File Selection ---
     dropZone.addEventListener('click', () => fileInput.click());
@@ -210,37 +212,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- YouTube Submission ---
-    submitYoutubeBtn.addEventListener('click', async () => {
-        const url = youtubeUrlInput.value.trim();
-        if (!url) {
-            showError("Please enter a YouTube video URL.");
-            return;
-        }
-
-        submitYoutubeBtn.disabled = true;
-        hideError();
-
-        try {
-            const response = await fetch('/api/jobs/youtube', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url })
-            });
-
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.detail || "YouTube extraction submission failed");
+    // --- Direct Audio URL Submission ---
+    if (submitAudioUrlBtn && audioUrlInput) {
+        submitAudioUrlBtn.addEventListener('click', async () => {
+            const url = audioUrlInput.value.trim();
+            if (!url) {
+                showError("Please enter a direct audio URL.");
+                return;
             }
 
-            youtubeUrlInput.value = '';
-            startJobTracking(data.job_id);
-        } catch (err) {
-            showError(err.message);
-        } finally {
-            submitYoutubeBtn.disabled = false;
-        }
-    });
+            submitAudioUrlBtn.disabled = true;
+            hideError();
+
+            try {
+                const response = await fetch('/api/jobs/download-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || "Audio URL download submission failed");
+                }
+
+                audioUrlInput.value = '';
+                startJobTracking(data.job_id);
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                submitAudioUrlBtn.disabled = false;
+            }
+        });
+    }
 
     // --- Job Status Polling Manager ---
     function startJobTracking(jobId) {

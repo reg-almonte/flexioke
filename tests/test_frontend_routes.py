@@ -11,7 +11,7 @@ def test_index_page_structure():
     # Core elements from TASK-0010
     assert "Flexioke" in html
     assert "upload-tab-btn" in html or "Upload Audio" in html
-    assert "youtube-tab-btn" in html or "YouTube" in html
+    assert "tab-url-btn" in html or "Audio URL" in html or "YouTube" in html
     assert "processing-card" in html or "progress" in html.lower()
     assert "/static/app.js" in html
     assert "/static/styles.css" in html

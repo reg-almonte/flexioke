@@ -1,7 +1,7 @@
 ---
-status: pending-approval
-approved_by:
-approved_at:
+status: approved
+approved_by: reg
+approved_at: 2026-08-31
 ---
 
 # Version 0.2.4 — Stem Studio Upgrade & Separation Job Queue — Functional Spec
