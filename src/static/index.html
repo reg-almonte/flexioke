@@ -105,15 +105,15 @@
                     <!-- Tab 1: File Upload Form -->
                     <div id="tab-upload-content" class="space-y-4">
                         <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-brand-500/70 hover:bg-brand-500/5 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center gap-2 group">
-                            <input type="file" id="file-input" class="hidden" accept=".mp3,.wav,.m4a,.flac,.ogg">
+                            <input type="file" id="file-input" class="hidden" accept=".mp3,.wav,.m4a,.flac,.ogg" multiple>
                             <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-xl group-hover:scale-110 transition group-hover:bg-brand-500/20">
                                 🎵
                             </div>
                             <div>
-                                <p class="text-xs font-medium text-slate-200">Drag & drop your audio file here</p>
+                                <p class="text-xs font-medium text-slate-200">Drag & drop your audio file(s) here</p>
                                 <p class="text-[11px] text-slate-400 mt-0.5">or <span class="text-brand-400 underline">browse from computer</span></p>
                             </div>
-                            <p class="text-[10px] text-slate-500">MP3, WAV, FLAC, M4A, OGG (Max 100MB)</p>
+                            <p class="text-[10px] text-slate-500">Single or Multiple MP3, WAV, FLAC, M4A, OGG (Max 100MB each)</p>
                         </div>
 
                         <div id="selected-file-badge" class="hidden flex items-center justify-between p-2.5 bg-slate-800/80 border border-slate-700 rounded-lg text-xs">
@@ -152,7 +152,10 @@
                                 <span class="w-2 h-2 rounded-full bg-brand-400 animate-ping"></span>
                                 Separation Pipeline Active
                             </span>
-                            <span id="progress-percent" class="text-xs font-bold text-brand-400">0%</span>
+                            <div class="flex items-center gap-2">
+                                <span id="progress-percent" class="text-xs font-bold text-brand-400">0%</span>
+                                <button id="cancel-active-job-btn" class="text-slate-400 hover:text-rose-400 text-xs px-1.5 py-0.5 rounded hover:bg-slate-800 transition" title="Cancel this job">✕ Cancel</button>
+                            </div>
                         </div>
 
                         <!-- Progress Bar -->
@@ -160,13 +163,25 @@
                             <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-brand-500 to-violet-400 transition-all duration-300 w-0"></div>
                         </div>
 
-                        <p id="progress-stage-text" class="text-[11px] text-slate-300 truncate">Initializing pipeline...</p>
+                        <div class="flex items-center justify-between text-[11px] text-slate-300">
+                            <span id="active-job-title" class="font-medium text-slate-200 truncate max-w-[180px]">Song Title</span>
+                            <span id="progress-stage-text" class="text-slate-400 truncate max-w-[150px]">Initializing...</span>
+                        </div>
 
                         <!-- Stage Steps -->
                         <div class="grid grid-cols-3 gap-1 text-[10px] text-center pt-1 border-t border-slate-800/80">
                             <div id="step-ingest" class="p-1 rounded bg-slate-800/60 text-slate-400">1. Ingestion</div>
                             <div id="step-stage1" class="p-1 rounded bg-slate-800/60 text-slate-400">2. RoFormer</div>
                             <div id="step-stage2" class="p-1 rounded bg-slate-800/60 text-slate-400">3. Karaoke</div>
+                        </div>
+
+                        <!-- Queued Jobs List -->
+                        <div id="queued-jobs-section" class="hidden pt-2 border-t border-slate-800/80 space-y-1.5">
+                            <div class="flex items-center justify-between text-[10px] font-semibold text-slate-400">
+                                <span>WAITING IN QUEUE</span>
+                                <span id="queued-jobs-count" class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300">0 queued</span>
+                            </div>
+                            <div id="queued-jobs-list" class="space-y-1 max-h-[140px] overflow-y-auto custom-scrollbar"></div>
                         </div>
                     </div>
 

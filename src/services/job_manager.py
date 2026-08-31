@@ -111,6 +111,29 @@ class JobManager:
         self._save_job(updated_record)
         return updated_record
 
+    def cancel_job(self, job_id: str) -> Optional[JobRecord]:
+        """Cancels a job if it is queued or in progress."""
+        record = self.get_job(job_id)
+        if not record:
+            return None
+        if record.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
+            return record
+        return self.update_job(
+            job_id,
+            status=JobStatus.CANCELLED,
+            current_stage="Cancelled by user"
+        )
+
+    def get_queue_position(self, job_id: str) -> int:
+        """Returns 1-based position in queue among all queued jobs (or 0 if not queued)."""
+        with self._lock:
+            queued_jobs = [j for j in self._cache.values() if j.status == JobStatus.QUEUED]
+        queued_jobs.sort(key=lambda j: j.created_at)
+        for idx, job in enumerate(queued_jobs):
+            if job.job_id == job_id:
+                return idx + 1
+        return 0
+
     def list_jobs(self, status: Optional[JobStatus] = None, query: Optional[str] = None) -> List[JobRecord]:
         """Returns filtered list of jobs sorted by creation date descending."""
         with self._lock:

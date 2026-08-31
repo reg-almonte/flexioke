@@ -13,6 +13,9 @@ def test_index_page_structure():
     assert "upload-tab-btn" in html or "Upload Audio" in html
     assert "tab-url-btn" in html or "Audio URL" in html or "YouTube" in html
     assert "processing-card" in html or "progress" in html.lower()
+    assert "cancel-active-job-btn" in html
+    assert "queued-jobs-section" in html
+    assert 'type="file"' in html and 'multiple' in html
     assert "/static/app.js" in html
     assert "/static/styles.css" in html
 

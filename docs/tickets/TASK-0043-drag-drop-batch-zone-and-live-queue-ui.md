@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-08-31
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0043: Multi-File Drag-and-Drop Batch Dropzone & Live Queue Progress UI
@@ -11,12 +11,20 @@ implementation: pending
 - `docs/tickets/STORY-0018-multi-upload-and-fifo-separation-queue.md`
 
 ## What to build
-Implement HTML5 drag-and-drop batch upload dropzone (`#studio-dropzone`) and multi-file input (`<input type="file" multiple accept="audio/*">`) in Stem Studio. Render active and queued jobs in `#processing-queue-container` with progress bars, position badges (`Position #2 in queue`), and cancel buttons.
+Update Stem Studio dropzone to support multiple files simultaneously (`<input type="file" multiple>`), batch upload them to `POST /api/jobs/upload`, and render a live queue status UI showing:
+- Currently active job with progress bar, stage indicator, and cancel button.
+- Waiting queued jobs list with `#N in queue` badges and cancel buttons.
 
 ## Acceptance Criteria
-- [ ] Drag-and-drop zone accepts single or multiple audio files with hover feedback.
-- [ ] Live queue list renders all queued jobs with position badges.
-- [ ] Clicking cancel button dispatches cancellation request and updates UI.
+- [x] Users can select or drag multiple audio files simultaneously.
+- [x] Multi-file batches are uploaded and enqueued sequentially.
+- [x] Queued jobs list dynamically displays waiting items and allows one-click cancellation.
+
+## Implementation
+- Added `multiple` attribute and multi-file selection badge to `src/static/index.html`.
+- Added `#queued-jobs-section`, `#queued-jobs-count`, `#queued-jobs-list`, and `#cancel-active-job-btn` in `src/static/index.html`.
+- Implemented batch uploading loop and multi-job queue polling manager in `src/static/app.js`.
+- Verified in `tests/test_frontend_routes.py` and test suite.
 
 ## Blocked by
-- TASK-0042: In-Process Thread-Safe FIFO Separation Worker & Queue Cancellation
+- `docs/tickets/TASK-0042-fifo-separation-worker-and-cancellation.md` (in-review)

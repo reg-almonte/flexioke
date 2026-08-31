@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-08-31
-implementation: pending
+implementation: in-review
 ---
 
 # STORY-0018: Multi-File Batch Ingestion & Asynchronous Separation FIFO Queue
@@ -11,16 +11,20 @@ implementation: pending
 - `docs/tickets/EPIC-0006-stem-studio-upgrade-and-job-queue.md`
 
 ## What it delivers
-Enables batch uploading of multiple audio tracks via file picker and drag-and-drop zone, processing them sequentially in a thread-safe FIFO background queue with queue position indicators and cancellation actions.
+Enables users to select or drag multiple audio files at once for batch separation, enqueues them sequentially into an in-process thread-safe FIFO worker without freezing the UI or dropping requests, and provides live queue inspection with one-click cancellation.
 
 ## Acceptance Criteria
-- [ ] Multiple audio files can be selected or dropped simultaneously, queuing in `status: QUEUED`.
-- [ ] Backend FIFO worker executes exactly 1 active `PROCESSING` job at a time, auto-advancing to subsequent queued items upon completion.
-- [ ] UI shows active job progress alongside waiting items with queue positions and `✕ Cancel` buttons.
+- [x] Multi-file drag-and-drop batch upload supported in Stem Studio.
+- [x] In-process FIFO worker processes jobs sequentially without concurrency race conditions.
+- [x] Live queue progress card renders active job progress, waiting queue order (#N), and cancellation triggers.
 
 ## Tasks
-- [ ] TASK-0042: In-Process Thread-Safe FIFO Separation Worker & Queue Cancellation
-- [ ] TASK-0043: Multi-File Drag-and-Drop Batch Dropzone & Live Queue Progress UI
+- [x] TASK-0042: In-Process Thread-Safe FIFO Separation Worker & Queue Cancellation
+- [x] TASK-0043: Multi-File Drag-and-Drop Batch Dropzone & Live Queue Progress UI
+
+## Implementation
+- Branch: `story/STORY-0018-multi-upload-and-fifo-separation-queue`
+- Delivered TASK-0042 and TASK-0043, verified by 96 passing tests.
 
 ## Blocked by
-- None (can start immediately)
+- `docs/tickets/STORY-0017-direct-audio-url-and-smart-naming.md` (in-review)

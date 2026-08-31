@@ -10,6 +10,7 @@ class JobStatus(str, Enum):
     SEPARATING_STAGE_2 = "separating_stage_2"
     COMPLETED = "completed"
     FAILED = "failed"
+    CANCELLED = "cancelled"
 
 class SourceType(str, Enum):
     UPLOAD = "upload"

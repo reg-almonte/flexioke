@@ -103,6 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitAudioUrlBtn = document.getElementById('submit-audio-url-btn') || document.getElementById('submit-youtube-btn');
 
     const processingCard = document.getElementById('processing-card');
+    const activeJobTitle = document.getElementById('active-job-title');
+    const cancelActiveJobBtn = document.getElementById('cancel-active-job-btn');
     const progressBarFill = document.getElementById('progress-bar-fill');
     const progressPercent = document.getElementById('progress-percent');
     const progressStageText = document.getElementById('progress-stage-text');
@@ -110,12 +112,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const stepStage1 = document.getElementById('step-stage1');
     const stepStage2 = document.getElementById('step-stage2');
 
+    const queuedJobsSection = document.getElementById('queued-jobs-section');
+    const queuedJobsCount = document.getElementById('queued-jobs-count');
+    const queuedJobsList = document.getElementById('queued-jobs-list');
+
     const errorCard = document.getElementById('error-card');
     const errorMessageText = document.getElementById('error-message-text');
     const dismissErrorBtn = document.getElementById('dismiss-error-btn');
 
-    let currentSelectedFile = null;
+    let currentSelectedFiles = [];
     let activePollingInterval = null;
+    let currentActiveJobId = null;
+    const trackedJobIds = new Set();
 
     // --- Tab Switching ---
     if (tabUploadBtn && tabUrlBtn && tabUploadContent && tabUrlContent) {
@@ -134,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Drag & Drop / File Selection ---
+    // --- Drag & Drop / Multi-File Selection ---
     dropZone.addEventListener('click', () => fileInput.click());
 
     dropZone.addEventListener('dragover', (e) => {
@@ -150,20 +158,29 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         dropZone.classList.remove('border-brand-500', 'bg-brand-500/10');
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            handleFileSelection(e.dataTransfer.files[0]);
+            handleFileSelection(e.dataTransfer.files);
         }
     });
 
     fileInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files.length > 0) {
-            handleFileSelection(e.target.files[0]);
+            handleFileSelection(e.target.files);
         }
     });
 
-    function handleFileSelection(file) {
-        currentSelectedFile = file;
-        selectedFileName.textContent = file.name;
-        selectedFileSize.textContent = `(${(file.size / (1024 * 1024)).toFixed(1)} MB)`;
+    function handleFileSelection(files) {
+        currentSelectedFiles = Array.from(files);
+        if (currentSelectedFiles.length === 0) return;
+
+        if (currentSelectedFiles.length === 1) {
+            const file = currentSelectedFiles[0];
+            selectedFileName.textContent = file.name;
+            selectedFileSize.textContent = `(${(file.size / (1024 * 1024)).toFixed(1)} MB)`;
+        } else {
+            const totalBytes = currentSelectedFiles.reduce((acc, f) => acc + f.size, 0);
+            selectedFileName.textContent = `${currentSelectedFiles.length} audio files selected`;
+            selectedFileSize.textContent = `(${(totalBytes / (1024 * 1024)).toFixed(1)} MB total)`;
+        }
         selectedFileBadge.classList.remove('hidden');
         dropZone.classList.add('hidden');
         hideError();
@@ -171,40 +188,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     clearFileBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        currentSelectedFile = null;
+        currentSelectedFiles = [];
         fileInput.value = '';
         selectedFileBadge.classList.add('hidden');
         dropZone.classList.remove('hidden');
     });
 
-    // --- File Upload Submission ---
+    // --- Multi-File Batch Upload Submission ---
     submitUploadBtn.addEventListener('click', async () => {
-        if (!currentSelectedFile) {
-            showError("Please select an audio file first.");
+        if (!currentSelectedFiles || currentSelectedFiles.length === 0) {
+            showError("Please select one or more audio files first.");
             return;
         }
-
-        const formData = new FormData();
-        formData.append('file', currentSelectedFile);
 
         submitUploadBtn.disabled = true;
         hideError();
 
-        try {
-            const response = await fetch('/api/jobs/upload', {
-                method: 'POST',
-                body: formData
-            });
+        const filesToUpload = [...currentSelectedFiles];
+        // Reset upload form immediately
+        clearFileBtn.click();
 
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.detail || "Upload failed");
+        try {
+            for (const file of filesToUpload) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch('/api/jobs/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.detail || `Upload failed for ${file.name}`);
+                }
+
+                trackedJobIds.add(data.job_id);
             }
 
-            // Start tracking job
-            startJobTracking(data.job_id);
-            // Reset upload form
-            clearFileBtn.click();
+            startQueueTracking();
         } catch (err) {
             showError(err.message);
         } finally {
@@ -237,7 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 audioUrlInput.value = '';
-                startJobTracking(data.job_id);
+                trackedJobIds.add(data.job_id);
+                startQueueTracking();
             } catch (err) {
                 showError(err.message);
             } finally {
@@ -246,42 +269,119 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Job Status Polling Manager ---
-    function startJobTracking(jobId) {
+    // --- Active Job Cancellation ---
+    if (cancelActiveJobBtn) {
+        cancelActiveJobBtn.addEventListener('click', async () => {
+            if (!currentActiveJobId) return;
+            try {
+                await fetch(`/api/jobs/${currentActiveJobId}/cancel`, { method: 'POST' });
+                pollSeparationQueue();
+            } catch (err) {
+                console.error("Failed to cancel active job:", err);
+            }
+        });
+    }
+
+    // --- Separation Queue Manager & Polling ---
+    function startQueueTracking() {
         if (activePollingInterval) {
             clearInterval(activePollingInterval);
         }
-
         processingCard.classList.remove('hidden');
-        updateProgressUI(5, "Initializing separation job...", "queued");
+        pollSeparationQueue();
+        activePollingInterval = setInterval(pollSeparationQueue, 1500);
+    }
 
-        activePollingInterval = setInterval(async () => {
-            try {
-                const resp = await fetch(`/api/jobs/${jobId}`);
-                if (!resp.ok) {
-                    throw new Error(`Failed to check job status (${resp.status})`);
+    async function pollSeparationQueue() {
+        try {
+            const resp = await fetch('/api/jobs');
+            if (!resp.ok) return;
+            const data = await resp.json();
+            const allJobs = data.jobs || [];
+
+            // Active or queued jobs
+            const activeJobs = allJobs.filter(j => 
+                ['downloading', 'separating_stage_1', 'separating_stage_2'].includes(j.status)
+            );
+            const queuedJobs = allJobs.filter(j => j.status === 'queued')
+                                      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+            const totalInFlight = activeJobs.length + queuedJobs.length;
+
+            if (totalInFlight === 0) {
+                // If everything completed, clean up
+                if (activePollingInterval) {
+                    clearInterval(activePollingInterval);
+                    activePollingInterval = null;
                 }
-                const job = await resp.json();
-
-                updateProgressUI(job.progress, job.current_stage, job.status);
-
-                if (job.status === 'completed') {
-                    clearInterval(activePollingInterval);
-                    setTimeout(() => {
-                        processingCard.classList.add('hidden');
-                    }, 2500);
-
-                    // Notify application of completed job
-                    window.dispatchEvent(new CustomEvent('flexioke:job-completed', { detail: job }));
-                } else if (job.status === 'failed') {
-                    clearInterval(activePollingInterval);
+                setTimeout(() => {
                     processingCard.classList.add('hidden');
-                    showError(job.error || "Separation pipeline failed.");
-                }
-            } catch (err) {
-                console.error("Polling error:", err);
+                }, 2000);
+                window.dispatchEvent(new CustomEvent('flexioke:library-updated'));
+                return;
             }
-        }, 1500);
+
+            processingCard.classList.remove('hidden');
+
+            // Pick currently running job (or first queued job if none active yet)
+            const currentRunningJob = activeJobs[0] || queuedJobs[0];
+            currentActiveJobId = currentRunningJob.job_id;
+
+            if (activeJobTitle) {
+                const titleStr = currentRunningJob.artist 
+                    ? `${currentRunningJob.title} — ${currentRunningJob.artist}` 
+                    : currentRunningJob.title;
+                activeJobTitle.textContent = titleStr;
+            }
+
+            updateProgressUI(currentRunningJob.progress, currentRunningJob.current_stage, currentRunningJob.status);
+
+            // Render remaining queued jobs (excluding the one displayed as active)
+            const remainingQueued = queuedJobs.filter(j => j.job_id !== currentRunningJob.job_id);
+
+            if (remainingQueued.length > 0) {
+                queuedJobsSection.classList.remove('hidden');
+                queuedJobsCount.textContent = `${remainingQueued.length} queued`;
+                queuedJobsList.innerHTML = remainingQueued.map((j, idx) => `
+                    <div class="flex items-center justify-between p-2 bg-slate-900/80 rounded-lg border border-slate-800 text-xs">
+                        <div class="flex items-center gap-2 truncate">
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300 font-semibold">#${idx + 1}</span>
+                            <div class="truncate">
+                                <p class="font-medium text-slate-200 truncate">${j.title}</p>
+                                <p class="text-[10px] text-slate-400 truncate">${j.artist || 'Unknown Artist'}</p>
+                            </div>
+                        </div>
+                        <button class="cancel-queued-btn text-slate-400 hover:text-rose-400 p-1 text-xs transition" data-job-id="${j.job_id}" title="Cancel separation">✕</button>
+                    </div>
+                `).join('');
+
+                // Bind cancellation buttons
+                queuedJobsList.querySelectorAll('.cancel-queued-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const jId = btn.getAttribute('data-job-id');
+                        try {
+                            await fetch(`/api/jobs/${jId}/cancel`, { method: 'POST' });
+                            pollSeparationQueue();
+                        } catch (err) {
+                            console.error("Failed to cancel queued job:", err);
+                        }
+                    });
+                });
+            } else {
+                queuedJobsSection.classList.add('hidden');
+            }
+
+            // Check if any tracked job just completed
+            allJobs.forEach(j => {
+                if (trackedJobIds.has(j.job_id) && j.status === 'completed') {
+                    trackedJobIds.delete(j.job_id);
+                    window.dispatchEvent(new CustomEvent('flexioke:job-completed', { detail: j }));
+                }
+            });
+        } catch (err) {
+            console.error("Queue polling error:", err);
+        }
     }
 
     function updateProgressUI(progress, stageText, status) {
@@ -308,4 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     dismissErrorBtn.addEventListener('click', hideError);
+
+    // Initial check for in-flight jobs on load
+    pollSeparationQueue();
 });

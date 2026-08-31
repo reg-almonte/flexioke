@@ -22,6 +22,9 @@ def run_separation_pipeline(job_id: str):
     if not job:
         logger.error(f"Job {job_id} not found when starting pipeline.")
         return
+    if job.status == JobStatus.CANCELLED:
+        logger.info(f"Job {job_id} was cancelled before starting.")
+        return
 
     job_dir = job_manager.get_job_dir(job_id)
 
@@ -41,6 +44,9 @@ def run_separation_pipeline(job_id: str):
     input_file = input_files[0]
 
     try:
+        if job_manager.get_job(job_id).status == JobStatus.CANCELLED:
+            return
+
         # Stage 1: Mel-Band RoFormer
         job_manager.update_job(
             job_id,
@@ -50,6 +56,10 @@ def run_separation_pipeline(job_id: str):
         )
         stage1_out = job_dir / "stage1_temp"
         stage1_res = separator.separate_stage_1(input_file, stage1_out)
+
+        if job_manager.get_job(job_id).status == JobStatus.CANCELLED:
+            shutil.rmtree(stage1_out, ignore_errors=True)
+            return
 
         # Stage 2: UVR MDX-Net Karaoke
         job_manager.update_job(

@@ -211,6 +211,17 @@ def get_job_status(job_id: str):
         )
     return job
 
+@router.post("/jobs/{job_id}/cancel", response_model=JobRecord)
+def cancel_job(job_id: str):
+    """Cancel a queued or in-progress separation job."""
+    job = job_manager.cancel_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found."
+        )
+    return job
+
 @router.patch("/jobs/{job_id}", response_model=JobRecord)
 def update_job_metadata(job_id: str, req: JobUpdateMetadataRequest):
     """Update song title and artist metadata for a job."""
