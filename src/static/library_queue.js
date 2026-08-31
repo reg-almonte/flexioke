@@ -558,7 +558,7 @@ class SongLibraryManager {
                 this.jobs = this.jobs.filter(j => j.job_id !== deletedId);
                 this.render(this.jobs);
                 if (window.flexiokeQueue) {
-                    window.flexiokeQueue.loadState();
+                    window.flexiokeQueue.fetchQueue();
                 }
                 window.dispatchEvent(new CustomEvent('flexioke:job-deleted', { detail: { job_id: deletedId } }));
             } else {

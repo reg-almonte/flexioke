@@ -1,9 +1,12 @@
+import io
+import re
+import zipfile
 import urllib.parse
 from typing import Optional
 from pathlib import Path
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 from src.services.job_manager import job_manager
 from src.services.queue_manager import queue_manager
@@ -325,11 +328,6 @@ def export_job_stems_zip(job_id: str):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Stem '{name}' is missing on disk for job '{job_id}'."
             )
-
-    import io
-    import zipfile
-    import re
-    from fastapi.responses import Response
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:

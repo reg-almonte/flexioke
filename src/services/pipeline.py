@@ -1,3 +1,5 @@
+import re
+import urllib.parse
 import logging
 import shutil
 from pathlib import Path
@@ -102,7 +104,8 @@ def run_separation_pipeline(job_id: str):
         try:
             archive_dir = job_manager.data_dir.parent / "archive"
             archive_dir.mkdir(parents=True, exist_ok=True)
-            clean_source = (job.source_name or "audio").replace(" ", "_")
+            raw_name = Path(urllib.parse.urlparse(job.source_name or "audio").path).name or "audio.mp3"
+            clean_source = re.sub(r'[^\w\-_.]', '_', raw_name)
             dest_archive_path = archive_dir / f"{job_id}_{clean_source}"
             if input_file.exists():
                 shutil.move(str(input_file), str(dest_archive_path))
