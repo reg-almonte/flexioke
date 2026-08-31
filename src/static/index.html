@@ -584,9 +584,14 @@
             <div id="lyrics-save-status" class="text-xs text-slate-400"></div>
 
             <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-                <button id="delete-track-btn" class="px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-200 border border-rose-800/50 text-xs font-semibold flex items-center gap-1.5 transition" title="Permanently delete this song and all its stems">
-                    <span>🗑</span> Delete Track
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="delete-track-btn" class="px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-200 border border-rose-800/50 text-xs font-semibold flex items-center gap-1.5 transition" title="Permanently delete this song and all its stems">
+                        <span>🗑</span> Delete
+                    </button>
+                    <button id="modal-download-zip-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-semibold flex items-center gap-1.5 transition" title="Download all stems and lyrics as a single .zip">
+                        <span>📦</span> Export Stems (.zip)
+                    </button>
+                </div>
                 <div class="flex items-center gap-2">
                     <button id="cancel-lyrics-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
                         Cancel

@@ -22,6 +22,7 @@ class SongLibraryManager {
         this.cancelLyricsBtn = document.getElementById('cancel-lyrics-btn');
         this.saveLyricsBtn = document.getElementById('save-lyrics-btn');
         this.deleteTrackBtn = document.getElementById('delete-track-btn');
+        this.modalDownloadZipBtn = document.getElementById('modal-download-zip-btn');
         this.activeLyricsJobId = null;
 
         // Play interruption confirmation modal
@@ -137,6 +138,13 @@ class SongLibraryManager {
         }
         if (this.deleteTrackBtn) {
             this.deleteTrackBtn.addEventListener('click', () => this.handleDeleteTrack());
+        }
+        if (this.modalDownloadZipBtn) {
+            this.modalDownloadZipBtn.addEventListener('click', () => {
+                if (this.activeLyricsJobId) {
+                    window.location.href = `/api/jobs/${this.activeLyricsJobId}/export/zip`;
+                }
+            });
         }
 
         // Play confirmation modal handlers
@@ -396,6 +404,9 @@ class SongLibraryManager {
                     <button class="catalog-edit-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-brand-300 text-xs font-medium transition flex items-center gap-1" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
                         <span>📝</span> Edit
                     </button>
+                    <button class="catalog-zip-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition flex items-center gap-1" title="Export Stems .zip" data-job-id="${job.job_id}">
+                        <span>📦</span> .zip
+                    </button>
                 </div>
             `;
 
@@ -423,6 +434,13 @@ class SongLibraryManager {
                 editBtn.addEventListener('click', () => {
                     this.closeCatalogModal();
                     this.openLyricsModal(job);
+                });
+            }
+
+            const zipBtn = row.querySelector('.catalog-zip-btn');
+            if (zipBtn) {
+                zipBtn.addEventListener('click', () => {
+                    window.location.href = `/api/jobs/${job.job_id}/export/zip`;
                 });
             }
 
