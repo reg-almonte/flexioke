@@ -119,3 +119,27 @@ made while building the template itself.
 - approved_by: reg
 - notes: Version 0.2.3 fully approved and released. Includes Title & Artist Intro Splash overlay with audio pre-buffering delay, configurable Intro Splash duration (0–5s) and Countdown Cue Gap threshold (3–5s) sliders in Stage Settings, stage restart lyrics scroll-to-top (scrollTop = 0) and active highlight reset, global keyboard shortcuts (R/Home for Restart, Esc for dismissals), dual highlight color controls (--karaoke-highlight-color for border glow, --karaoke-highlight-fill for background tint), fixed 3-card Playback Queue (h-[196px]) and compact Song Library (h-[210px]) sidebars, "Stems ready" badge removal, mode-scoped Edit Details/Lyrics button visibility (strictly Stem Studio), full-screen Song Catalog Modal with real-time search, sorting, and 1-click Play Now & Add to Queue actions, and bugfixes for countdown cue active lyric suppression (BUG-0004) and Stem Studio edit button selector scoping (BUG-0005).
 
+## 2026-08-31 — Approved Requirements: Version 0.2.4 Stem Studio Upgrade & Separation Job Queue
+- artifact: docs/requirements/version0.2.4.md
+- approved_by: reg
+- notes: Requirements approved for Version 0.2.4 covering direct audio URL downloader (replacing YouTube scraper), collapsible sidebar cards in Stem Studio, expanded Studio Song Catalog modal with search/sort and editing, default recently-added sort in Studio Library, multi-upload drag-and-drop batching with FIFO sequential separation queue, smart Title/Artist filename parser, Stem Studio scratchpad notes modal (Option B), combined .zip stem & lyrics export, in-library track deletion, active queue job cancellation, and automatic post-processing raw audio archiving to ./data/archive/.
+
+## 2026-08-31 — Approved Functional Spec: Version 0.2.4 Stem Studio Upgrade & Separation Job Queue
+- artifact: docs/specs/version0.2.4.md
+- approved_by: reg
+- notes: Functional spec approved detailing 9 behavioral flows: Direct audio URL download (POST /api/jobs/download-url), collapsible sidebar accordions with localStorage persistence, expanded Studio Song Catalog modal with search/sort and editing, multi-file drag-and-drop batch upload with FIFO sequential separation worker, smart Title & Artist filename parser, persistent Stem Studio scratchpad notes modal (Option B), combined stem & lyrics .zip export (GET /api/jobs/{job_id}/export/zip), in-library track deletion (DELETE /api/jobs/{job_id}), and automatic post-separation raw audio archiving to ./data/archive/.
+
+## 2026-08-31 — Approved ADR-0007: In-Process Async FIFO Separation Worker, Streaming Zip Engine & Reactive Studio UI
+- artifact: docs/design/ADR-0007-stem-studio-upgrade-and-job-queue.md
+- approved_by: reg
+- notes: Approved Option 1 (In-Process Async FIFO Separation Worker, Streaming Zip Engine & Reactive Studio UI) delivering thread-safe sequential separation task worker, direct audio URL downloader (replacing YouTube scraper), smart Title & Artist filename parser, combined .zip stem & lyrics export, post-separation raw audio archiving to ./data/archive/, in-library track deletion, collapsible sidebar accordions, expanded Studio Song Catalog modal with editing, and persistent Stem Studio scratchpad notes modal.
+
+## 2026-08-31 — Approved Ticket Breakdown: EPIC-0006 Stem Studio Upgrade & Separation Job Queue
+- artifact: docs/tickets/EPIC-0006-stem-studio-upgrade-and-job-queue.md
+- approved_by: reg
+- notes: Approved EPIC-0006 work breakdown comprising STORY-0017 to STORY-0021 and TASK-0040 to TASK-0050 covering direct audio URL downloader, smart Title/Artist filename parser, multi-file drag-and-drop batch upload with FIFO sequential separation worker, collapsible sidebar accordions with localStorage state, persistent header notes scratchpad modal, expanded Studio Song Catalog modal, default recently-added sort order, combined .zip stem export, in-library track deletion, and post-separation audio archiving. Previous tickets archived to docs/tickets/archive/v0.2.3/.
+
+
+
+
+
