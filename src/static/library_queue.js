@@ -15,8 +15,9 @@ class SongLibraryManager {
         this.lyricsModalTitle = document.getElementById('lyrics-modal-title');
         this.lyricsEditTitle = document.getElementById('lyrics-edit-title');
         this.lyricsEditArtist = document.getElementById('lyrics-edit-artist');
-        this.lyricsTextarea = document.getElementById('lyrics-textarea');
-        this.lyricsSaveStatus = document.getElementById('lyrics-save-status');
+        this.lyricsTextarea = document.getElementById('lyrics-edit-textarea') || document.getElementById('lyrics-textarea');
+        this.lyricsSaveStatus = document.getElementById('lyrics-modal-alert') || document.getElementById('lyrics-save-status');
+        this.lyricsClearBtn = document.getElementById('lyrics-clear-btn');
         this.closeLyricsModalBtn = document.getElementById('close-lyrics-modal-btn');
         this.cancelLyricsBtn = document.getElementById('cancel-lyrics-btn');
         this.saveLyricsBtn = document.getElementById('save-lyrics-btn');
@@ -416,6 +417,7 @@ class SongLibraryManager {
             const editBtn = row.querySelector('.catalog-edit-btn');
             if (editBtn) {
                 editBtn.addEventListener('click', () => {
+                    this.closeCatalogModal();
                     this.openLyricsModal(job);
                 });
             }

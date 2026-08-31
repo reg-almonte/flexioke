@@ -549,7 +549,7 @@
     </main>
 
     <!-- Lyrics Editor Modal -->
-    <div id="lyrics-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div id="lyrics-modal" class="hidden fixed inset-0 z-[10010] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
         <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div class="truncate">
@@ -570,24 +570,23 @@
                 </div>
             </div>
 
-            <div class="space-y-2">
-                <label for="lyrics-textarea" class="text-xs text-slate-300 flex items-center justify-between">
-                    <span>Synchronized (.lrc) or Plain Text Lyrics</span>
-                    <span class="text-[10px] text-slate-500">e.g. [00:05.12] Lyric line</span>
-                </label>
-                <textarea id="lyrics-textarea" rows="8" placeholder="[00:00.00] Song starts&#10;[00:05.20] First line of lyrics&#10;[00:10.50] Second line of lyrics" class="w-full bg-surface-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-brand-500 transition resize-none custom-scrollbar"></textarea>
+            <div class="space-y-1">
+                <div class="flex items-center justify-between">
+                    <label for="lyrics-textarea" class="text-xs text-slate-300 font-medium">LRC Synchronized Lyrics Content</label>
+                    <button id="lyrics-clear-btn" class="text-[10px] text-rose-400 hover:text-rose-300 transition">Clear Lyrics</button>
+                </div>
+                <textarea id="lyrics-textarea" rows="8" placeholder="[00:12.34]Lyric line 1&#10;[00:15.67]Lyric line 2" class="w-full bg-surface-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 font-mono focus:outline-none focus:border-brand-500 transition resize-none"></textarea>
             </div>
 
+            <div id="lyrics-save-status" class="text-xs text-slate-400"></div>
+
             <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-                <span id="lyrics-save-status" class="text-xs text-slate-400"></span>
-                <div class="flex items-center gap-2">
-                    <button id="cancel-lyrics-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
-                        Cancel
-                    </button>
-                    <button id="save-lyrics-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition shadow-md shadow-brand-500/20 flex items-center gap-1.5">
-                        <span>💾</span> Save Changes
-                    </button>
-                </div>
+                <button id="cancel-lyrics-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+                    Cancel
+                </button>
+                <button id="save-lyrics-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold transition shadow-lg shadow-brand-500/20 flex items-center gap-1.5">
+                    <span>💾</span> Save Changes
+                </button>
             </div>
         </div>
     </div>
@@ -644,10 +643,10 @@
                 <div class="flex items-center gap-2 shrink-0">
                     <span class="text-xs text-slate-400 font-medium">Sort:</span>
                     <select id="catalog-sort-select" class="bg-surface-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500 cursor-pointer">
+                        <option value="recent" selected>Recently Added</option>
                         <option value="title_asc">Title (A-Z)</option>
                         <option value="title_desc">Title (Z-A)</option>
                         <option value="artist_asc">Artist (A-Z)</option>
-                        <option value="recent">Recently Added</option>
                     </select>
                 </div>
             </div>
