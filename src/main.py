@@ -12,7 +12,7 @@ STATIC_DIR = BASE_DIR / "static"
 app = FastAPI(
     title="Flexioke API",
     description="AI-Powered Audio Stem Separation & Multitrack Karaoke Web Player",
-    version="0.2.3",
+    version="0.2.4",
 )
 
 # Enable CORS for local and cross-origin usage
