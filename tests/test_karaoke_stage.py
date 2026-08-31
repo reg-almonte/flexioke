@@ -145,6 +145,74 @@ def test_dual_highlight_color_controls_in_html_and_js():
     assert "activeHighlightFillColor" in resp_js.text
     assert "--karaoke-highlight-fill" in resp_js.text
 
+def test_countdown_cue_only_triggers_on_intro_or_empty_line_interlude():
+    import subprocess
+    import shutil
+
+    node_path = shutil.which("node")
+    if not node_path:
+        return
+
+    node_script = """
+    const fs = require('fs');
+    const vm = require('vm');
+    const sandbox = {
+        document: {
+            documentElement: { style: { setProperty: () => {} } },
+            getElementById: () => ({ classList: { add: () => {}, remove: () => {}, contains: () => false }, style: {}, innerHTML: '', textContent: '', addEventListener: () => {} }),
+            querySelectorAll: () => [],
+            addEventListener: () => {}
+        },
+        window: { addEventListener: () => {} },
+        console: console,
+        setInterval: () => {},
+        setTimeout: () => {},
+        clearInterval: () => {},
+        clearTimeout: () => {},
+        localStorage: { getItem: () => null, setItem: () => {} }
+    };
+    vm.createContext(sandbox);
+    const code = fs.readFileSync('src/static/karaoke.js', 'utf8') + '; this.KaraokeStageManager = KaraokeStageManager; this.LrcParser = LrcParser;';
+    vm.runInContext(code, sandbox);
+
+    const stage = new sandbox.KaraokeStageManager();
+    stage.config = { countdownThreshold: 3 };
+
+    // Scenario:
+    // Intro 0-5s (5s >= 3s threshold) -> countdown cue SHOULD trigger at t=3.0s into line 1 at 5s.
+    // Line 1 is sung from 5s to 12s. At t=9.5s (2.5s before Line 2), Line 1 is being sung -> countdown cue MUST NOT trigger!
+    // At 20s, empty line (instrumental break) until 26s (6s >= 3s threshold). At t=24s -> countdown cue SHOULD trigger!
+    const lrc = "[00:05.00] Line 1\\n[00:12.00] Line 2\\n[00:20.00] \\n[00:26.00] Line 3";
+    stage.lyricsData = sandbox.LrcParser.parse(lrc);
+
+    let cueVisible = false;
+    stage.countdownCue = {
+        classList: {
+            remove: (cls) => { if (cls === 'hidden') cueVisible = true; },
+            add: (cls) => { if (cls === 'hidden') cueVisible = false; },
+            contains: (cls) => (cls === 'hidden' ? !cueVisible : false)
+        }
+    };
+
+    // 1. At t=3.5s (Intro, 1.5s before Line 1): MUST show cue
+    stage.updateCountdownCue(3.5);
+    if (!cueVisible) throw new Error("Expected cue visible during intro at 3.5s");
+
+    // 2. At t=9.5s (Active Line 1 sung, 2.5s before Line 2): MUST NOT show cue
+    stage.updateCountdownCue(9.5);
+    if (cueVisible) throw new Error("Cue should NOT be visible while Line 1 is being sung before Line 2");
+
+    // 3. At t=24.0s (During empty instrumental break, 2s before Line 3): MUST show cue
+    stage.updateCountdownCue(24.0);
+    if (!cueVisible) throw new Error("Expected cue visible during instrumental break at 24.0s");
+
+    console.log("OK");
+    """
+
+    proc = subprocess.run([node_path, "-e", node_script], capture_output=True, text=True)
+    assert proc.returncode == 0, f"Countdown cue evaluator failed: {proc.stderr}\n{proc.stdout}"
+
+
 
 
 
