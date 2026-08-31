@@ -68,6 +68,9 @@
         </nav>
 
         <div class="flex items-center gap-3">
+            <button id="open-notes-modal-btn" class="px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700/60 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="Studio Scratchpad & Resource Links">
+                <span>📝</span> Notes
+            </button>
             <div id="system-status" class="text-xs text-slate-400 flex items-center gap-2 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700/50">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>System Ready</span>
@@ -84,100 +87,102 @@
             <!-- Left Column: Ingestion + Studio Library + Studio Queue (4 cols) -->
             <aside class="lg:col-span-4 space-y-6 flex flex-col">
                 
-                <!-- Ingestion Card -->
-                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <!-- Ingestion Card (Accordion 1) -->
+                <section id="studio-card-add-song" class="bg-surface-900 border border-slate-800/90 rounded-2xl shadow-xl overflow-hidden transition">
+                    <button id="accordion-header-add-song" class="accordion-toggle w-full p-4 flex items-center justify-between border-b border-slate-800/80 hover:bg-slate-800/40 transition text-left cursor-pointer select-none">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
                             <span>✨</span> Add Song for Separation
                         </h2>
-                    </div>
+                        <span id="accordion-chevron-add-song" class="accordion-chevron text-slate-400 text-xs font-bold transition-transform duration-200">▾</span>
+                    </button>
 
-                    <!-- Source Tabs -->
-                    <div class="flex p-1 bg-surface-950 rounded-xl border border-slate-800/80 text-xs font-medium">
-                        <button id="tab-upload-btn" class="flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5">
-                            <span>📁</span> Upload Audio
-                        </button>
-                        <button id="tab-url-btn" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
-                            <span>🌐</span> Audio URL
-                        </button>
-                    </div>
+                    <div id="accordion-body-add-song" class="accordion-body p-5 space-y-4">
+                        <!-- Source Tabs -->
+                        <div class="flex p-1 bg-surface-950 rounded-xl border border-slate-800/80 text-xs font-medium">
+                            <button id="tab-upload-btn" class="flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5">
+                                <span>📁</span> Upload Audio
+                            </button>
+                            <button id="tab-url-btn" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5">
+                                <span>🌐</span> Audio URL
+                            </button>
+                        </div>
 
-                    <!-- Tab 1: File Upload Form -->
-                    <div id="tab-upload-content" class="space-y-4">
-                        <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-brand-500/70 hover:bg-brand-500/5 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center gap-2 group">
-                            <input type="file" id="file-input" class="hidden" accept=".mp3,.wav,.m4a,.flac,.ogg" multiple>
-                            <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-xl group-hover:scale-110 transition group-hover:bg-brand-500/20">
-                                🎵
+                        <!-- Tab 1: File Upload Form -->
+                        <div id="tab-upload-content" class="space-y-4">
+                            <div id="drop-zone" class="border-2 border-dashed border-slate-700 hover:border-brand-500/70 hover:bg-brand-500/5 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center gap-2 group">
+                                <input type="file" id="file-input" class="hidden" accept=".mp3,.wav,.m4a,.flac,.ogg" multiple>
+                                <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-xl group-hover:scale-110 transition group-hover:bg-brand-500/20">
+                                    🎵
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-slate-200">Drag & drop your audio file(s) here</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">or <span class="text-brand-400 underline">browse from computer</span></p>
+                                </div>
+                                <p class="text-[10px] text-slate-500">Single or Multiple MP3, WAV, FLAC, M4A, OGG (Max 100MB each)</p>
                             </div>
-                            <div>
-                                <p class="text-xs font-medium text-slate-200">Drag & drop your audio file(s) here</p>
-                                <p class="text-[11px] text-slate-400 mt-0.5">or <span class="text-brand-400 underline">browse from computer</span></p>
+
+                            <div id="selected-file-badge" class="hidden flex items-center justify-between p-2.5 bg-slate-800/80 border border-slate-700 rounded-lg text-xs">
+                                <div class="flex items-center gap-2 truncate">
+                                    <span>📄</span>
+                                    <span id="selected-file-name" class="font-medium text-slate-200 truncate">filename.mp3</span>
+                                    <span id="selected-file-size" class="text-[10px] text-slate-400"></span>
+                                </div>
+                                <button id="clear-file-btn" class="text-slate-400 hover:text-rose-400 p-1 text-xs">✕</button>
                             </div>
-                            <p class="text-[10px] text-slate-500">Single or Multiple MP3, WAV, FLAC, M4A, OGG (Max 100MB each)</p>
+
+                            <button id="submit-upload-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-brand-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                <span>⚡</span> Separate Stems
+                            </button>
                         </div>
 
-                        <div id="selected-file-badge" class="hidden flex items-center justify-between p-2.5 bg-slate-800/80 border border-slate-700 rounded-lg text-xs">
-                            <div class="flex items-center gap-2 truncate">
-                                <span>📄</span>
-                                <span id="selected-file-name" class="font-medium text-slate-200 truncate">filename.mp3</span>
-                                <span id="selected-file-size" class="text-[10px] text-slate-400"></span>
+                        <!-- Tab 2: Audio URL Form -->
+                        <div id="tab-url-content" class="hidden space-y-4">
+                            <div class="space-y-1.5">
+                                <label for="audio-url-input" class="text-xs font-medium text-slate-300">Direct Audio URL</label>
+                                <div class="relative">
+                                    <input type="url" id="audio-url-input" placeholder="https://example.com/audio/Song_-_Artist.mp3" class="w-full bg-surface-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
+                                </div>
+                                <p class="text-[10px] text-slate-500">Supports MP3, WAV, FLAC, M4A, OGG direct URLs (Max 100MB)</p>
                             </div>
-                            <button id="clear-file-btn" class="text-slate-400 hover:text-rose-400 p-1 text-xs">✕</button>
+
+                            <button id="submit-audio-url-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-brand-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                <span>⚡</span> Download & Separate
+                            </button>
                         </div>
 
-                        <button id="submit-upload-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-brand-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <span>⚡</span> Separate Stems
-                        </button>
-                    </div>
-
-                    <!-- Tab 2: Audio URL Form -->
-                    <div id="tab-url-content" class="hidden space-y-4">
-                        <div class="space-y-1.5">
-                            <label for="audio-url-input" class="text-xs font-medium text-slate-300">Direct Audio URL</label>
-                            <div class="relative">
-                                <input type="url" id="audio-url-input" placeholder="https://example.com/audio/Song_-_Artist.mp3" class="w-full bg-surface-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition">
+                        <!-- Live Progress Card -->
+                        <div id="processing-card" class="hidden border border-brand-500/40 bg-brand-950/20 rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-brand-300 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-brand-400 animate-ping"></span>
+                                    Separation Pipeline Active
+                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span id="progress-percent" class="text-xs font-bold text-brand-400">0%</span>
+                                    <button id="cancel-active-job-btn" class="text-slate-400 hover:text-rose-400 text-xs px-1.5 py-0.5 rounded hover:bg-slate-800 transition" title="Cancel this job">✕ Cancel</button>
+                                </div>
                             </div>
-                            <p class="text-[10px] text-slate-500">Supports MP3, WAV, FLAC, M4A, OGG direct URLs (Max 100MB)</p>
-                        </div>
 
-                        <button id="submit-audio-url-btn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold rounded-xl transition shadow-lg shadow-brand-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <span>⚡</span> Download & Separate
-                        </button>
-                    </div>
-
-                    <!-- Live Progress Card -->
-                    <div id="processing-card" class="hidden border border-brand-500/40 bg-brand-950/20 rounded-xl p-4 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold text-brand-300 flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-brand-400 animate-ping"></span>
-                                Separation Pipeline Active
-                            </span>
-                            <div class="flex items-center gap-2">
-                                <span id="progress-percent" class="text-xs font-bold text-brand-400">0%</span>
-                                <button id="cancel-active-job-btn" class="text-slate-400 hover:text-rose-400 text-xs px-1.5 py-0.5 rounded hover:bg-slate-800 transition" title="Cancel this job">✕ Cancel</button>
+                            <!-- Progress Bar -->
+                            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-brand-500 to-violet-400 transition-all duration-300 w-0"></div>
                             </div>
-                        </div>
 
-                        <!-- Progress Bar -->
-                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-brand-500 to-violet-400 transition-all duration-300 w-0"></div>
-                        </div>
+                            <div class="flex items-center justify-between text-[11px] text-slate-300">
+                                <span id="active-job-title" class="font-medium text-slate-200 truncate max-w-[180px]">Song Title</span>
+                                <span id="progress-stage-text" class="text-slate-400 truncate max-w-[150px]">Initializing...</span>
+                            </div>
 
-                        <div class="flex items-center justify-between text-[11px] text-slate-300">
-                            <span id="active-job-title" class="font-medium text-slate-200 truncate max-w-[180px]">Song Title</span>
-                            <span id="progress-stage-text" class="text-slate-400 truncate max-w-[150px]">Initializing...</span>
-                        </div>
+                            <!-- Stage Steps -->
+                            <div class="grid grid-cols-3 gap-1 text-[10px] text-center pt-1 border-t border-slate-800/80">
+                                <div id="step-ingest" class="p-1 rounded bg-slate-800/60 text-slate-400">1. Ingestion</div>
+                                <div id="step-stage1" class="p-1 rounded bg-slate-800/60 text-slate-400">2. RoFormer</div>
+                                <div id="step-stage2" class="p-1 rounded bg-slate-800/60 text-slate-400">3. Karaoke</div>
+                            </div>
 
-                        <!-- Stage Steps -->
-                        <div class="grid grid-cols-3 gap-1 text-[10px] text-center pt-1 border-t border-slate-800/80">
-                            <div id="step-ingest" class="p-1 rounded bg-slate-800/60 text-slate-400">1. Ingestion</div>
-                            <div id="step-stage1" class="p-1 rounded bg-slate-800/60 text-slate-400">2. RoFormer</div>
-                            <div id="step-stage2" class="p-1 rounded bg-slate-800/60 text-slate-400">3. Karaoke</div>
-                        </div>
-
-                        <!-- Queued Jobs List -->
-                        <div id="queued-jobs-section" class="hidden pt-2 border-t border-slate-800/80 space-y-1.5">
-                            <div class="flex items-center justify-between text-[10px] font-semibold text-slate-400">
+                            <!-- Queued Jobs List -->
+                            <div id="queued-jobs-section" class="hidden pt-2 border-t border-slate-800/80 space-y-1.5">
+                                <div class="flex items-center justify-between text-[10px] font-semibold text-slate-400">
                                 <span>WAITING IN QUEUE</span>
                                 <span id="queued-jobs-count" class="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300">0 queued</span>
                             </div>
@@ -193,17 +198,22 @@
                         </div>
                         <p id="error-message-text" class="text-[11px] text-rose-300/90 leading-relaxed"></p>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                <!-- Studio Song Library Card -->
-                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex flex-col">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <!-- Studio Song Library Card (Accordion 2) -->
+            <section id="studio-card-library" class="bg-surface-900 border border-slate-800/90 rounded-2xl shadow-xl overflow-hidden transition flex flex-col">
+                <button id="accordion-header-library" class="accordion-toggle w-full p-4 flex items-center justify-between border-b border-slate-800/80 hover:bg-slate-800/40 transition text-left cursor-pointer select-none">
+                    <div class="flex items-center gap-2">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
                             <span>📚</span> Studio Song Library
                         </h2>
                         <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
                     </div>
+                    <span id="accordion-chevron-library" class="accordion-chevron text-slate-400 text-xs font-bold transition-transform duration-200">▾</span>
+                </button>
 
+                <div id="accordion-body-library" class="accordion-body p-5 space-y-3.5 flex flex-col">
                     <!-- Search Input -->
                     <div class="relative flex items-center">
                         <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
@@ -217,26 +227,32 @@
                             No songs in library yet.<br>Upload or extract a track above!
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                <!-- Studio Playback Queue Card -->
-                <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <!-- Studio Playback Queue Card (Accordion 3) -->
+            <section id="studio-card-queue" class="bg-surface-900 border border-slate-800/90 rounded-2xl shadow-xl overflow-hidden transition">
+                <button id="accordion-header-queue" class="accordion-toggle w-full p-4 flex items-center justify-between border-b border-slate-800/80 hover:bg-slate-800/40 transition text-left cursor-pointer select-none">
+                    <div class="flex items-center gap-2">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
                             <span>📋</span> Studio Queue
                         </h2>
-                        <div class="flex items-center gap-2">
-                            <span class="queue-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
-                            <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
-                        </div>
+                        <span class="queue-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
                     </div>
+                    <div class="flex items-center gap-2">
+                        <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-0.5 rounded transition">Clear</button>
+                        <span id="accordion-chevron-queue" class="accordion-chevron text-slate-400 text-xs font-bold transition-transform duration-200">▾</span>
+                    </div>
+                </button>
 
+                <div id="accordion-body-queue" class="accordion-body p-5 space-y-3.5">
                     <div class="queue-list-container space-y-2 max-h-[180px] overflow-y-auto pr-1 custom-scrollbar">
                         <div class="queue-empty-state text-center py-4 text-slate-500 text-xs">
                             Playback queue is empty.
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
             </aside>
 
@@ -722,6 +738,44 @@
                 <button id="save-settings-btn" class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition shadow-lg shadow-brand-500/20">
                     Done
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Studio Notes / Resource Scratchpad Modal -->
+    <div id="studio-notes-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
+        <div class="bg-surface-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-surface-950">
+                <div class="flex items-center gap-2">
+                    <span class="text-base">📝</span>
+                    <h3 class="text-sm font-semibold text-white">Studio Scratchpad & Resource Links</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="notes-save-indicator" class="text-[10px] text-emerald-400 font-medium hidden">Saved</span>
+                    <button id="close-notes-modal-btn" class="text-slate-400 hover:text-white text-base p-1 rounded-lg hover:bg-slate-800 transition">✕</button>
+                </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 space-y-4 overflow-y-auto custom-scrollbar flex-1 flex flex-col">
+                <p class="text-[11px] text-slate-400">Keep quick notes, audio download URLs, chords, or track ideas. Content auto-saves locally in your browser.</p>
+                
+                <div class="flex-1 flex flex-col min-h-[220px]">
+                    <textarea id="studio-notes-textarea" class="w-full flex-1 bg-surface-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-500 font-mono leading-relaxed focus:outline-none focus:border-brand-500 transition resize-none custom-scrollbar" placeholder="Paste audio download URLs, song notes, chords, lyrics links, or stems notes here..."></textarea>
+                </div>
+
+                <!-- Parsed Clickable Links Preview -->
+                <div id="notes-links-section" class="hidden space-y-1.5 pt-2 border-t border-slate-800">
+                    <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Detected Links</p>
+                    <div id="notes-links-list" class="space-y-1 max-h-[100px] overflow-y-auto custom-scrollbar text-xs"></div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-between px-5 py-3 border-t border-slate-800 bg-surface-950/60 text-xs">
+                <span class="text-[11px] text-slate-500">Auto-saved to local browser storage</span>
+                <button id="dismiss-notes-btn" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition">Done</button>
             </div>
         </div>
     </div>

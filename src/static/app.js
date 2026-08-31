@@ -421,4 +421,140 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial check for in-flight jobs on load
     pollSeparationQueue();
+
+    // --- Sidebar Accordion Manager ---
+    const ACCORDION_STORAGE_KEY = 'flexioke_studio_accordions';
+    const defaultAccordionState = { 'add-song': true, 'library': true, 'queue': true };
+    let accordionState = { ...defaultAccordionState };
+
+    try {
+        const saved = localStorage.getItem(ACCORDION_STORAGE_KEY);
+        if (saved) {
+            accordionState = { ...defaultAccordionState, ...JSON.parse(saved) };
+        }
+    } catch (e) {
+        console.error("Failed to load accordion state:", e);
+    }
+
+    function updateAccordionUI(section, isExpanded) {
+        const body = document.getElementById(`accordion-body-${section}`);
+        const chevron = document.getElementById(`accordion-chevron-${section}`);
+        if (body) {
+            if (isExpanded) {
+                body.classList.remove('hidden');
+            } else {
+                body.classList.add('hidden');
+            }
+        }
+        if (chevron) {
+            chevron.textContent = isExpanded ? '▾' : '▸';
+        }
+    }
+
+    ['add-song', 'library', 'queue'].forEach(section => {
+        const header = document.getElementById(`accordion-header-${section}`);
+        if (header) {
+            // Initial render from state
+            updateAccordionUI(section, !!accordionState[section]);
+
+            header.addEventListener('click', (e) => {
+                // Prevent clicks on action buttons inside header (e.g. clear queue) from toggling
+                if (e.target.closest('button:not(.accordion-toggle)')) return;
+                accordionState[section] = !accordionState[section];
+                try {
+                    localStorage.setItem(ACCORDION_STORAGE_KEY, JSON.stringify(accordionState));
+                } catch (err) {}
+                updateAccordionUI(section, accordionState[section]);
+            });
+        }
+    });
+
+    // --- Studio Notes Scratchpad Manager ---
+    const NOTES_STORAGE_KEY = 'flexioke_studio_notes';
+    const openNotesModalBtn = document.getElementById('open-notes-modal-btn');
+    const closeNotesModalBtn = document.getElementById('close-notes-modal-btn');
+    const dismissNotesBtn = document.getElementById('dismiss-notes-btn');
+    const studioNotesModal = document.getElementById('studio-notes-modal');
+    const studioNotesTextarea = document.getElementById('studio-notes-textarea');
+    const notesSaveIndicator = document.getElementById('notes-save-indicator');
+    const notesLinksSection = document.getElementById('notes-links-section');
+    const notesLinksList = document.getElementById('notes-links-list');
+
+    let notesSaveTimeout = null;
+
+    function parseAndRenderLinks(text) {
+        if (!notesLinksSection || !notesLinksList) return;
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const matches = text.match(urlRegex) || [];
+        const uniqueUrls = Array.from(new Set(matches));
+
+        if (uniqueUrls.length > 0) {
+            notesLinksSection.classList.remove('hidden');
+            notesLinksList.innerHTML = uniqueUrls.map(url => `
+                <a href="${url}" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline truncate block transition flex items-center gap-1">
+                    <span>🔗</span> <span class="truncate">${url}</span>
+                </a>
+            `).join('');
+        } else {
+            notesLinksSection.classList.add('hidden');
+            notesLinksList.innerHTML = '';
+        }
+    }
+
+    if (studioNotesTextarea) {
+        // Load saved notes
+        try {
+            const savedNotes = localStorage.getItem(NOTES_STORAGE_KEY) || '';
+            studioNotesTextarea.value = savedNotes;
+            parseAndRenderLinks(savedNotes);
+        } catch (err) {}
+
+        // Auto-save on input
+        studioNotesTextarea.addEventListener('input', (e) => {
+            const text = e.target.value;
+            try {
+                localStorage.setItem(NOTES_STORAGE_KEY, text);
+            } catch (err) {}
+            parseAndRenderLinks(text);
+
+            if (notesSaveIndicator) {
+                notesSaveIndicator.classList.remove('hidden');
+                if (notesSaveTimeout) clearTimeout(notesSaveTimeout);
+                notesSaveTimeout = setTimeout(() => {
+                    notesSaveIndicator.classList.add('hidden');
+                }, 1500);
+            }
+        });
+    }
+
+    const openNotesModal = () => {
+        if (studioNotesModal) {
+            studioNotesModal.classList.remove('hidden');
+            if (studioNotesTextarea) {
+                studioNotesTextarea.focus();
+            }
+        }
+    };
+
+    const closeNotesModal = () => {
+        if (studioNotesModal) {
+            studioNotesModal.classList.add('hidden');
+        }
+    };
+
+    if (openNotesModalBtn) openNotesModalBtn.addEventListener('click', openNotesModal);
+    if (closeNotesModalBtn) closeNotesModalBtn.addEventListener('click', closeNotesModal);
+    if (dismissNotesBtn) dismissNotesBtn.addEventListener('click', closeNotesModal);
+
+    if (studioNotesModal) {
+        studioNotesModal.addEventListener('click', (e) => {
+            if (e.target === studioNotesModal) closeNotesModal();
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && studioNotesModal && !studioNotesModal.classList.contains('hidden')) {
+            closeNotesModal();
+        }
+    });
 });

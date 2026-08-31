@@ -16,6 +16,12 @@ def test_index_page_structure():
     assert "cancel-active-job-btn" in html
     assert "queued-jobs-section" in html
     assert 'type="file"' in html and 'multiple' in html
+    assert "accordion-header-add-song" in html
+    assert "accordion-header-library" in html
+    assert "accordion-header-queue" in html
+    assert "open-notes-modal-btn" in html
+    assert "studio-notes-modal" in html
+    assert "studio-notes-textarea" in html
     assert "/static/app.js" in html
     assert "/static/styles.css" in html
 
