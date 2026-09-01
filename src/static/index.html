@@ -573,6 +573,20 @@
                 </div>
             </div>
 
+            <!-- Auto-Fetch LRC Action Toolbar -->
+            <div class="flex items-center justify-between p-2.5 bg-surface-950/80 border border-slate-800/80 rounded-xl">
+                <div class="flex items-center gap-2 text-[11px] text-slate-300">
+                    <span class="text-sm">🌐</span>
+                    <span class="text-slate-400">Fetch synchronized LRC lyrics from <strong class="text-slate-200">LRCLIB</strong></span>
+                </div>
+                <button id="fetch-lrclib-btn" type="button" class="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm" title="Search LRCLIB using Title and Artist">
+                    <span id="fetch-lrclib-icon">⚡</span>
+                    <span id="fetch-lrclib-text">Auto-Fetch LRC</span>
+                </button>
+            </div>
+
+            <div id="lrclib-fetch-alert" class="hidden text-xs p-2 rounded-xl border"></div>
+
             <div class="space-y-1">
                 <div class="flex items-center justify-between">
                     <label for="lyrics-textarea" class="text-xs text-slate-300 font-medium">LRC Synchronized Lyrics Content</label>

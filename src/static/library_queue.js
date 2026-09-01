@@ -23,6 +23,10 @@ class SongLibraryManager {
         this.saveLyricsBtn = document.getElementById('save-lyrics-btn');
         this.deleteTrackBtn = document.getElementById('delete-track-btn');
         this.modalDownloadZipBtn = document.getElementById('modal-download-zip-btn');
+        this.fetchLrclibBtn = document.getElementById('fetch-lrclib-btn');
+        this.fetchLrclibIcon = document.getElementById('fetch-lrclib-icon');
+        this.fetchLrclibText = document.getElementById('fetch-lrclib-text');
+        this.lrclibFetchAlert = document.getElementById('lrclib-fetch-alert');
         this.activeLyricsJobId = null;
 
         // Play interruption confirmation modal
@@ -145,6 +149,9 @@ class SongLibraryManager {
                     window.location.href = `/api/jobs/${this.activeLyricsJobId}/export/zip`;
                 }
             });
+        }
+        if (this.fetchLrclibBtn) {
+            this.fetchLrclibBtn.addEventListener('click', () => this.handleFetchLrclib());
         }
 
         // Play confirmation modal handlers
@@ -465,6 +472,10 @@ class SongLibraryManager {
         if (this.lyricsSaveStatus) {
             this.lyricsSaveStatus.textContent = "";
         }
+        if (this.lrclibFetchAlert) {
+            this.lrclibFetchAlert.className = 'hidden text-xs p-2 rounded-xl border';
+            this.lrclibFetchAlert.textContent = '';
+        }
         if (this.lyricsModal) {
             this.lyricsModal.classList.remove('hidden');
         }
@@ -482,6 +493,66 @@ class SongLibraryManager {
             if (this.lyricsTextarea) {
                 this.lyricsTextarea.value = "";
             }
+        }
+    }
+
+    async handleFetchLrclib() {
+        const title = this.lyricsEditTitle ? this.lyricsEditTitle.value.trim() : "";
+        const artist = this.lyricsEditArtist ? this.lyricsEditArtist.value.trim() : "";
+
+        if (!title) {
+            this.showLrclibAlert("Please enter a Song Title before fetching lyrics.", "warning");
+            return;
+        }
+
+        // Set loading state
+        if (this.fetchLrclibBtn) this.fetchLrclibBtn.disabled = true;
+        if (this.fetchLrclibIcon) this.fetchLrclibIcon.textContent = "⏳";
+        if (this.fetchLrclibText) this.fetchLrclibText.textContent = "Fetching...";
+        this.showLrclibAlert("Searching LRCLIB for synchronized lyrics...", "info");
+
+        try {
+            const params = new URLSearchParams({ title });
+            if (artist) params.append("artist", artist);
+
+            const resp = await fetch(`/api/lyrics/lrclib/get?${params.toString()}`);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data.found && data.lyrics) {
+                    if (this.lyricsTextarea) {
+                        this.lyricsTextarea.value = data.lyrics;
+                    }
+                    const typeMsg = data.has_timestamps ? "Synchronized (.lrc)" : "Plain";
+                    this.showLrclibAlert(`✓ ${typeMsg} lyrics loaded from LRCLIB! Click "Save Changes" to apply.`, "success");
+                } else {
+                    this.showLrclibAlert(`⚠️ No matching lyrics found on LRCLIB for "${title}". Try adjusting Title/Artist keywords.`, "warning");
+                }
+            } else {
+                this.showLrclibAlert("⚠️ Failed to reach LRCLIB service. Please try again.", "error");
+            }
+        } catch (err) {
+            console.error("Error fetching from LRCLIB:", err);
+            this.showLrclibAlert("⚠️ Network error while fetching lyrics.", "error");
+        } finally {
+            if (this.fetchLrclibBtn) this.fetchLrclibBtn.disabled = false;
+            if (this.fetchLrclibIcon) this.fetchLrclibIcon.textContent = "⚡";
+            if (this.fetchLrclibText) this.fetchLrclibText.textContent = "Auto-Fetch LRC";
+        }
+    }
+
+    showLrclibAlert(message, type = "info") {
+        if (!this.lrclibFetchAlert) return;
+        this.lrclibFetchAlert.textContent = message;
+        this.lrclibFetchAlert.className = 'text-xs p-2.5 rounded-xl border transition animate-fade-in ';
+
+        if (type === "success") {
+            this.lrclibFetchAlert.className += 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300';
+        } else if (type === "warning") {
+            this.lrclibFetchAlert.className += 'bg-amber-950/40 border-amber-800/60 text-amber-300';
+        } else if (type === "error") {
+            this.lrclibFetchAlert.className += 'bg-rose-950/40 border-rose-800/60 text-rose-300';
+        } else {
+            this.lrclibFetchAlert.className += 'bg-slate-900 border-slate-800 text-slate-300';
         }
     }
 
