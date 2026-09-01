@@ -8,7 +8,7 @@ MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024  # 100 MB
 def parse_song_and_artist(filename: str) -> Tuple[str, str]:
     """
     Parses a filename into (title, artist).
-    Handles '<Song Title> - <Artist>.<ext>', stripping leading track numbers
+    Handles '<Artist> - <Song Title>.<ext>', stripping leading track numbers
     and normalizing underscores to spaces.
     """
     stem = Path(filename).stem

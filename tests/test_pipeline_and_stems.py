@@ -95,3 +95,36 @@ def test_stem_streaming_invalid_stem(mock_job_environment):
     resp = client.get(f"/api/jobs/{job.job_id}/stems/invalid_stem")
     assert resp.status_code == 400
     assert "invalid stem type" in resp.json()["detail"].lower()
+
+def test_pipeline_auto_sync_lyrics(mock_job_environment, monkeypatch):
+    job = mock_job_environment.create_job(
+        source_type=SourceType.UPLOAD,
+        source_name="valley_last_birthday.mp3",
+        title="Last Birthday",
+        artist="Valley"
+    )
+    job_dir = mock_job_environment.get_job_dir(job.job_id)
+    input_file = job_dir / "input.mp3"
+    input_file.write_bytes(b"dummy audio")
+
+    from src.services import pipeline
+    from src.services.separator import Stage1Result, Stage2Result, FinalStems
+
+    monkeypatch.setattr(pipeline.separator, "separate_stage_1", lambda inp, out: Stage1Result(instrumental_path=out/"i.wav", vocals_path=out/"v.wav"))
+    monkeypatch.setattr(pipeline.separator, "separate_stage_2", lambda voc, out: Stage2Result(lead_vocals_path=out/"l.wav", backing_vocals_path=out/"b.wav"))
+    monkeypatch.setattr(pipeline.separator, "encode_final_stems", lambda s1, s2, jd: FinalStems(instrumental=jd/"i.mp3", lead_vocals=jd/"l.mp3", backing_vocals=jd/"b.mp3"))
+
+    mock_lyrics = {
+        "found": True,
+        "lyrics": "[00:08.02] I wanted to talk\n[00:12.03] You wanted to sleep",
+        "has_timestamps": True
+    }
+    monkeypatch.setattr(pipeline.lrclib_client, "get_lyrics", lambda track_name, artist_name: mock_lyrics)
+
+    pipeline.run_separation_pipeline(job.job_id)
+
+    # Verify lyrics.lrc was created automatically
+    lyrics_file = job_dir / "lyrics.lrc"
+    assert lyrics_file.exists()
+    assert "[00:08.02] I wanted to talk" in lyrics_file.read_text(encoding="utf-8")
+

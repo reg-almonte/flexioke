@@ -14,6 +14,7 @@ from src.services.audio_validator import validate_audio_file, clean_song_title, 
 from src.services.audio_downloader import validate_audio_url, download_audio_url
 from src.services.youtube_downloader import validate_youtube_url, download_youtube_audio
 from src.services.pipeline import run_separation_pipeline, VALID_STEM_TYPES
+from src.services.lrclib_client import lrclib_client
 from src.models import (
     JobRecord,
     JobListResponse,
@@ -390,6 +391,22 @@ def save_song_lyrics(job_id: str, req: LyricsUpdateRequest):
             detail=f"Job '{job_id}' not found."
         )
     return job_manager.save_lyrics(job_id, req.lyrics)
+
+@router.get("/lyrics/lrclib/get")
+def get_lrclib_lyrics(
+    title: str = Query(..., description="Song track name"),
+    artist: Optional[str] = Query(None, description="Artist name"),
+    duration: Optional[float] = Query(None, description="Track duration in seconds")
+):
+    """Proxy endpoint to fetch lyrics from LRCLIB with fallback to search."""
+    return lrclib_client.get_lyrics(track_name=title, artist_name=artist, duration=duration)
+
+@router.get("/lyrics/lrclib/search")
+def search_lrclib_lyrics(
+    q: str = Query(..., description="Search query keywords")
+):
+    """Proxy endpoint to search candidate tracks on LRCLIB."""
+    return {"results": lrclib_client.search_lyrics(q)}
 
 # --- Playback Queue Endpoints ---
 

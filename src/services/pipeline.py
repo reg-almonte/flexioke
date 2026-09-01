@@ -7,6 +7,7 @@ from typing import Optional
 
 from src.models import JobStatus
 from src.services.job_manager import job_manager
+from src.services.lrclib_client import lrclib_client
 from src.services import separator
 
 logger = logging.getLogger("flexioke.pipeline")
@@ -112,6 +113,24 @@ def run_separation_pipeline(job_id: str):
                 logger.info(f"[{job_id}] Archived raw input audio to {dest_archive_path}")
         except Exception as archive_err:
             logger.warning(f"[{job_id}] Failed to archive input audio: {archive_err}")
+
+        # Automated LRCLIB lyrics synchronization
+        try:
+            lyrics_path = job_dir / "lyrics.lrc"
+            if not lyrics_path.exists() or lyrics_path.stat().st_size == 0:
+                current_job = job_manager.get_job(job_id)
+                track_title = current_job.title if (current_job and current_job.title) else job.title
+                track_artist = current_job.artist if (current_job and current_job.artist) else job.artist
+                logger.info(f"[{job_id}] Auto-fetching lyrics from LRCLIB for '{track_title}' ('{track_artist}')")
+                lyrics_data = lrclib_client.get_lyrics(
+                    track_name=track_title,
+                    artist_name=track_artist
+                )
+                if lyrics_data and lyrics_data.get("found") and lyrics_data.get("lyrics"):
+                    lyrics_path.write_text(lyrics_data["lyrics"], encoding="utf-8")
+                    logger.info(f"[{job_id}] Successfully auto-synchronized lyrics from LRCLIB (has_timestamps={lyrics_data.get('has_timestamps')})")
+        except Exception as lyrics_err:
+            logger.warning(f"[{job_id}] Background LRCLIB lyrics sync failed (non-fatal): {lyrics_err}")
 
         job_manager.update_job(
             job_id,
