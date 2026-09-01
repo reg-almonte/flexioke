@@ -10,6 +10,7 @@ env/
 data/jobs/
 data/models/
 data/*.zip
+data/archive/
 *.zip
 *.egg-info/
 dist/
