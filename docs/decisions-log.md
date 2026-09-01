@@ -143,3 +143,23 @@ made while building the template itself.
 - artifact: docs/releases/v0.2.4.md
 - approved_by: reg
 - notes: Version 0.2.4 fully approved and released. Includes streaming direct audio URL downloader (POST /api/jobs/download-url), smart Title/Artist delimiter parsing engine, multi-file drag-and-drop batch upload, asynchronous FIFO sequential separation queue worker (ThreadPoolExecutor) with live cancellation, collapsible sidebar accordions with localStorage persistence, persistent Studio Notes scratchpad modal with auto-save and clickable URL previews, expanded Studio Song Catalog modal with real-time search/sort and editing, default Recently Added sort for Stem Studio library, dynamic streaming stem & lyrics .zip bundler (GET /api/jobs/{job_id}/export/zip), permanent track deletion with cascading storage cleanup (DELETE /api/jobs/{job_id}), and automatic post-separation raw audio archiving to ./data/archive/.
+
+## 2026-09-01 — Approved Requirements: Version 0.2.5 Automated LRCLIB Synchronized Lyrics Integration
+- artifact: docs/requirements/version0.2.5.md
+- approved_by: reg
+- notes: Approved requirements for Version 0.2.5 covering background auto-fetching of synchronized LRC lyrics from LRCLIB.net during ingestion/separation pipeline, interactive 1-click "Auto-Fetch from LRCLIB" in Song Details & Lyrics editor modal, and backend LRCLIB client proxy service with resilient error handling.
+
+## 2026-09-01 — Approved Functional Spec: Version 0.2.5 Automated LRCLIB Synchronized Lyrics Integration
+- artifact: docs/specs/version0.2.5.md
+- approved_by: reg
+- notes: Functional spec approved detailing LRCLIB client service (src/services/lrclib_client.py), automated pipeline ingestion lyrics synchronization (src/services/pipeline.py), interactive 1-click auto-fetch in lyrics modal (src/static/library_queue.js), and REST proxy endpoints (GET /api/lyrics/lrclib/get and /search).
+
+## 2026-09-01 — Approved ADR-0008: In-Process LRCLIB Client with Dual Pipeline Auto-Sync & Interactive Proxy
+- artifact: docs/design/ADR-0008-lrclib-synchronized-lyrics-integration.md
+- approved_by: reg
+- notes: Approved Option 1 (In-Process Python LRCLIB Client with Dual Pipeline Auto-Sync & Interactive REST Proxy) delivering lightweight HTTP LRCLIB client service (src/services/lrclib_client.py), automated background lyrics synchronization in separation pipeline (src/services/pipeline.py), REST proxy endpoints (GET /api/lyrics/lrclib/get and /search), and 1-click interactive auto-fetch inside the Song Details & Lyrics editor modal.
+
+## 2026-09-01 — Approved Ticket Breakdown: EPIC-0007 Automated LRCLIB Synchronized Lyrics Integration
+- artifact: docs/tickets/EPIC-0007-lrclib-lyrics-integration.md
+- approved_by: reg
+- notes: Approved EPIC-0007 work breakdown comprising STORY-0022 and STORY-0023 across TASK-0051 to TASK-0053 covering in-process LRCLIB client module, proxy REST endpoints, automated pipeline ingestion lyrics synchronization, and interactive 1-click auto-fetch in Song Details & Lyrics modal. Previous tickets archived to docs/tickets/archive/v0.2.4/.
