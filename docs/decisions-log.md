@@ -163,3 +163,8 @@ made while building the template itself.
 - artifact: docs/tickets/EPIC-0007-lrclib-lyrics-integration.md
 - approved_by: reg
 - notes: Approved EPIC-0007 work breakdown comprising STORY-0022 and STORY-0023 across TASK-0051 to TASK-0053 covering in-process LRCLIB client module, proxy REST endpoints, automated pipeline ingestion lyrics synchronization, and interactive 1-click auto-fetch in Song Details & Lyrics modal. Previous tickets archived to docs/tickets/archive/v0.2.4/.
+
+## 2026-09-01 — Approved Release v0.2.5: Automated LRCLIB Synchronized Lyrics Integration
+- artifact: docs/releases/v0.2.5.md
+- approved_by: reg
+- notes: Version 0.2.5 fully approved and released. Includes in-process LRCLIB HTTP client module (src/services/lrclib_client.py), REST proxy endpoints (GET /api/lyrics/lrclib/get & /search), automated background lyrics auto-sync during separation pipeline (src/services/pipeline.py), interactive 1-click Auto-Fetch LRC action bar and status banners in Song Details & Lyrics modal (src/static/index.html & library_queue.js), and smart filename parser alignment for standard <Artist> - <Song Title> format.
