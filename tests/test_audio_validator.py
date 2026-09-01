@@ -2,16 +2,16 @@ import pytest
 from src.services.audio_validator import clean_song_title, parse_song_and_artist, validate_audio_file
 
 def test_parse_song_and_artist_with_hyphen():
-    title, artist = parse_song_and_artist("Bohemian Rhapsody - Queen.mp3")
+    title, artist = parse_song_and_artist("Queen - Bohemian Rhapsody.mp3")
     assert title == "Bohemian Rhapsody"
     assert artist == "Queen"
 
 def test_parse_song_and_artist_with_track_number_prefix():
-    title, artist = parse_song_and_artist("01. Hotel California - Eagles.flac")
+    title, artist = parse_song_and_artist("01. Eagles - Hotel California.flac")
     assert title == "Hotel California"
     assert artist == "Eagles"
 
-    title2, artist2 = parse_song_and_artist("02 - Sweet_Child_O_Mine - Guns_N_Roses.mp3")
+    title2, artist2 = parse_song_and_artist("02 - Guns_N_Roses - Sweet_Child_O_Mine.mp3")
     assert title2 == "Sweet Child O Mine"
     assert artist2 == "Guns N Roses"
 

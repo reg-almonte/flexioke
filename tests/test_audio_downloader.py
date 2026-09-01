@@ -48,7 +48,7 @@ def test_download_audio_url_mock(monkeypatch, tmp_path):
     monkeypatch.setattr(urllib.request, "urlopen", mock_urlopen)
 
     dest = tmp_path / "input.mp3"
-    info = download_audio_url("https://example.com/music/Bohemian_Rhapsody_-_Queen.mp3", dest)
+    info = download_audio_url("https://example.com/music/Queen_-_Bohemian_Rhapsody.mp3", dest)
     assert dest.exists()
     assert dest.stat().st_size == 100
     assert info["title"] == "Bohemian Rhapsody"

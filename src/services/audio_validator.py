@@ -22,8 +22,8 @@ def parse_song_and_artist(filename: str) -> Tuple[str, str]:
 
     if " - " in stem_normalized:
         parts = stem_normalized.split(" - ", 1)
-        title = re.sub(r"_+", " ", parts[0]).strip()
-        artist = re.sub(r"_+", " ", parts[1]).strip()
+        artist = re.sub(r"_+", " ", parts[0]).strip()
+        title = re.sub(r"_+", " ", parts[1]).strip()
         return (title or "Untitled Track", artist or "Unknown Artist")
     
     title = re.sub(r"[_\-]+", " ", stem_cleaned).strip()

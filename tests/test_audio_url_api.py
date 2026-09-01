@@ -29,7 +29,7 @@ def test_download_url_endpoint_success(monkeypatch, tmp_path):
 
     resp = client.post(
         "/api/jobs/download-url",
-        json={"url": "https://example.com/audio/01._Bohemian_Rhapsody_-_Queen.mp3"}
+        json={"url": "https://example.com/audio/01._Queen_-_Bohemian_Rhapsody.mp3"}
     )
     assert resp.status_code == 202
     data = resp.json()
