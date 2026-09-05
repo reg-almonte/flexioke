@@ -111,6 +111,21 @@ def test_javascript_static_files_syntax():
         proc = subprocess.run([node_path, "-c", str(js_file)], capture_output=True, text=True)
         assert proc.returncode == 0, f"JS Syntax error in {js_file}: {proc.stderr}"
 
+def test_karaoke_sidebar_accordions():
+    resp_html = client.get("/")
+    assert resp_html.status_code == 200
+    assert "accordion-header-karaoke-queue" in resp_html.text
+    assert "accordion-body-karaoke-queue" in resp_html.text
+    assert "accordion-chevron-karaoke-queue" in resp_html.text
+    assert "accordion-header-karaoke-library" in resp_html.text
+    assert "accordion-body-karaoke-library" in resp_html.text
+    assert "accordion-chevron-karaoke-library" in resp_html.text
+
+    resp_js = client.get("/static/karaoke.js")
+    assert resp_js.status_code == 200
+    assert "initKaraokeAccordions" in resp_js.text
+    assert "flexioke_karaoke_accordions" in resp_js.text
+
 
 
 

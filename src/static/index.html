@@ -381,46 +381,52 @@
                 
                 <!-- Karaoke Playback Queue Card (Top) -->
                 <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <div id="accordion-header-karaoke-queue" role="button" tabindex="0" class="cursor-pointer select-none flex items-center justify-between border-b border-slate-800 pb-2.5">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
                             <span>📋</span> Playback Queue
                         </h2>
                         <div class="flex items-center gap-2">
                             <span class="queue-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
-                            <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
+                            <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition" title="Clear all queued songs">Clear</button>
+                            <span id="accordion-chevron-karaoke-queue" class="accordion-toggle text-slate-400 text-xs font-mono ml-1">▾</span>
                         </div>
                     </div>
 
-                    <div class="queue-list-container space-y-2 h-[196px] overflow-y-auto pr-1 custom-scrollbar">
-                        <div class="queue-empty-state h-full flex items-center justify-center text-center py-4 text-slate-500 text-xs">
-                            Karaoke queue is empty.
+                    <div id="accordion-body-karaoke-queue" class="space-y-3.5">
+                        <div class="queue-list-container space-y-2 h-[196px] overflow-y-auto pr-1 custom-scrollbar">
+                            <div class="queue-empty-state h-full flex items-center justify-center text-center py-4 text-slate-500 text-xs">
+                                Karaoke queue is empty.
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 <!-- Karaoke Song Library Card (Bottom) -->
                 <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex flex-col">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <div id="accordion-header-karaoke-library" role="button" tabindex="0" class="cursor-pointer select-none flex items-center justify-between border-b border-slate-800 pb-2.5">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
                             <span>🎤</span> Song Library
                         </h2>
                         <div class="flex items-center gap-2">
                             <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
                             <button id="open-catalog-modal-btn" class="text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800 transition text-sm flex items-center gap-1" title="Open Full Song Catalog">⛶</button>
+                            <span id="accordion-chevron-karaoke-library" class="accordion-toggle text-slate-400 text-xs font-mono ml-1">▾</span>
                         </div>
                     </div>
 
-                    <!-- Search Input -->
-                    <div class="relative flex items-center">
-                        <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
-                        <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title or artist...">
-                        <button class="library-search-clear-btn hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-200 text-xs transition select-none" title="Clear search">✕</button>
-                    </div>
+                    <div id="accordion-body-karaoke-library" class="space-y-3.5 flex flex-col">
+                        <!-- Search Input -->
+                        <div class="relative flex items-center">
+                            <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
+                            <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title or artist...">
+                            <button class="library-search-clear-btn hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-200 text-xs transition select-none" title="Clear search">✕</button>
+                        </div>
 
-                    <!-- Library List Container -->
-                    <div id="karaoke-library-list" class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar h-[210px]">
-                        <div class="library-empty-state h-full flex items-center justify-center text-center py-6 text-slate-500 text-xs">
-                            No songs available.<br>Process songs in Stem Studio!
+                        <!-- Library List Container -->
+                        <div id="karaoke-library-list" class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar h-[210px]">
+                            <div class="library-empty-state h-full flex items-center justify-center text-center py-6 text-slate-500 text-xs">
+                                No songs available.<br>Process songs in Stem Studio!
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -586,6 +592,26 @@
             </div>
 
             <div id="lrclib-fetch-alert" class="hidden text-xs p-2 rounded-xl border"></div>
+
+            <!-- LRC Timestamp Calibration Toolbar -->
+            <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-surface-950/80 border border-slate-800/80 rounded-xl text-xs">
+                <div class="flex items-center gap-1.5 text-slate-300 font-medium">
+                    <span class="text-sm">⏱️</span>
+                    <span class="text-slate-300">Time-Shift:</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button type="button" class="lyrics-shift-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 text-[11px] font-mono transition" data-shift="-0.5" title="Subtract 0.5 seconds from all timestamps">-0.5s</button>
+                    <button type="button" class="lyrics-shift-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 text-[11px] font-mono transition" data-shift="-0.1" title="Subtract 0.1 seconds from all timestamps">-0.1s</button>
+                    <button type="button" class="lyrics-shift-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 text-[11px] font-mono transition" data-shift="0.1" title="Add 0.1 seconds to all timestamps">+0.1s</button>
+                    <button type="button" class="lyrics-shift-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 text-[11px] font-mono transition" data-shift="0.5" title="Add 0.5 seconds to all timestamps">+0.5s</button>
+                </div>
+                <div class="flex items-center gap-1">
+                    <input type="number" id="lyrics-custom-shift-input" step="0.1" placeholder="±sec" class="w-16 bg-surface-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-slate-200 placeholder-slate-500 font-mono focus:outline-none focus:border-brand-500" title="Enter positive or negative seconds (e.g. 1.2 or -0.8)">
+                    <button type="button" id="lyrics-custom-shift-btn" class="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-[11px] font-semibold transition" title="Apply custom time shift">Apply</button>
+                </div>
+            </div>
+
+            <div id="lyrics-shift-alert" class="hidden text-xs p-2 rounded-xl border"></div>
 
             <div class="space-y-1">
                 <div class="flex items-center justify-between">

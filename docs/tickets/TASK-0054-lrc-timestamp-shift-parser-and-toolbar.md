@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-05
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0054: Client-Side LRC Timestamp Shift Parser & Calibration Toolbar UI
@@ -17,7 +17,12 @@ implementation: pending
 4. Add automated tests in `tests/test_lyrics_modal_frontend.py`.
 
 ## Acceptance Criteria
-- [ ] `shiftLrcTimestamps` correctly shifts timestamp lines and clamps at 0.
-- [ ] Toolbar UI renders properly in `#lyrics-modal`.
-- [ ] Quick buttons and custom input update `#lyrics-textarea` in place.
-- [ ] Automated tests pass cleanly.
+- [x] `shiftLrcTimestamps` correctly shifts timestamp lines and clamps at 0.
+- [x] Toolbar UI renders properly in `#lyrics-modal`.
+- [x] Quick buttons and custom input update `#lyrics-textarea` in place.
+- [x] Automated tests pass cleanly.
+
+## Implementation
+- Added Time-Shift Calibration Toolbar (`-0.5s`, `-0.1s`, `+0.1s`, `+0.5s`, custom offset input, `Apply` button) and `#lyrics-shift-alert` banner in `#lyrics-modal` in `src/static/index.html`.
+- Implemented `shiftLrcTimestamps(text, deltaSeconds)`, `handleShiftLrc()`, and `showLyricsShiftAlert()` in `src/static/library_queue.js`.
+- Added test coverage in `tests/test_lyrics_modal_frontend.py`.

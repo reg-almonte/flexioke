@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class LRCLIBClient:
     """In-process HTTP client for the public LRCLIB API."""
     BASE_URL = "https://lrclib.net/api"
-    USER_AGENT = "Flexioke/0.2.5 (https://github.com/reg-almonte/flexioke)"
+    USER_AGENT = "Flexioke/0.2.6 (https://github.com/reg-almonte/flexioke)"
     TIMEOUT = 5.0
 
     def __init__(self, base_url: str = BASE_URL, timeout: float = TIMEOUT):
