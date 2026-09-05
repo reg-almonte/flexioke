@@ -27,6 +27,9 @@ class SongLibraryManager {
         this.fetchLrclibIcon = document.getElementById('fetch-lrclib-icon');
         this.fetchLrclibText = document.getElementById('fetch-lrclib-text');
         this.lrclibFetchAlert = document.getElementById('lrclib-fetch-alert');
+        this.lyricsShiftAlert = document.getElementById('lyrics-shift-alert');
+        this.lyricsCustomShiftInput = document.getElementById('lyrics-custom-shift-input');
+        this.lyricsCustomShiftBtn = document.getElementById('lyrics-custom-shift-btn');
         this.activeLyricsJobId = null;
 
         // Play interruption confirmation modal
@@ -152,6 +155,28 @@ class SongLibraryManager {
         }
         if (this.fetchLrclibBtn) {
             this.fetchLrclibBtn.addEventListener('click', () => this.handleFetchLrclib());
+        }
+
+        // LRC Time-Shift calibration button listeners
+        document.querySelectorAll('.lyrics-shift-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const delta = parseFloat(e.currentTarget.getAttribute('data-shift'));
+                if (!isNaN(delta)) {
+                    this.handleShiftLrc(delta);
+                }
+            });
+        });
+        if (this.lyricsCustomShiftBtn) {
+            this.lyricsCustomShiftBtn.addEventListener('click', () => {
+                if (this.lyricsCustomShiftInput) {
+                    const val = parseFloat(this.lyricsCustomShiftInput.value);
+                    if (!isNaN(val)) {
+                        this.handleShiftLrc(val);
+                    } else {
+                        this.showLyricsShiftAlert("Please enter a valid seconds offset (e.g. 0.5 or -0.5).", "warning");
+                    }
+                }
+            });
         }
 
         // Play confirmation modal handlers
@@ -476,6 +501,13 @@ class SongLibraryManager {
             this.lrclibFetchAlert.className = 'hidden text-xs p-2 rounded-xl border';
             this.lrclibFetchAlert.textContent = '';
         }
+        if (this.lyricsShiftAlert) {
+            this.lyricsShiftAlert.className = 'hidden text-xs p-2 rounded-xl border';
+            this.lyricsShiftAlert.textContent = '';
+        }
+        if (this.lyricsCustomShiftInput) {
+            this.lyricsCustomShiftInput.value = '';
+        }
         if (this.lyricsModal) {
             this.lyricsModal.classList.remove('hidden');
         }
@@ -493,6 +525,58 @@ class SongLibraryManager {
             if (this.lyricsTextarea) {
                 this.lyricsTextarea.value = "";
             }
+        }
+    }
+
+    shiftLrcTimestamps(text, deltaSeconds) {
+        if (!text || typeof text !== 'string') return { text: text || "", count: 0 };
+        let count = 0;
+        // Matches [MM:SS.xx] or [MM:SS.xxx]
+        const regex = /\[(\d{2}):(\d{2}(?:\.\d{1,3})?)\]/g;
+        const shiftedText = text.replace(regex, (match, minsStr, secsStr) => {
+            const mins = parseInt(minsStr, 10);
+            const secs = parseFloat(secsStr);
+            if (isNaN(mins) || isNaN(secs)) return match;
+            const totalSecs = mins * 60 + secs + deltaSeconds;
+            const clampedSecs = Math.max(0, totalSecs);
+            const newMins = Math.floor(clampedSecs / 60);
+            const newSecs = clampedSecs % 60;
+            count++;
+            return `[${String(newMins).padStart(2, '0')}:${newSecs.toFixed(2).padStart(5, '0')}]`;
+        });
+        return { text: shiftedText, count };
+    }
+
+    handleShiftLrc(deltaSeconds) {
+        if (!this.lyricsTextarea) return;
+        const original = this.lyricsTextarea.value;
+        if (!original || !original.trim()) {
+            this.showLyricsShiftAlert("No lyrics in editor to time-shift.", "warning");
+            return;
+        }
+        const result = this.shiftLrcTimestamps(original, deltaSeconds);
+        if (result.count === 0) {
+            this.showLyricsShiftAlert("No timestamped lines found to shift.", "warning");
+            return;
+        }
+        this.lyricsTextarea.value = result.text;
+        const sign = deltaSeconds >= 0 ? `+${deltaSeconds.toFixed(2)}` : `${deltaSeconds.toFixed(2)}`;
+        this.showLyricsShiftAlert(`✓ Shifted timestamps by ${sign}s (${result.count} line${result.count === 1 ? '' : 's'} updated). Click "Save Changes" to apply.`, "success");
+    }
+
+    showLyricsShiftAlert(message, type = "info") {
+        if (!this.lyricsShiftAlert) return;
+        this.lyricsShiftAlert.textContent = message;
+        this.lyricsShiftAlert.className = 'text-xs p-2.5 rounded-xl border transition animate-fade-in ';
+
+        if (type === "success") {
+            this.lyricsShiftAlert.className += 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300';
+        } else if (type === "warning") {
+            this.lyricsShiftAlert.className += 'bg-amber-950/40 border-amber-800/60 text-amber-300';
+        } else if (type === "error") {
+            this.lyricsShiftAlert.className += 'bg-rose-950/40 border-rose-800/60 text-rose-300';
+        } else {
+            this.lyricsShiftAlert.className += 'bg-slate-900 border-slate-800 text-slate-300';
         }
     }
 

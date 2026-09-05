@@ -587,6 +587,26 @@
 
             <div id="lrclib-fetch-alert" class="hidden text-xs p-2 rounded-xl border"></div>
 
+            <!-- LRC Timestamp Calibration Toolbar -->
+            <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-surface-950/80 border border-slate-800/80 rounded-xl text-xs">
+                <div class="flex items-center gap-1.5 text-slate-300 font-medium">
+                    <span class="text-sm">⏱️</span>
+                    <span class="text-slate-300">Time-Shift:</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button type="button" class="lyrics-shift-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 text-[11px] font-mono transition" data-shift="-0.5" title="Subtract 0.5 seconds from all timestamps">-0.5s</button>
+                    <button type="button" class="lyrics-shift-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 text-[11px] font-mono transition" data-shift="-0.1" title="Subtract 0.1 seconds from all timestamps">-0.1s</button>
+                    <button type="button" class="lyrics-shift-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 text-[11px] font-mono transition" data-shift="0.1" title="Add 0.1 seconds to all timestamps">+0.1s</button>
+                    <button type="button" class="lyrics-shift-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 text-[11px] font-mono transition" data-shift="0.5" title="Add 0.5 seconds to all timestamps">+0.5s</button>
+                </div>
+                <div class="flex items-center gap-1">
+                    <input type="number" id="lyrics-custom-shift-input" step="0.1" placeholder="±sec" class="w-16 bg-surface-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-slate-200 placeholder-slate-500 font-mono focus:outline-none focus:border-brand-500" title="Enter positive or negative seconds (e.g. 1.2 or -0.8)">
+                    <button type="button" id="lyrics-custom-shift-btn" class="px-2.5 py-1 rounded-lg bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white text-[11px] font-semibold transition" title="Apply custom time shift">Apply</button>
+                </div>
+            </div>
+
+            <div id="lyrics-shift-alert" class="hidden text-xs p-2 rounded-xl border"></div>
+
             <div class="space-y-1">
                 <div class="flex items-center justify-between">
                     <label for="lyrics-textarea" class="text-xs text-slate-300 font-medium">LRC Synchronized Lyrics Content</label>
