@@ -168,3 +168,23 @@ made while building the template itself.
 - artifact: docs/releases/v0.2.5.md
 - approved_by: reg
 - notes: Version 0.2.5 fully approved and released. Includes in-process LRCLIB HTTP client module (src/services/lrclib_client.py), REST proxy endpoints (GET /api/lyrics/lrclib/get & /search), automated background lyrics auto-sync during separation pipeline (src/services/pipeline.py), interactive 1-click Auto-Fetch LRC action bar and status banners in Song Details & Lyrics modal (src/static/index.html & library_queue.js), and smart filename parser alignment for standard <Artist> - <Song Title> format.
+
+## 2026-09-05 — Approved Requirements: Version 0.2.6 Synchronized Lyrics Calibration & Karaoke UX Enhancements
+- artifact: docs/requirements/version0.2.6.md
+- approved_by: reg
+- notes: Approved requirements for Version 0.2.6 covering frontend global and directional LRC timestamp time-shift calibration tools in the lyrics editor modal, collapsible sidebar cards in Karaoke Mode with localStorage persistence, and smart idle stage play from playback queue with empty queue catalog fallback.
+
+## 2026-09-05 — Approved Functional Spec: Version 0.2.6 Synchronized Lyrics Calibration & Karaoke UX Enhancements
+- artifact: docs/specs/version0.2.6.md
+- approved_by: reg
+- notes: Approved functional specification defining in-place DOM timestamp delta shifting math with clamping, Karaoke Mode collapsible accordion containers with localStorage state, and empty stage smart play queue/catalog fallback logic.
+
+## 2026-09-05 — Approved ADR-0009: Client-Side Synchronized Lyrics Calibration, Karaoke Accordions & Smart Transport Dispatch
+- artifact: docs/design/ADR-0009-lyrics-calibration-and-karaoke-ux.md
+- approved_by: reg
+- notes: Approved Option 1 for Version 0.2.6 delivering client-side LRC timestamp shifting parser utility in library_queue.js with in-place DOM textarea recalculation, Karaoke Mode collapsible accordion sidebars with localStorage state caching, and empty stage smart play dispatch from queue with catalog modal fallback.
+
+## 2026-09-05 — Approved Ticket Breakdown: EPIC-0008 Synchronized Lyrics Calibration & Karaoke UX Enhancements
+- artifact: docs/tickets/EPIC-0008-lyrics-calibration-and-karaoke-ux.md
+- approved_by: reg
+- notes: Approved EPIC-0008 work breakdown comprising STORY-0024, STORY-0025, and STORY-0026 across TASK-0054 to TASK-0056 covering client-side LRC timestamp calibration toolbar, Karaoke Mode collapsible sidebars, and empty stage smart play dispatch. Previous tickets archived to docs/tickets/archive/v0.2.5/.
