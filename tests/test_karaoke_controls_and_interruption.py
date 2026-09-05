@@ -28,9 +28,15 @@ def test_compact_vocal_buttons_and_fullscreen_style():
     assert "karaoke-lead-status-text" in resp.text
 
 def test_karaoke_idle_stage_smart_play_dispatch():
-    resp_js = client.get("/static/karaoke.js")
-    assert resp_js.status_code == 200
-    assert "togglePlayPause" in resp_js.text
-    assert "playNext" in resp_js.text
-    assert "openCatalogModal" in resp_js.text
+    resp_karaoke = client.get("/static/karaoke.js")
+    assert resp_karaoke.status_code == 200
+    assert "togglePlayPause" in resp_karaoke.text
+    assert "playNext" in resp_karaoke.text
+    assert "openCatalogModal" in resp_karaoke.text
+
+    resp_lib = client.get("/static/library_queue.js")
+    assert resp_lib.status_code == 200
+    assert "playNext" in resp_lib.text
+    assert "advanceNext" in resp_lib.text
+    assert "window.flexiokeSongLibrary" in resp_lib.text
 

@@ -838,6 +838,10 @@ class PlaybackQueueManager {
         await this.advanceNext(false);
     }
 
+    async playNext() {
+        return this.advanceNext(true);
+    }
+
     async advanceNext(autoPlay = true) {
         if (this.isAdvancing) return;
         this.isAdvancing = true;
@@ -979,5 +983,6 @@ function escapeHtml(str) {
 
 document.addEventListener('DOMContentLoaded', () => {
     window.flexiokeLibrary = new SongLibraryManager();
+    window.flexiokeSongLibrary = window.flexiokeLibrary;
     window.flexiokeQueue = new PlaybackQueueManager();
 });

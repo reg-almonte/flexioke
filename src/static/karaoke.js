@@ -717,9 +717,19 @@ class KaraokeStageManager {
         } else if (!this.currentJob) {
             // Smart Idle Play Dispatch
             if (window.flexiokeQueue && Array.isArray(window.flexiokeQueue.queue) && window.flexiokeQueue.queue.length > 0) {
-                window.flexiokeQueue.playNext();
-            } else if (window.flexiokeSongLibrary) {
-                window.flexiokeSongLibrary.openCatalogModal();
+                if (typeof window.flexiokeQueue.playNext === 'function') {
+                    window.flexiokeQueue.playNext();
+                } else if (typeof window.flexiokeQueue.advanceNext === 'function') {
+                    window.flexiokeQueue.advanceNext(true);
+                }
+            } else {
+                const lib = window.flexiokeSongLibrary || window.flexiokeLibrary;
+                if (lib && typeof lib.openCatalogModal === 'function') {
+                    lib.openCatalogModal();
+                } else {
+                    const catalogModal = document.getElementById('song-catalog-modal');
+                    if (catalogModal) catalogModal.classList.remove('hidden');
+                }
             }
         }
     }
