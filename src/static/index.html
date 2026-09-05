@@ -381,46 +381,52 @@
                 
                 <!-- Karaoke Playback Queue Card (Top) -->
                 <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <div id="accordion-header-karaoke-queue" class="cursor-pointer select-none flex items-center justify-between border-b border-slate-800 pb-2.5">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
                             <span>📋</span> Playback Queue
                         </h2>
                         <div class="flex items-center gap-2">
                             <span class="queue-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
-                            <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition">Clear</button>
+                            <button class="clear-queue-btn text-[11px] text-slate-400 hover:text-rose-400 px-2 py-1 rounded transition" title="Clear all queued songs">Clear</button>
+                            <span id="accordion-chevron-karaoke-queue" class="accordion-toggle text-slate-400 text-xs font-mono ml-1">▾</span>
                         </div>
                     </div>
 
-                    <div class="queue-list-container space-y-2 h-[196px] overflow-y-auto pr-1 custom-scrollbar">
-                        <div class="queue-empty-state h-full flex items-center justify-center text-center py-4 text-slate-500 text-xs">
-                            Karaoke queue is empty.
+                    <div id="accordion-body-karaoke-queue" class="space-y-3.5">
+                        <div class="queue-list-container space-y-2 h-[196px] overflow-y-auto pr-1 custom-scrollbar">
+                            <div class="queue-empty-state h-full flex items-center justify-center text-center py-4 text-slate-500 text-xs">
+                                Karaoke queue is empty.
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 <!-- Karaoke Song Library Card (Bottom) -->
                 <section class="bg-surface-900 border border-slate-800/90 rounded-2xl p-5 shadow-xl space-y-3.5 flex flex-col">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <div id="accordion-header-karaoke-library" class="cursor-pointer select-none flex items-center justify-between border-b border-slate-800 pb-2.5">
                         <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
                             <span>🎤</span> Song Library
                         </h2>
                         <div class="flex items-center gap-2">
                             <span class="library-count-badge text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">0 songs</span>
                             <button id="open-catalog-modal-btn" class="text-slate-400 hover:text-white px-1.5 py-0.5 rounded hover:bg-slate-800 transition text-sm flex items-center gap-1" title="Open Full Song Catalog">⛶</button>
+                            <span id="accordion-chevron-karaoke-library" class="accordion-toggle text-slate-400 text-xs font-mono ml-1">▾</span>
                         </div>
                     </div>
 
-                    <!-- Search Input -->
-                    <div class="relative flex items-center">
-                        <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
-                        <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title or artist...">
-                        <button class="library-search-clear-btn hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-200 text-xs transition select-none" title="Clear search">✕</button>
-                    </div>
+                    <div id="accordion-body-karaoke-library" class="space-y-3.5 flex flex-col">
+                        <!-- Search Input -->
+                        <div class="relative flex items-center">
+                            <span class="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
+                            <input type="text" class="library-search-input w-full bg-surface-950 border border-slate-800 rounded-xl pl-8 pr-8 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-500 transition" placeholder="Search by song title or artist...">
+                            <button class="library-search-clear-btn hidden absolute right-2.5 top-2 text-slate-500 hover:text-slate-200 text-xs transition select-none" title="Clear search">✕</button>
+                        </div>
 
-                    <!-- Library List Container -->
-                    <div id="karaoke-library-list" class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar h-[210px]">
-                        <div class="library-empty-state h-full flex items-center justify-center text-center py-6 text-slate-500 text-xs">
-                            No songs available.<br>Process songs in Stem Studio!
+                        <!-- Library List Container -->
+                        <div id="karaoke-library-list" class="library-list-container overflow-y-auto space-y-2 pr-1 custom-scrollbar h-[210px]">
+                            <div class="library-empty-state h-full flex items-center justify-center text-center py-6 text-slate-500 text-xs">
+                                No songs available.<br>Process songs in Stem Studio!
+                            </div>
                         </div>
                     </div>
                 </section>

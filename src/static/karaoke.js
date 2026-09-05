@@ -401,12 +401,59 @@ class KaraokeStageManager {
             resizeObs.observe(this.stageCard);
         }
 
-        window.addEventListener('resize', () => {
-            this.updateStageHeader();
-        });
-
         // Time & Transport state check
         setInterval(() => this.onTimeCheck(), 100);
+
+        // Initialize Karaoke Sidebar Accordions
+        this.initKaraokeAccordions();
+    }
+
+    initKaraokeAccordions() {
+        const ACCORDION_STORAGE_KEY = 'flexioke_karaoke_accordions';
+        const defaultAccordionState = { 'karaoke-queue': true, 'karaoke-library': true };
+        let accordionState = { ...defaultAccordionState };
+
+        try {
+            const saved = localStorage.getItem(ACCORDION_STORAGE_KEY);
+            if (saved) {
+                accordionState = { ...defaultAccordionState, ...JSON.parse(saved) };
+            }
+        } catch (e) {
+            console.error("Failed to load karaoke accordion state:", e);
+        }
+
+        const updateKaraokeAccordionUI = (section, isExpanded) => {
+            const body = document.getElementById(`accordion-body-${section}`);
+            const chevron = document.getElementById(`accordion-chevron-${section}`);
+            if (body) {
+                if (isExpanded) {
+                    body.classList.remove('hidden');
+                } else {
+                    body.classList.add('hidden');
+                }
+            }
+            if (chevron) {
+                chevron.textContent = isExpanded ? '▾' : '▸';
+            }
+        };
+
+        ['karaoke-queue', 'karaoke-library'].forEach(section => {
+            const header = document.getElementById(`accordion-header-${section}`);
+            if (header) {
+                // Initial render from state
+                updateKaraokeAccordionUI(section, !!accordionState[section]);
+
+                header.addEventListener('click', (e) => {
+                    // Prevent clicks on action buttons inside header (e.g. clear queue, open catalog) from toggling
+                    if (e.target.closest('button:not(.accordion-toggle)')) return;
+                    accordionState[section] = !accordionState[section];
+                    try {
+                        localStorage.setItem(ACCORDION_STORAGE_KEY, JSON.stringify(accordionState));
+                    } catch (err) {}
+                    updateKaraokeAccordionUI(section, accordionState[section]);
+                });
+            }
+        });
     }
 
     loadSettings() {
