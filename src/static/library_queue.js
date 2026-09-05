@@ -539,8 +539,9 @@ class SongLibraryManager {
             if (isNaN(mins) || isNaN(secs)) return match;
             const totalSecs = mins * 60 + secs + deltaSeconds;
             const clampedSecs = Math.max(0, totalSecs);
-            const newMins = Math.floor(clampedSecs / 60);
-            const newSecs = clampedSecs % 60;
+            const roundedTotal = Math.round(clampedSecs * 100) / 100;
+            const newMins = Math.floor(roundedTotal / 60);
+            const newSecs = roundedTotal % 60;
             count++;
             return `[${String(newMins).padStart(2, '0')}:${newSecs.toFixed(2).padStart(5, '0')}]`;
         });
@@ -578,6 +579,11 @@ class SongLibraryManager {
         } else {
             this.lyricsShiftAlert.className += 'bg-slate-900 border-slate-800 text-slate-300';
         }
+
+        if (this.lyricsShiftAlertTimer) clearTimeout(this.lyricsShiftAlertTimer);
+        this.lyricsShiftAlertTimer = setTimeout(() => {
+            if (this.lyricsShiftAlert) this.lyricsShiftAlert.classList.add('hidden');
+        }, 3500);
     }
 
     async handleFetchLrclib() {
