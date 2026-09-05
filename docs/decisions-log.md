@@ -188,3 +188,8 @@ made while building the template itself.
 - artifact: docs/tickets/EPIC-0008-lyrics-calibration-and-karaoke-ux.md
 - approved_by: reg
 - notes: Approved EPIC-0008 work breakdown comprising STORY-0024, STORY-0025, and STORY-0026 across TASK-0054 to TASK-0056 covering client-side LRC timestamp calibration toolbar, Karaoke Mode collapsible sidebars, and empty stage smart play dispatch. Previous tickets archived to docs/tickets/archive/v0.2.5/.
+
+## 2026-09-06 — Approved Check Sheet: Version 0.2.6 Synchronized Lyrics Calibration & Karaoke UX Enhancements
+- artifact: docs/checksheets/version0.2.6.md
+- approved_by: reg
+- notes: Approved Phase 5 Check Sheet with 100% test coverage and 0 gaps across LRC timestamp calibration math, collapsible sidebar accordions in Karaoke Mode, and smart idle stage play dispatch from queue.
