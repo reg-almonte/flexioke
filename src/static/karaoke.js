@@ -256,10 +256,7 @@ class KaraokeStageManager {
         // Bind Karaoke Transport Controls
         if (this.playBtn) {
             this.playBtn.addEventListener('click', () => {
-                if (window.flexiokePlayer) {
-                    window.flexiokePlayer.togglePlay();
-                    this.updatePlayBtnUI();
-                }
+                this.togglePlayPause();
             });
         }
 
@@ -717,6 +714,13 @@ class KaraokeStageManager {
         if (window.flexiokePlayer && this.currentJob) {
             window.flexiokePlayer.togglePlay();
             this.updatePlayBtnUI();
+        } else if (!this.currentJob) {
+            // Smart Idle Play Dispatch
+            if (window.flexiokeQueue && Array.isArray(window.flexiokeQueue.queue) && window.flexiokeQueue.queue.length > 0) {
+                window.flexiokeQueue.playNext();
+            } else if (window.flexiokeSongLibrary) {
+                window.flexiokeSongLibrary.openCatalogModal();
+            }
         }
     }
 
