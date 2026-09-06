@@ -132,12 +132,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
     height: 56vh !important;
     max-height: 540px !important;
     padding: 2.5rem 1.5rem !important;
-    background-color: rgba(3, 7, 18, 0.65) !important;
+    background: transparent !important;
+    background-color: transparent !important;
     border: none !important;
-    border-radius: 1.5rem !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
@@ -146,7 +146,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 /* Auto-hiding Scrollbar on Karaoke Lyrics Stage */
 #karaoke-lyrics-stage {
+    background: transparent !important;
+    background-color: transparent !important;
     border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
     transition: scrollbar-color 0.3s ease;
