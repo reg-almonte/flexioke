@@ -123,7 +123,15 @@ class KaraokeStageManager {
         this.fullscreenBtn = document.getElementById('karaoke-fullscreen-btn');
         this.fullscreenIcon = document.getElementById('fullscreen-icon');
         this.fullscreenBtnText = document.getElementById('fullscreen-btn-text');
+        this.topHeaderEl = document.getElementById('karaoke-top-header');
+        this.transportBarEl = document.getElementById('karaoke-transport-bar');
+        this.exitFullscreenBtn = document.getElementById('karaoke-exit-fullscreen-btn');
         this.isFullscreen = false;
+
+        // Inactivity Auto-Hide Engine State
+        this.inactivityTimer = null;
+        this.inactivityDelay = 3000;
+        this.isChromeHidden = false;
 
         // Karaoke Transport Elements
         this.playBtn = document.getElementById('karaoke-play-btn');
@@ -211,19 +219,42 @@ class KaraokeStageManager {
             });
         }
 
-        // Stage Background Click-to-Play/Pause
+        // Initialize Inactivity Auto-Hide Controller
+        this.initInactivityController();
+
+        // Stage Background Click-to-Play/Pause & Double-Click Fullscreen
         if (this.stageContainer) {
             this.stageContainer.style.cursor = 'pointer';
+            let clickDebounceTimer = null;
+
             this.stageContainer.addEventListener('click', (e) => {
-                if (!e.target.closest('.karaoke-line')) {
-                    this.togglePlayPause();
+                this.wakeChrome();
+                this.scheduleInactivityTimer();
+                if (e.target.closest('.karaoke-line')) return;
+
+                if (clickDebounceTimer === null) {
+                    clickDebounceTimer = setTimeout(() => {
+                        clickDebounceTimer = null;
+                        this.togglePlayPause();
+                    }, 220);
                 }
+            });
+
+            this.stageContainer.addEventListener('dblclick', (e) => {
+                if (clickDebounceTimer !== null) {
+                    clearTimeout(clickDebounceTimer);
+                    clickDebounceTimer = null;
+                }
+                this.toggleFullscreen();
             });
         }
 
-        // Fullscreen Toggle
+        // Fullscreen Toggle Buttons
         if (this.fullscreenBtn) {
             this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+        }
+        if (this.exitFullscreenBtn) {
+            this.exitFullscreenBtn.addEventListener('click', () => this.exitFullscreen());
         }
 
         document.addEventListener('keydown', (e) => {
@@ -239,10 +270,20 @@ class KaraokeStageManager {
                 }
             }
 
-            // Keyboard Shortcut: 'R' or 'Home' to restart song in Karaoke Mode
+            // Stage Keyboard Shortcuts when not typing in input/textarea
             const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
             const isTyping = activeTag === 'input' || activeTag === 'textarea' || (document.activeElement && document.activeElement.isContentEditable);
             if (!isTyping) {
+                // 'F' / 'f' toggles Fullscreen Mode
+                if (e.key === 'f' || e.key === 'F') {
+                    const karaokeView = document.getElementById('view-karaoke');
+                    if (karaokeView && !karaokeView.classList.contains('hidden')) {
+                        e.preventDefault();
+                        this.toggleFullscreen();
+                    }
+                }
+
+                // 'R' or 'Home' to restart song in Karaoke Mode
                 if (e.key === 'r' || e.key === 'R' || e.key === 'Home') {
                     const karaokeView = document.getElementById('view-karaoke');
                     if (karaokeView && !karaokeView.classList.contains('hidden')) {
@@ -585,6 +626,71 @@ class KaraokeStageManager {
         setTimeout(evaluate, 350);
     }
 
+    get isPlaying() {
+        return Boolean(window.flexiokePlayer && window.flexiokePlayer.isPlaying);
+    }
+
+    initInactivityController() {
+        const handleActivity = (e) => {
+            this.handleUserActivity(e);
+        };
+
+        window.addEventListener('mousemove', handleActivity, { passive: true });
+        window.addEventListener('pointermove', handleActivity, { passive: true });
+        window.addEventListener('touchstart', handleActivity, { passive: true });
+        window.addEventListener('keydown', handleActivity, { passive: true });
+        window.addEventListener('wheel', handleActivity, { passive: true });
+    }
+
+    handleUserActivity(e) {
+        if (!this.isFullscreen) {
+            this.wakeChrome();
+            return;
+        }
+        this.wakeChrome();
+        this.scheduleInactivityTimer();
+    }
+
+    handlePlaybackStateChange() {
+        if (this.isFullscreen && this.isPlaying) {
+            this.scheduleInactivityTimer();
+        } else {
+            this.wakeChrome();
+            this.clearInactivityTimer();
+        }
+    }
+
+    scheduleInactivityTimer() {
+        this.clearInactivityTimer();
+        if (!this.isFullscreen || !this.isPlaying) return;
+
+        this.inactivityTimer = setTimeout(() => {
+            this.hideChrome();
+        }, this.inactivityDelay);
+    }
+
+    clearInactivityTimer() {
+        if (this.inactivityTimer) {
+            clearTimeout(this.inactivityTimer);
+            this.inactivityTimer = null;
+        }
+    }
+
+    hideChrome() {
+        if (!this.isFullscreen || !this.isPlaying) return;
+        this.isChromeHidden = true;
+        if (this.topHeaderEl) this.topHeaderEl.classList.add('karaoke-chrome-hidden');
+        if (this.transportBarEl) this.transportBarEl.classList.add('karaoke-chrome-hidden');
+        if (this.stageCard) this.stageCard.classList.add('karaoke-cursor-hidden');
+    }
+
+    wakeChrome() {
+        this.isChromeHidden = false;
+        if (this.topHeaderEl) this.topHeaderEl.classList.remove('karaoke-chrome-hidden');
+        if (this.transportBarEl) this.transportBarEl.classList.remove('karaoke-chrome-hidden');
+        if (this.stageCard) this.stageCard.classList.remove('karaoke-cursor-hidden');
+    }
+
     toggleFullscreen() {
         if (this.isFullscreen) {
             this.exitFullscreen();
@@ -596,7 +702,7 @@ class KaraokeStageManager {
     enterFullscreen() {
         this.isFullscreen = true;
         if (this.stageCard) {
-            this.stageCard.classList.add('stage-fullscreen');
+            this.stageCard.classList.add('stage-fullscreen', 'karaoke-cinema-fullscreen');
         }
         if (this.fullscreenIcon) {
             if (window.getIconHtml) {
@@ -607,14 +713,18 @@ class KaraokeStageManager {
         }
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Collapse';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Exit Fullscreen Stage (Esc / F)";
+        if (this.exitFullscreenBtn) this.exitFullscreenBtn.classList.remove('hidden');
+
+        this.wakeChrome();
         this.updateStageHeader();
+        this.handlePlaybackStateChange();
         setTimeout(() => this.updateStageHeader(), 350);
     }
 
     exitFullscreen() {
         this.isFullscreen = false;
         if (this.stageCard) {
-            this.stageCard.classList.remove('stage-fullscreen');
+            this.stageCard.classList.remove('stage-fullscreen', 'karaoke-cinema-fullscreen');
         }
         if (this.fullscreenIcon) {
             if (window.getIconHtml) {
@@ -625,6 +735,10 @@ class KaraokeStageManager {
         }
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Expand';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Toggle Fullscreen Stage (F)";
+        if (this.exitFullscreenBtn) this.exitFullscreenBtn.classList.add('hidden');
+
+        this.wakeChrome();
+        this.clearInactivityTimer();
         this.updateStageHeader();
         setTimeout(() => this.updateStageHeader(), 350);
     }
@@ -753,6 +867,7 @@ class KaraokeStageManager {
         } else {
             this.playBtn.innerHTML = window.flexiokePlayer.isPlaying ? '⏸' : '▶';
         }
+        this.handlePlaybackStateChange();
     }
 
     async loadLyricsForJob(jobId) {

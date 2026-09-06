@@ -512,21 +512,26 @@
                 <section id="karaoke-stage-card" class="bg-surface-900 border border-slate-800/90 rounded-2xl p-6 shadow-2xl space-y-4 min-h-[560px] flex flex-col justify-between relative overflow-hidden transition-all">
                     
                     <!-- Karaoke Track Info Header -->
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 gap-6">
+                    <div id="karaoke-top-header" class="karaoke-cinema-top-header flex items-center justify-between border-b border-slate-800 pb-3 gap-4">
                         <!-- Left: Now Singing -->
-                        <div id="karaoke-now-singing-container" class="min-w-0 max-w-[60%] flex items-center gap-2 overflow-hidden shrink">
+                        <div id="karaoke-now-singing-container" class="min-w-0 max-w-[55%] flex items-center gap-2 overflow-hidden shrink">
                             <span class="text-[10px] uppercase font-bold tracking-widest text-brand-400 shrink-0">Now Singing:</span>
                             <div class="marquee-wrapper overflow-hidden min-w-0">
                                 <span id="karaoke-now-singing-text" class="text-xs sm:text-sm font-bold text-white tracking-tight inline-block whitespace-nowrap">No Track Selected</span>
                             </div>
                         </div>
 
-                        <!-- Right: Up Next -->
-                        <div id="karaoke-up-next-container" class="min-w-0 max-w-[60%] flex items-center justify-end gap-2 text-right overflow-hidden ml-auto shrink">
-                            <span class="text-[10px] uppercase font-bold tracking-widest text-violet-400 shrink-0">Up Next:</span>
-                            <div class="marquee-wrapper overflow-hidden text-right min-w-0">
-                                <span id="karaoke-up-next-text" class="text-xs sm:text-sm font-medium text-slate-300 tracking-tight inline-block whitespace-nowrap">— (Queue Empty)</span>
+                        <!-- Right: Up Next & Fullscreen Exit Action -->
+                        <div class="flex items-center gap-3 ml-auto shrink min-w-0">
+                            <div id="karaoke-up-next-container" class="min-w-0 flex items-center justify-end gap-2 text-right overflow-hidden">
+                                <span class="text-[10px] uppercase font-bold tracking-widest text-violet-400 shrink-0">Up Next:</span>
+                                <div class="marquee-wrapper overflow-hidden text-right min-w-0">
+                                    <span id="karaoke-up-next-text" class="text-xs sm:text-sm font-medium text-slate-300 tracking-tight inline-block whitespace-nowrap">— (Queue Empty)</span>
+                                </div>
                             </div>
+                            <button id="karaoke-exit-fullscreen-btn" type="button" class="hidden text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800/80 transition" title="Exit Fullscreen Stage (Esc / F)">
+                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6m10-10h-6V4m0 6 7-7M3 21l7-7"/></svg>
+                            </button>
                         </div>
                     </div>
 
@@ -569,7 +574,7 @@
                     </div>
 
                     <!-- Karaoke Quick Vocal Toggles & Transport Bar -->
-                    <div class="bg-surface-950 border border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-4">
+                    <div id="karaoke-transport-bar" class="karaoke-cinema-bottom-bar bg-surface-950 border border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-4">
                         
                         <!-- Left Cluster: Play/Pause, Expanding Volume, Timecode -->
                         <div class="flex items-center gap-3">
