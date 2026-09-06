@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: in-review
+implementation: completed
 ---
 
 # TASK-0068: UI Iconography Overhaul & Hotkey Tooltips

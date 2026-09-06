@@ -245,9 +245,19 @@ made while building the template itself.
 - notes: Approved Option 1 delivering unified client state coordinator in SongLibraryManager with dirty changes confirmation guard, centralized modular SVG icon dictionary in src/static/icons.js with hotkey tooltips, and in-place cinema fullscreen stage in KaraokeStageManager with 3-second auto-hiding floating chrome and cursor.
 
 ## 2026-09-06 — Approved Ticket Breakdown: EPIC-0010 UI & Stage Experience Enhancements
-- artifact: docs/tickets/EPIC-0010-ui-and-stage-experience-enhancements.md
+- artifact: docs/tickets/archive/v0.3.1/EPIC-0010-ui-and-stage-experience-enhancements.md
 - approved_by: reg
-- notes: Approved EPIC-0010 work breakdown comprising STORY-0031 to STORY-0033 across TASK-0065 to TASK-0070 covering in-modal song navigation with previous/next buttons and unsaved edits confirmation guard, centralized modular SVG icon dictionary in src/static/icons.js with hotkey tooltips, and immersive YouTube-style full-screen karaoke stage with 3-second auto-hiding floating chrome and cursor.
+- notes: Approved EPIC-0010 work breakdown comprising STORY-0031 to STORY-0033 across TASK-0065 to TASK-0070 covering in-modal song navigation with previous/next buttons and unsaved edits confirmation guard, centralized modular SVG icon dictionary in src/static/icons.js with hotkey tooltips, and immersive YouTube-style full-screen karaoke stage with 3-second auto-hiding floating chrome and cursor. Previous tickets archived to docs/tickets/archive/v0.3.1/.
+
+## 2026-09-06 — Approved Check Sheet: Version 0.3.1 UI & Stage Experience Enhancements
+- artifact: docs/checksheets/version0.3.1.md
+- approved_by: reg
+- notes: Approved Phase 5 Check Sheet with 100% test coverage (155/155 passing) and 0 gaps across in-modal song navigation, dirty state confirmation interceptor, centralized modular SVG icon dictionary & hotkey tooltips, and in-place cinema fullscreen stage with 3-second inactivity auto-hide and cursor suppression.
+
+## 2026-09-06 — Approved Release v0.3.1: UI & Stage Experience Enhancements
+- artifact: docs/releases/v0.3.1.md
+- approved_by: reg
+- notes: Version 0.3.1 fully approved and released. Includes in-modal previous/next navigation toolbar with dynamic track counter badge (TASK-0065), unsaved edits dirty guard intercepting navigation, close, and Esc with keyboard shortcuts (TASK-0066), standalone centralized modular SVG icon dictionary module (TASK-0067), comprehensive iconography overhaul and hotkey tooltips (TASK-0068), in-place cinema fullscreen stage layout with floating glassmorphism overlays and explicit exit button (TASK-0069), and 3-second inactivity auto-hide engine with cursor suppression and stage shortcuts (TASK-0070). All tickets archived to docs/tickets/archive/v0.3.1/.
 
 
 

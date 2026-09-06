@@ -1,7 +1,7 @@
 ---
-status: pending-approval
-approved_by:
-approved_at:
+status: approved
+approved_by: reg
+approved_at: 2026-09-06
 ---
 
 # Version 0.3.1: UI & Stage Experience Enhancements — Check Sheet

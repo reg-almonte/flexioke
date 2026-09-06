@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: in-review
+implementation: completed
 ---
 
 # STORY-0032: Centralized Modular SVG Icon Dictionary
