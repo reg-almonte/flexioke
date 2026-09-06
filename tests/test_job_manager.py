@@ -1,3 +1,4 @@
+import json
 import pytest
 import shutil
 from pathlib import Path
@@ -146,4 +147,82 @@ def test_legacy_job_json_without_artist_loads_gracefully(tmp_path):
     # Verify persisted to disk
     reloaded = json.loads((legacy_job_dir / "job.json").read_text(encoding="utf-8"))
     assert reloaded["artist"] == "Legacy Artist"
+
+def test_startup_prunes_leftover_queued_and_in_progress_jobs(tmp_path):
+    """Verify that restarting the server / initializing JobManager automatically cleans up uncompleted queued/in-flight jobs."""
+    jobs_dir = tmp_path / "jobs"
+    jobs_dir.mkdir(parents=True, exist_ok=True)
+    archive_dir = tmp_path / "archive"
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Completed job (should be kept)
+    comp_dir = jobs_dir / "comp-job-1"
+    comp_dir.mkdir(parents=True)
+    (comp_dir / "job.json").write_text(json.dumps({
+        "job_id": "comp-job-1",
+        "source_type": "upload",
+        "source_name": "comp.mp3",
+        "title": "Completed Song",
+        "status": "completed",
+        "progress": 100,
+        "current_stage": "Ready",
+        "stems": {"instrumental": "/stems/inst.mp3"},
+        "created_at": "2026-09-01T00:00:00Z",
+        "updated_at": "2026-09-01T00:00:00Z"
+    }), encoding="utf-8")
+
+    # 2. Queued job from previous session (should be pruned)
+    queued_dir = jobs_dir / "queued-job-2"
+    queued_dir.mkdir(parents=True)
+    (queued_dir / "job.json").write_text(json.dumps({
+        "job_id": "queued-job-2",
+        "source_type": "upload",
+        "source_name": "queued.mp3",
+        "title": "Queued Song",
+        "status": "queued",
+        "progress": 0,
+        "current_stage": "Queued",
+        "stems": {},
+        "created_at": "2026-09-01T00:01:00Z",
+        "updated_at": "2026-09-01T00:01:00Z"
+    }), encoding="utf-8")
+    queued_archive = archive_dir / "queued-job-2_audio.mp3"
+    queued_archive.write_text("dummy", encoding="utf-8")
+
+    # 3. In-flight Stage 1 job from previous session (should be pruned)
+    stage1_dir = jobs_dir / "stage1-job-3"
+    stage1_dir.mkdir(parents=True)
+    (stage1_dir / "job.json").write_text(json.dumps({
+        "job_id": "stage1-job-3",
+        "source_type": "youtube",
+        "source_name": "https://youtube.com/watch?v=xyz",
+        "title": "In Flight Song",
+        "status": "separating_stage_1",
+        "progress": 45,
+        "current_stage": "Stage 1",
+        "stems": {},
+        "created_at": "2026-09-01T00:02:00Z",
+        "updated_at": "2026-09-01T00:02:00Z"
+    }), encoding="utf-8")
+
+    # Initialize JobManager (simulating server restart)
+    manager = JobManager(data_dir=jobs_dir, max_workers=1)
+
+    # Verify completed job is preserved
+    assert manager.get_job("comp-job-1") is not None
+    assert comp_dir.exists()
+
+    # Verify queued and in-flight jobs are pruned from cache and disk
+    assert manager.get_job("queued-job-2") is None
+    assert not queued_dir.exists()
+    assert not queued_archive.exists()
+
+    assert manager.get_job("stage1-job-3") is None
+    assert not stage1_dir.exists()
+
+    # Verify list_jobs returns only completed job
+    all_jobs = manager.list_jobs(status=None)
+    assert len(all_jobs) == 1
+    assert all_jobs[0].job_id == "comp-job-1"
+
 

@@ -24,7 +24,7 @@ class JobManager:
         self._load_existing_jobs()
 
     def _load_existing_jobs(self):
-        """Loads all existing job records from disk into memory cache."""
+        """Loads completed job records from disk into memory cache and prunes uncompleted/queued separation jobs on startup."""
         with self._lock:
             if not self.data_dir.exists():
                 return
@@ -35,7 +35,26 @@ class JobManager:
                         try:
                             data = json.loads(meta_file.read_text(encoding="utf-8"))
                             record = JobRecord.model_validate(data)
-                            self._cache[record.job_id] = record
+                            
+                            # On server restart, remove leftover queued or in-progress separation jobs from previous session
+                            if record.status in (
+                                JobStatus.QUEUED,
+                                JobStatus.DOWNLOADING,
+                                JobStatus.SEPARATING_STAGE_1,
+                                JobStatus.SEPARATING_STAGE_2
+                            ):
+                                import shutil
+                                shutil.rmtree(job_dir, ignore_errors=True)
+                                archive_dir = self.data_dir.parent / "archive"
+                                if archive_dir.exists():
+                                    for f in archive_dir.glob(f"{record.job_id}_*"):
+                                        try:
+                                            f.unlink(missing_ok=True)
+                                        except Exception:
+                                            pass
+                                print(f"[JobManager] Cleaned up leftover {record.status.value} separation job {record.job_id} ({record.title}) on restart")
+                            else:
+                                self._cache[record.job_id] = record
                         except Exception as e:
                             # Log and skip corrupted job files
                             print(f"[JobManager] Failed to load job metadata from {meta_file}: {e}")
