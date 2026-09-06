@@ -175,3 +175,33 @@ def test_inactivity_timer_debouncing_and_autohide_in_node():
     assert proc.returncode == 0, f"Node script error: {proc.stderr}"
     assert "AUTOHIDE_TEST_SUCCESS" in proc.stdout
 
+def test_settings_button_auto_closes_fullscreen_mode():
+    """Verify openSettingsModal auto-closes fullscreen mode to immediately display the subwindow."""
+    resp = client.get("/static/karaoke.js")
+    assert resp.status_code == 200
+    js = resp.text
+
+    assert "openSettingsModal()" in js
+    assert "if (this.isFullscreen) {" in js or "this.isFullscreen &&" in js
+    assert "this.exitFullscreen" in js
+
+def test_lyrics_stage_margins_and_countdown_clearance():
+    """Verify vertical padding clearance for countdown cue and maximized horizontal width for long lines."""
+    resp_css = client.get("/static/styles.css")
+    assert resp_css.status_code == 200
+    css = resp_css.text
+
+    # Fullscreen lyrics stage vertical clearance and maximized width
+    assert "padding-top: 8.5rem" in css or "padding-top: 9rem" in css or "padding-top: 8" in css
+    assert "padding-bottom: 8.5rem" in css or "padding-bottom: 9rem" in css or "padding-bottom: 8" in css
+    assert "max-width: 98%" in css
+
+    resp_html = client.get("/")
+    assert resp_html.status_code == 200
+    html = resp_html.text
+
+    # Windowed lyrics stage clearance
+    assert "top-16" in html
+    assert "pt-14" in html and "pb-14" in html
+
+

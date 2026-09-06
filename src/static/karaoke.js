@@ -565,6 +565,9 @@ class KaraokeStageManager {
     }
 
     openSettingsModal() {
+        if (this.isFullscreen) {
+            this.exitFullscreen();
+        }
         if (this.settingsModal) {
             this.applySettings();
             this.settingsModal.classList.remove('hidden');
@@ -991,7 +994,7 @@ class KaraokeStageManager {
 
         // Timestamped LRC mode
         const wrapper = document.createElement('div');
-        wrapper.className = "space-y-3 py-32 max-w-3xl mx-auto w-full text-center";
+        wrapper.className = "space-y-3 py-16 max-w-5xl mx-auto w-full text-center px-1 sm:px-2";
 
         this.lyricsData.lines.forEach((line, index) => {
             const rowWrapper = document.createElement('div');
