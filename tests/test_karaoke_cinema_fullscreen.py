@@ -186,22 +186,23 @@ def test_settings_button_auto_closes_fullscreen_mode():
     assert "this.exitFullscreen" in js
 
 def test_lyrics_stage_margins_and_countdown_clearance():
-    """Verify vertical padding clearance for countdown cue and maximized horizontal width for long lines."""
+    """Verify vertical centering, height bounds, and maximized horizontal width for lyrics stage."""
     resp_css = client.get("/static/styles.css")
     assert resp_css.status_code == 200
     css = resp_css.text
 
-    # Fullscreen lyrics stage vertical clearance and maximized width
-    assert "padding-top: 8.5rem" in css or "padding-top: 9rem" in css or "padding-top: 8" in css
-    assert "padding-bottom: 8.5rem" in css or "padding-bottom: 9rem" in css or "padding-bottom: 8" in css
+    # Fullscreen lyrics stage centered box and maximized width
+    assert "top: 50%" in css and "translate(-50%, -50%)" in css
     assert "max-width: 98%" in css
+    assert "56vh" in css or "max-height: 540px" in css
 
     resp_html = client.get("/")
     assert resp_html.status_code == 200
     html = resp_html.text
 
-    # Windowed lyrics stage clearance
+    # Windowed lyrics stage clearance and vertical margin
     assert "top-16" in html
-    assert "pt-14" in html and "pb-14" in html
+    assert "max-h-[350px]" in html or "my-3" in html or "my-4" in html
+
 
 
