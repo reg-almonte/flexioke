@@ -204,5 +204,23 @@ def test_lyrics_stage_margins_and_countdown_clearance():
     assert "top-16" in html
     assert "max-h-[350px]" in html or "my-3" in html or "my-4" in html
 
+def test_lyrics_stage_scrollbar_and_stage_card_click_play_pause():
+    """Verify auto-hiding scrollbar on lyrics stage and play/pause binding on whole stage card."""
+    resp_css = client.get("/static/styles.css")
+    assert resp_css.status_code == 200
+    css = resp_css.text
+
+    assert "#karaoke-lyrics-stage:hover::-webkit-scrollbar-thumb" in css
+    assert "scrollbar-color: transparent transparent" in css
+
+    resp_js = client.get("/static/karaoke.js")
+    assert resp_js.status_code == 200
+    js = resp_js.text
+
+    assert "stageTarget = this.stageCard || this.stageContainer" in js
+    assert "stageTarget.addEventListener('click'" in js
+    assert "this.togglePlayPause()" in js
+
+
 
 

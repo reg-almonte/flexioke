@@ -223,15 +223,20 @@ class KaraokeStageManager {
         // Initialize Inactivity Auto-Hide Controller
         this.initInactivityController();
 
-        // Stage Background Click-to-Play/Pause & Double-Click Fullscreen
-        if (this.stageContainer) {
-            this.stageContainer.style.cursor = 'pointer';
+        // Whole Stage Card Click-to-Play/Pause & Double-Click Fullscreen
+        const stageTarget = this.stageCard || this.stageContainer;
+        if (stageTarget) {
+            stageTarget.style.cursor = 'pointer';
             let clickDebounceTimer = null;
 
-            this.stageContainer.addEventListener('click', (e) => {
+            stageTarget.addEventListener('click', (e) => {
                 this.wakeChrome();
                 this.scheduleInactivityTimer();
-                if (e.target.closest('.karaoke-line')) return;
+
+                // Prevent toggling playback when clicking interactive controls or lyric lines
+                if (e.target.closest('button, input, textarea, a, select, .karaoke-line, #karaoke-top-header, #karaoke-transport-bar, #karaoke-settings-modal, #karaoke-intro-splash')) {
+                    return;
+                }
 
                 if (clickDebounceTimer === null) {
                     clickDebounceTimer = setTimeout(() => {
@@ -241,7 +246,10 @@ class KaraokeStageManager {
                 }
             });
 
-            this.stageContainer.addEventListener('dblclick', (e) => {
+            stageTarget.addEventListener('dblclick', (e) => {
+                if (e.target.closest('button, input, textarea, a, select, .karaoke-line, #karaoke-top-header, #karaoke-transport-bar, #karaoke-settings-modal')) {
+                    return;
+                }
                 if (clickDebounceTimer !== null) {
                     clearTimeout(clickDebounceTimer);
                     clickDebounceTimer = null;
