@@ -413,7 +413,7 @@ class SongLibraryManager {
                 const lyricsBtn = card.querySelector('.lyrics-btn');
                 if (lyricsBtn) {
                     lyricsBtn.addEventListener('click', () => {
-                        this.openLyricsModal(job, this.jobs);
+                        this.openLyricsModal(job, displayJobs);
                     });
                 }
 
@@ -715,7 +715,7 @@ class SongLibraryManager {
                 if (this.lyricsTextarea && this.activeLyricsJobId === targetId) {
                     this.lyricsTextarea.value = fetchedLyrics;
                     this.modalContext.baseline.lyrics = fetchedLyrics;
-                    this.modalContext.isDirty = false;
+                    this.modalContext.isDirty = this.isModalDirty();
                 }
             }
         } catch (err) {
@@ -723,7 +723,7 @@ class SongLibraryManager {
             if (this.lyricsTextarea && this.activeLyricsJobId === targetId) {
                 this.lyricsTextarea.value = "";
                 this.modalContext.baseline.lyrics = "";
-                this.modalContext.isDirty = false;
+                this.modalContext.isDirty = this.isModalDirty();
             }
         }
     }
@@ -885,6 +885,12 @@ class SongLibraryManager {
                         if (idx !== -1 && updatedJob) {
                             this.jobs[idx] = updatedJob;
                             this.render(this.jobs);
+                        }
+                    }
+                    if (this.modalContext.items && Array.isArray(this.modalContext.items)) {
+                        const mIdx = this.modalContext.items.findIndex(j => (j.job_id || j.id) === this.activeLyricsJobId);
+                        if (mIdx !== -1 && updatedJob) {
+                            this.modalContext.items[mIdx] = updatedJob;
                         }
                     }
                     window.dispatchEvent(new CustomEvent('flexioke:metadata-updated', {
