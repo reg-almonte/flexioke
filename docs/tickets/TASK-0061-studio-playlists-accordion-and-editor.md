@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0061: Stem Studio Playlists Accordion & Detail Editor
@@ -19,9 +19,15 @@ Implement the Stem Studio Playlists UI component:
 - Add delete button for custom playlists with confirmation prompt.
 
 ## Acceptance Criteria
-- [ ] Playlists accordion toggles and persists open/closed state.
-- [ ] Creating, editing, and deleting playlists functions seamlessly with real-time UI refresh.
-- [ ] Reordering tracks sends `PUT /api/playlists/{id}/reorder` and maintains order.
+- [x] Playlists accordion toggles and persists open/closed state.
+- [x] Creating, editing, and deleting playlists functions seamlessly with real-time UI refresh.
+- [x] Reordering tracks sends `PUT /api/playlists/{id}/reorder` and maintains order.
 
 ## Blocked by
 - `docs/tickets/STORY-0027-backend-playlist-store-and-api.md`
+
+## Implementation
+- Branch: `story/STORY-0029-studio-playlists-ui-and-modal-assignment`
+- Added collapsible `#studio-card-playlists` accordion to Stem Studio in `src/static/index.html` and `src/static/app.js`.
+- Implemented Directory and Detail views with track search, reordering, removing, and `Queue All` in `src/static/playlists.js`.
+- Added tests in `tests/test_studio_playlists_frontend.py`.

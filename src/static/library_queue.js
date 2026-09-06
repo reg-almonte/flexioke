@@ -558,6 +558,10 @@ class SongLibraryManager {
             this.lyricsModal.classList.remove('hidden');
         }
 
+        if (window.flexiokePlaylistsManager) {
+            window.flexiokePlaylistsManager.renderLyricsModalPlaylists(job.job_id);
+        }
+
         try {
             const resp = await fetch(`/api/jobs/${job.job_id}/lyrics`);
             if (resp.ok) {

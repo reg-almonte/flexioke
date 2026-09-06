@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0062: Multi-Playlist Selection in Song Details & Lyrics Modal
@@ -17,8 +17,14 @@ Integrate playlist assignments into `#lyrics-modal`:
 - Toggling a checkbox sends `POST /api/playlists/{id}/songs` or `DELETE /api/playlists/{id}/songs/{song_id}` and shows ephemeral feedback.
 
 ## Acceptance Criteria
-- [ ] All existing playlists are displayed with correct checked state for the active song.
-- [ ] Checking/unchecking updates playlist membership immediately without closing the modal.
+- [x] All existing playlists are displayed with correct checked state for the active song.
+- [x] Checking/unchecking updates playlist membership immediately without closing the modal.
 
 ## Blocked by
 - `docs/tickets/STORY-0027-backend-playlist-store-and-api.md`
+
+## Implementation
+- Branch: `story/STORY-0029-studio-playlists-ui-and-modal-assignment`
+- Added `#lyrics-modal-playlists-container` to `#lyrics-modal` in `src/static/index.html`.
+- Implemented dynamic checkbox rendering and membership toggling with feedback in `src/static/playlists.js`.
+- Added tests in `tests/test_studio_playlists_frontend.py`.

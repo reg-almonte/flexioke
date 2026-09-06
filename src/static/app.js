@@ -431,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Sidebar Accordion Manager ---
     const ACCORDION_STORAGE_KEY = 'flexioke_studio_accordions';
-    const defaultAccordionState = { 'add-song': true, 'library': true, 'queue': true };
+    const defaultAccordionState = { 'add-song': true, 'library': true, 'studio-playlists': true, 'queue': true };
     let accordionState = { ...defaultAccordionState };
 
     try {
@@ -458,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    ['add-song', 'library', 'queue'].forEach(section => {
+    ['add-song', 'library', 'studio-playlists', 'queue'].forEach(section => {
         const header = document.getElementById(`accordion-header-${section}`);
         if (header) {
             // Initial render from state

@@ -1,5 +1,5 @@
 /**
- * Flexioke — Playlists & Favorites Client State Machine
+ * Flexioke — Playlists & Favorites Client State Machine (Dual-Page Sync)
  */
 
 class FavoritesManager {
@@ -152,6 +152,526 @@ class FavoritesManager {
     }
 }
 
+class PlaylistsManager {
+    constructor() {
+        this.playlists = [];
+        this.activePlaylistDetail = null;
+        this.activePlaylistQuery = '';
+        this.activeLyricsJobId = null;
+
+        // Stem Studio Elements
+        this.studioCountBadge = document.getElementById('studio-playlists-count-badge');
+        this.studioCreateBtn = document.getElementById('studio-create-playlist-btn');
+        this.studioListContainer = document.getElementById('studio-playlists-list');
+        this.studioDirectoryView = document.getElementById('studio-playlists-directory-view');
+        this.studioDetailView = document.getElementById('studio-playlist-detail-view');
+        this.studioActiveName = document.getElementById('studio-active-playlist-name');
+        this.studioBackBtn = document.getElementById('studio-playlist-back-btn');
+        this.studioQueueAllBtn = document.getElementById('studio-playlist-queue-all-btn');
+        this.studioSearchInput = document.getElementById('studio-playlist-search-input');
+        this.studioSongsList = document.getElementById('studio-playlist-songs-list');
+
+        // Lyrics Modal Elements
+        this.lyricsModalPlaylistsContainer = document.getElementById('lyrics-modal-playlists-container');
+        this.lyricsModalFeedback = document.getElementById('lyrics-modal-playlist-feedback');
+
+        this.init();
+    }
+
+    init() {
+        if (this.studioCreateBtn) {
+            this.studioCreateBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.promptCreatePlaylist();
+            });
+        }
+
+        if (this.studioBackBtn) {
+            this.studioBackBtn.addEventListener('click', () => {
+                this.closePlaylistDetail();
+            });
+        }
+
+        if (this.studioQueueAllBtn) {
+            this.studioQueueAllBtn.addEventListener('click', () => {
+                if (!this.activePlaylistDetail || !this.activePlaylistDetail.songs) return;
+                const songIds = this.activePlaylistDetail.songs.map(s => s.job_id);
+                if (songIds.length > 0 && window.flexiokeQueue) {
+                    songIds.forEach(id => window.flexiokeQueue.addToQueue(id));
+                    this.studioQueueAllBtn.textContent = '✓ Queued All';
+                    setTimeout(() => {
+                        if (this.studioQueueAllBtn) this.studioQueueAllBtn.textContent = '➕ Queue All';
+                    }, 1200);
+                }
+            });
+        }
+
+        if (this.studioSearchInput) {
+            this.studioSearchInput.addEventListener('input', (e) => {
+                this.activePlaylistQuery = e.target.value.trim().toLowerCase();
+                this.renderActivePlaylistSongs();
+            });
+        }
+
+        window.addEventListener('flexioke:playlists-updated', () => {
+            this.fetchPlaylists();
+        });
+
+        window.addEventListener('flexioke:job-deleted', () => {
+            this.fetchPlaylists();
+        });
+
+        // Initial fetch
+        this.fetchPlaylists();
+    }
+
+    async fetchPlaylists() {
+        try {
+            const resp = await fetch('/api/playlists');
+            if (resp.ok) {
+                this.playlists = await resp.json();
+                window.flexiokePlaylists = this.playlists;
+                this.renderStudioDirectory();
+                
+                if (this.activePlaylistDetail) {
+                    this.fetchPlaylistDetail(this.activePlaylistDetail.id);
+                }
+            }
+        } catch (err) {
+            console.error("[PlaylistsManager] Error fetching playlists:", err);
+        }
+    }
+
+    async fetchPlaylistDetail(playlistId) {
+        try {
+            const resp = await fetch(`/api/playlists/${encodeURIComponent(playlistId)}`);
+            if (resp.ok) {
+                this.activePlaylistDetail = await resp.json();
+                this.renderActivePlaylistSongs();
+            } else if (resp.status === 404) {
+                this.closePlaylistDetail();
+            }
+        } catch (err) {
+            console.error("[PlaylistsManager] Error fetching playlist detail:", err);
+        }
+    }
+
+    renderStudioDirectory() {
+        if (this.studioCountBadge) {
+            this.studioCountBadge.textContent = String(this.playlists.length);
+        }
+
+        if (!this.studioListContainer) return;
+
+        if (this.playlists.length === 0) {
+            this.studioListContainer.innerHTML = `
+                <div class="text-center py-6 text-slate-500 text-xs">
+                    No playlists created yet.<br>Click "+ New" to create one!
+                </div>
+            `;
+            return;
+        }
+
+        this.studioListContainer.innerHTML = '';
+        this.playlists.forEach(pl => {
+            const card = document.createElement('div');
+            card.className = "p-2.5 bg-surface-950/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-2.5 group cursor-pointer";
+            
+            const icon = pl.is_system ? '❤️' : '📁';
+            const durationFmt = pl.total_duration_seconds ? `${Math.floor(pl.total_duration_seconds / 60)}:${String(Math.floor(pl.total_duration_seconds % 60)).padStart(2, '0')}` : '0:00';
+            const countStr = `${pl.song_count} ${pl.song_count === 1 ? 'song' : 'songs'}`;
+
+            let deleteBtnHtml = '';
+            if (!pl.is_system) {
+                deleteBtnHtml = `
+                    <button class="delete-pl-btn p-1 text-slate-500 hover:text-rose-400 text-xs transition" title="Delete Playlist" data-pl-id="${pl.id}" data-pl-name="${escapeHtml(pl.name)}">
+                        🗑
+                    </button>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span class="text-base">${icon}</span>
+                    <div class="truncate">
+                        <div class="flex items-center gap-1.5">
+                            <h4 class="text-xs font-semibold text-slate-200 truncate group-hover:text-brand-300 transition">${escapeHtml(pl.name)}</h4>
+                            ${pl.is_system ? '<span class="text-[9px] px-1 rounded bg-rose-950/80 text-rose-300 border border-rose-800/50">System</span>' : ''}
+                        </div>
+                        <div class="text-[10px] text-slate-400 flex items-center gap-1.5">
+                            <span>${countStr}</span>
+                            <span>•</span>
+                            <span>${durationFmt}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <button class="view-pl-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" data-pl-id="${pl.id}">
+                        View
+                    </button>
+                    ${deleteBtnHtml}
+                </div>
+            `;
+
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('button')) return;
+                this.openPlaylistDetail(pl.id);
+            });
+
+            const viewBtn = card.querySelector('.view-pl-btn');
+            if (viewBtn) {
+                viewBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.openPlaylistDetail(pl.id);
+                });
+            }
+
+            const deleteBtn = card.querySelector('.delete-pl-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.promptDeletePlaylist(pl.id, pl.name);
+                });
+            }
+
+            this.studioListContainer.appendChild(card);
+        });
+    }
+
+    openPlaylistDetail(playlistId) {
+        if (this.studioDirectoryView) this.studioDirectoryView.classList.add('hidden');
+        if (this.studioDetailView) this.studioDetailView.classList.remove('hidden');
+        if (this.studioSearchInput) this.studioSearchInput.value = '';
+        this.activePlaylistQuery = '';
+
+        const summary = this.playlists.find(p => p.id === playlistId);
+        if (summary && this.studioActiveName) {
+            this.studioActiveName.textContent = summary.name;
+        }
+
+        this.fetchPlaylistDetail(playlistId);
+    }
+
+    closePlaylistDetail() {
+        this.activePlaylistDetail = null;
+        if (this.studioDetailView) this.studioDetailView.classList.add('hidden');
+        if (this.studioDirectoryView) this.studioDirectoryView.classList.remove('hidden');
+    }
+
+    renderActivePlaylistSongs() {
+        if (!this.studioSongsList || !this.activePlaylistDetail) return;
+
+        const songs = this.activePlaylistDetail.songs || [];
+        const query = this.activePlaylistQuery;
+
+        let filtered = songs;
+        if (query) {
+            filtered = songs.filter(s => 
+                (s.title || '').toLowerCase().includes(query) || 
+                (s.artist || '').toLowerCase().includes(query)
+            );
+        }
+
+        if (this.studioActiveName) {
+            const countStr = `${songs.length} ${songs.length === 1 ? 'song' : 'songs'}`;
+            this.studioActiveName.textContent = `${this.activePlaylistDetail.name} (${countStr})`;
+        }
+
+        if (filtered.length === 0) {
+            this.studioSongsList.innerHTML = `
+                <div class="text-center py-5 text-slate-500 text-xs">
+                    ${query ? 'No matching songs in playlist.' : 'Playlist has no songs.<br>Add songs using the heart (♥) or song editor modal.'}
+                </div>
+            `;
+            return;
+        }
+
+        this.studioSongsList.innerHTML = '';
+        filtered.forEach((song, idx) => {
+            const row = document.createElement('div');
+            row.className = "p-2 bg-surface-950 border border-slate-800 rounded-lg flex items-center justify-between gap-2 text-xs hover:border-slate-700 transition";
+
+            const isFirst = idx === 0;
+            const isLast = idx === filtered.length - 1;
+            const durationFmt = song.duration_seconds ? `${Math.floor(song.duration_seconds / 60)}:${String(Math.floor(song.duration_seconds % 60)).padStart(2, '0')}` : '';
+
+            row.innerHTML = `
+                <div class="flex items-center gap-2 truncate min-w-0 flex-1">
+                    <span class="text-[10px] text-slate-500 font-mono w-4 shrink-0 text-center">${idx + 1}</span>
+                    <div class="truncate">
+                        <p class="font-medium text-slate-200 truncate">${escapeHtml(song.title)}</p>
+                        <p class="text-[10px] text-slate-400 truncate">${escapeHtml(song.artist || 'Unknown Artist')} ${durationFmt ? '• ' + durationFmt : ''}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                    <button class="pl-play-btn p-1 text-[10px] rounded bg-brand-600/80 hover:bg-brand-500 text-white transition" title="Play Now" data-job-id="${song.job_id}">
+                        ▶
+                    </button>
+                    <button class="pl-reorder-up-btn p-1 text-[10px] rounded hover:bg-slate-800 ${isFirst || query ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Up" ${isFirst || query ? 'disabled' : ''}>
+                        ▲
+                    </button>
+                    <button class="pl-reorder-down-btn p-1 text-[10px] rounded hover:bg-slate-800 ${isLast || query ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Down" ${isLast || query ? 'disabled' : ''}>
+                        ▼
+                    </button>
+                    <button class="pl-remove-song-btn text-slate-500 hover:text-rose-400 p-1 text-xs transition" title="Remove from playlist" data-song-id="${song.job_id}">
+                        ✕
+                    </button>
+                </div>
+            `;
+
+            const playBtn = row.querySelector('.pl-play-btn');
+            if (playBtn) {
+                playBtn.addEventListener('click', () => {
+                    if (window.flexiokeLibrary) {
+                        window.flexiokeLibrary.handlePlay(song);
+                    }
+                });
+            }
+
+            const upBtn = row.querySelector('.pl-reorder-up-btn');
+            if (upBtn && !isFirst && !query) {
+                upBtn.addEventListener('click', () => {
+                    const songIds = songs.map(s => s.job_id);
+                    const originalIdx = songIds.indexOf(song.job_id);
+                    if (originalIdx > 0) {
+                        const temp = songIds[originalIdx - 1];
+                        songIds[originalIdx - 1] = songIds[originalIdx];
+                        songIds[originalIdx] = temp;
+                        this.reorderPlaylistSongs(this.activePlaylistDetail.id, songIds);
+                    }
+                });
+            }
+
+            const downBtn = row.querySelector('.pl-reorder-down-btn');
+            if (downBtn && !isLast && !query) {
+                downBtn.addEventListener('click', () => {
+                    const songIds = songs.map(s => s.job_id);
+                    const originalIdx = songIds.indexOf(song.job_id);
+                    if (originalIdx !== -1 && originalIdx < songIds.length - 1) {
+                        const temp = songIds[originalIdx + 1];
+                        songIds[originalIdx + 1] = songIds[originalIdx];
+                        songIds[originalIdx] = temp;
+                        this.reorderPlaylistSongs(this.activePlaylistDetail.id, songIds);
+                    }
+                });
+            }
+
+            const removeBtn = row.querySelector('.pl-remove-song-btn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', () => {
+                    this.removeSongFromPlaylist(this.activePlaylistDetail.id, song.job_id);
+                });
+            }
+
+            this.studioSongsList.appendChild(row);
+        });
+    }
+
+    async promptCreatePlaylist() {
+        const name = window.prompt("Enter new playlist name:");
+        if (!name || !name.trim()) return;
+        const desc = window.prompt("Enter playlist description (optional):") || "";
+        await this.createPlaylist(name.trim(), desc.trim());
+    }
+
+    async createPlaylist(name, description = '') {
+        try {
+            const resp = await fetch('/api/playlists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description })
+            });
+            if (resp.ok) {
+                const newPl = await resp.json();
+                await this.fetchPlaylists();
+                this.openPlaylistDetail(newPl.id);
+            } else {
+                const err = await resp.json();
+                alert(`Failed to create playlist: ${err.detail || 'Unknown error'}`);
+            }
+        } catch (err) {
+            console.error("[PlaylistsManager] Error creating playlist:", err);
+            alert("Network error while creating playlist.");
+        }
+    }
+
+    async promptDeletePlaylist(playlistId, playlistName) {
+        const confirmed = window.confirm(`Are you sure you want to delete the playlist "${playlistName}"? This will not delete the songs from your library.`);
+        if (!confirmed) return;
+        await this.deletePlaylist(playlistId);
+    }
+
+    async deletePlaylist(playlistId) {
+        try {
+            const resp = await fetch(`/api/playlists/${encodeURIComponent(playlistId)}`, {
+                method: 'DELETE'
+            });
+            if (resp.ok) {
+                if (this.activePlaylistDetail && this.activePlaylistDetail.id === playlistId) {
+                    this.closePlaylistDetail();
+                }
+                await this.fetchPlaylists();
+                window.dispatchEvent(new CustomEvent('flexioke:playlists-updated'));
+            } else {
+                const err = await resp.json();
+                alert(`Failed to delete playlist: ${err.detail || 'Unknown error'}`);
+            }
+        } catch (err) {
+            console.error("[PlaylistsManager] Error deleting playlist:", err);
+            alert("Network error while deleting playlist.");
+        }
+    }
+
+    async removeSongFromPlaylist(playlistId, songId) {
+        try {
+            const resp = await fetch(`/api/playlists/${encodeURIComponent(playlistId)}/songs/${encodeURIComponent(songId)}`, {
+                method: 'DELETE'
+            });
+            if (resp.ok) {
+                this.activePlaylistDetail = await resp.json();
+                this.renderActivePlaylistSongs();
+                this.fetchPlaylists();
+                window.dispatchEvent(new CustomEvent('flexioke:playlists-updated'));
+                if (playlistId === 'favorites' && window.flexiokeFavorites) {
+                    window.flexiokeFavorites.favoritesSet.delete(songId);
+                    window.flexiokeFavoritesSet = window.flexiokeFavorites.favoritesSet;
+                    window.flexiokeFavorites.updateHeartButtonsForSong(songId, false);
+                }
+            }
+        } catch (err) {
+            console.error("[PlaylistsManager] Error removing song from playlist:", err);
+        }
+    }
+
+    async reorderPlaylistSongs(playlistId, songIds) {
+        try {
+            const resp = await fetch(`/api/playlists/${encodeURIComponent(playlistId)}/reorder`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ song_ids: songIds })
+            });
+            if (resp.ok) {
+                this.activePlaylistDetail = await resp.json();
+                this.renderActivePlaylistSongs();
+            }
+        } catch (err) {
+            console.error("[PlaylistsManager] Error reordering playlist:", err);
+        }
+    }
+
+    async renderLyricsModalPlaylists(songId) {
+        this.activeLyricsJobId = songId;
+        if (!this.lyricsModalPlaylistsContainer) return;
+
+        this.lyricsModalPlaylistsContainer.innerHTML = `
+            <div class="text-slate-500 text-[11px] py-1">Loading playlists...</div>
+        `;
+
+        try {
+            const resp = await fetch('/api/playlists');
+            if (!resp.ok) return;
+            const summaries = await resp.json();
+
+            // Fetch details or check inclusion
+            const playlistsWithDetails = await Promise.all(
+                summaries.map(async (s) => {
+                    try {
+                        const dResp = await fetch(`/api/playlists/${encodeURIComponent(s.id)}`);
+                        if (dResp.ok) return await dResp.json();
+                    } catch (e) {}
+                    return s;
+                })
+            );
+
+            this.lyricsModalPlaylistsContainer.innerHTML = '';
+            if (playlistsWithDetails.length === 0) {
+                this.lyricsModalPlaylistsContainer.innerHTML = `
+                    <div class="text-slate-500 text-[11px] py-1">No playlists available.</div>
+                `;
+                return;
+            }
+
+            playlistsWithDetails.forEach(pl => {
+                const songs = pl.songs || [];
+                const songIds = pl.song_ids || songs.map(s => s.job_id);
+                const isMember = songIds.includes(songId);
+
+                const item = document.createElement('label');
+                item.className = "flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-800/60 transition cursor-pointer select-none";
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-2 truncate">
+                        <input type="checkbox" class="playlist-assignment-checkbox rounded bg-surface-900 border-slate-700 text-brand-500 focus:ring-0 cursor-pointer" data-pl-id="${pl.id}" data-pl-name="${escapeHtml(pl.name)}" ${isMember ? 'checked' : ''}>
+                        <span class="text-xs font-medium text-slate-200 truncate">${escapeHtml(pl.name)}</span>
+                        ${pl.is_system ? '<span class="text-[9px] px-1 rounded bg-rose-950/80 text-rose-300 border border-rose-800/50">System</span>' : ''}
+                    </div>
+                    <span class="text-[10px] text-slate-500 shrink-0">${songIds.length} ${songIds.length === 1 ? 'song' : 'songs'}</span>
+                `;
+
+                const checkbox = item.querySelector('.playlist-assignment-checkbox');
+                checkbox.addEventListener('change', async (e) => {
+                    const checked = e.target.checked;
+                    await this.toggleSongPlaylistMembership(pl.id, pl.name, songId, checked);
+                });
+
+                this.lyricsModalPlaylistsContainer.appendChild(item);
+            });
+        } catch (err) {
+            console.error("[PlaylistsManager] Error rendering lyrics modal playlists:", err);
+        }
+    }
+
+    async toggleSongPlaylistMembership(playlistId, playlistName, songId, add) {
+        try {
+            let resp;
+            if (add) {
+                resp = await fetch(`/api/playlists/${encodeURIComponent(playlistId)}/songs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ song_id: songId })
+                });
+            } else {
+                resp = await fetch(`/api/playlists/${encodeURIComponent(playlistId)}/songs/${encodeURIComponent(songId)}`, {
+                    method: 'DELETE'
+                });
+            }
+
+            if (resp.ok) {
+                this.showLyricsModalFeedback(add ? `✓ Added to "${playlistName}"` : `✓ Removed from "${playlistName}"`);
+                window.dispatchEvent(new CustomEvent('flexioke:playlists-updated'));
+                if (playlistId === 'favorites' && window.flexiokeFavorites) {
+                    if (add) {
+                        window.flexiokeFavorites.favoritesSet.add(songId);
+                    } else {
+                        window.flexiokeFavorites.favoritesSet.delete(songId);
+                    }
+                    window.flexiokeFavoritesSet = window.flexiokeFavorites.favoritesSet;
+                    window.flexiokeFavorites.updateHeartButtonsForSong(songId, add);
+                }
+            } else {
+                const err = await resp.json();
+                this.showLyricsModalFeedback(`⚠️ ${err.detail || 'Action failed'}`, true);
+            }
+        } catch (err) {
+            console.error("[PlaylistsManager] Failed to toggle playlist membership:", err);
+            this.showLyricsModalFeedback("⚠️ Network error", true);
+        }
+    }
+
+    showLyricsModalFeedback(msg, isError = false) {
+        if (!this.lyricsModalFeedback) return;
+        this.lyricsModalFeedback.textContent = msg;
+        this.lyricsModalFeedback.className = isError ? "text-[10px] text-rose-400 font-medium" : "text-[10px] text-emerald-400 font-medium";
+        if (this.feedbackTimeout) clearTimeout(this.feedbackTimeout);
+        this.feedbackTimeout = setTimeout(() => {
+            if (this.lyricsModalFeedback) this.lyricsModalFeedback.textContent = '';
+        }, 2500);
+    }
+}
+
 // Global Singletons
-window.flexiokeFavorites = new FavoritesManager();
-window.flexiokeFavoritesSet = window.flexiokeFavorites.favoritesSet;
+document.addEventListener('DOMContentLoaded', () => {
+    window.flexiokeFavorites = new FavoritesManager();
+    window.flexiokeFavoritesSet = window.flexiokeFavorites.favoritesSet;
+    window.flexiokePlaylistsManager = new PlaylistsManager();
+});
