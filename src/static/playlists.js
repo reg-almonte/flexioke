@@ -171,6 +171,13 @@ class PlaylistsManager {
         this.studioSearchInput = document.getElementById('studio-playlist-search-input');
         this.studioSongsList = document.getElementById('studio-playlist-songs-list');
 
+        // Karaoke Mode Elements
+        this.karaokeCountBadge = document.getElementById('karaoke-playlists-count-badge');
+        this.karaokeListContainer = document.getElementById('karaoke-playlists-list');
+
+        // Queue-to-Playlist Elements
+        this.saveQueueBtns = document.querySelectorAll('.save-queue-playlist-btn, #studio-save-queue-playlist-btn, #karaoke-save-queue-playlist-btn');
+
         // Lyrics Modal Elements
         this.lyricsModalPlaylistsContainer = document.getElementById('lyrics-modal-playlists-container');
         this.lyricsModalFeedback = document.getElementById('lyrics-modal-playlist-feedback');
@@ -219,6 +226,23 @@ class PlaylistsManager {
             });
         }
 
+        // Wire Save Queue as Playlist buttons
+        this.saveQueueBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.saveQueueAsPlaylist();
+            });
+        });
+
+        // Listen for queue state updates to toggle Save Queue button disabled state
+        window.addEventListener('flexioke:queue-updated', (e) => {
+            const queue = e.detail?.queue || [];
+            const hasSongs = queue.length > 0;
+            this.saveQueueBtns.forEach(btn => {
+                btn.disabled = !hasSongs;
+            });
+        });
+
         window.addEventListener('flexioke:playlists-updated', () => {
             this.fetchPlaylists();
         });
@@ -238,6 +262,7 @@ class PlaylistsManager {
                 this.playlists = await resp.json();
                 window.flexiokePlaylists = this.playlists;
                 this.renderStudioDirectory();
+                this.renderKaraokePlaylists();
                 
                 if (this.activePlaylistDetail) {
                     this.fetchPlaylistDetail(this.activePlaylistDetail.id);
@@ -342,6 +367,189 @@ class PlaylistsManager {
 
             this.studioListContainer.appendChild(card);
         });
+    }
+
+    renderKaraokePlaylists() {
+        if (this.karaokeCountBadge) {
+            this.karaokeCountBadge.textContent = String(this.playlists.length);
+        }
+
+        if (!this.karaokeListContainer) return;
+
+        if (this.playlists.length === 0) {
+            this.karaokeListContainer.innerHTML = `
+                <div class="text-center py-6 text-slate-500 text-xs">
+                    No playlists available.<br>Create one in Stem Studio!
+                </div>
+            `;
+            return;
+        }
+
+        this.karaokeListContainer.innerHTML = '';
+        this.playlists.forEach(pl => {
+            const card = document.createElement('div');
+            card.className = "p-3 bg-surface-950/80 border border-slate-800/80 hover:border-brand-500/40 rounded-xl transition flex flex-col gap-2.5 group";
+
+            const icon = pl.is_system ? '❤️' : '📁';
+            const durationFmt = pl.total_duration_seconds ? `${Math.floor(pl.total_duration_seconds / 60)}:${String(Math.floor(pl.total_duration_seconds % 60)).padStart(2, '0')}` : '0:00';
+            const countStr = `${pl.song_count} ${pl.song_count === 1 ? 'song' : 'songs'}`;
+            const isEmpty = pl.song_count === 0;
+
+            card.innerHTML = `
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <span class="text-sm">${icon}</span>
+                        <div class="truncate">
+                            <div class="flex items-center gap-1.5">
+                                <h4 class="text-xs font-semibold text-slate-200 truncate group-hover:text-brand-300 transition">${escapeHtml(pl.name)}</h4>
+                                ${pl.is_system ? '<span class="text-[9px] px-1 rounded bg-rose-950/80 text-rose-300 border border-rose-800/50">System</span>' : ''}
+                            </div>
+                            <div class="text-[10px] text-slate-400 flex items-center gap-1.5">
+                                <span>${countStr}</span>
+                                <span>•</span>
+                                <span>${durationFmt}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3-Way Dispatch Toolbar -->
+                <div class="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-800/60 text-[10px]">
+                    <button class="karaoke-queue-order-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition flex items-center justify-center gap-1 ${isEmpty ? 'opacity-40 cursor-not-allowed' : ''}" title="Append all songs in order to queue" ${isEmpty ? 'disabled' : ''}>
+                        <span>➕</span> In Order
+                    </button>
+                    <button class="karaoke-queue-shuffle-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition flex items-center justify-center gap-1 ${isEmpty ? 'opacity-40 cursor-not-allowed' : ''}" title="Append all songs shuffled to queue" ${isEmpty ? 'disabled' : ''}>
+                        <span>🔀</span> Shuffle
+                    </button>
+                    <button class="karaoke-play-now-btn px-2 py-1 rounded-lg bg-brand-600/80 hover:bg-brand-500 text-white font-semibold transition flex items-center justify-center gap-1 ${isEmpty ? 'opacity-40 cursor-not-allowed' : ''}" title="Clear queue, play first track, and enqueue remainder" ${isEmpty ? 'disabled' : ''}>
+                        <span>▶</span> Play Now
+                    </button>
+                </div>
+            `;
+
+            const orderBtn = card.querySelector('.karaoke-queue-order-btn');
+            if (orderBtn && !isEmpty) {
+                orderBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    await this.dispatchPlaylistQueue(pl.id, 'in_order', orderBtn);
+                });
+            }
+
+            const shuffleBtn = card.querySelector('.karaoke-queue-shuffle-btn');
+            if (shuffleBtn && !isEmpty) {
+                shuffleBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    await this.dispatchPlaylistQueue(pl.id, 'shuffle', shuffleBtn);
+                });
+            }
+
+            const playNowBtn = card.querySelector('.karaoke-play-now-btn');
+            if (playNowBtn && !isEmpty) {
+                playNowBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    await this.dispatchPlaylistQueue(pl.id, 'play_now', playNowBtn);
+                });
+            }
+
+            this.karaokeListContainer.appendChild(card);
+        });
+    }
+
+    async dispatchPlaylistQueue(playlistId, mode = 'in_order', triggerBtn = null) {
+        if (!window.flexiokeQueue) return;
+
+        let songIds = [];
+        try {
+            const resp = await fetch(`/api/playlists/${encodeURIComponent(playlistId)}`);
+            if (resp.ok) {
+                const detail = await resp.json();
+                const songs = detail.songs || [];
+                songIds = detail.song_ids || songs.map(s => s.job_id);
+            }
+        } catch (err) {
+            console.error("[PlaylistsManager] Error fetching playlist details for dispatch:", err);
+            return;
+        }
+
+        if (songIds.length === 0) {
+            alert("This playlist has no songs.");
+            return;
+        }
+
+        if (triggerBtn) {
+            triggerBtn.disabled = true;
+        }
+
+        try {
+            if (mode === 'in_order') {
+                for (const songId of songIds) {
+                    await window.flexiokeQueue.addToQueue(songId);
+                }
+            } else if (mode === 'shuffle') {
+                const shuffled = [...songIds];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                for (const songId of shuffled) {
+                    await window.flexiokeQueue.addToQueue(songId);
+                }
+            } else if (mode === 'play_now') {
+                // Clear existing queue
+                await window.flexiokeQueue.clearQueue();
+                // Play first song
+                await window.flexiokeQueue.playNow(songIds[0]);
+                // Enqueue remaining songs
+                for (const songId of songIds.slice(1)) {
+                    await window.flexiokeQueue.addToQueue(songId);
+                }
+            }
+        } finally {
+            if (triggerBtn) {
+                triggerBtn.disabled = false;
+            }
+        }
+    }
+
+    async saveQueueAsPlaylist() {
+        if (!window.flexiokeQueue) return;
+        const queueItems = window.flexiokeQueue.queue || [];
+        const songIds = queueItems.map(item => item.job_id).filter(Boolean);
+
+        if (songIds.length === 0) {
+            alert("Playback queue is empty.");
+            return;
+        }
+
+        const name = window.prompt(`Save ${songIds.length} queued song(s) as new playlist:\nEnter playlist name:`);
+        if (!name || !name.trim()) return;
+
+        const description = window.prompt("Enter playlist description (optional):") || "";
+
+        try {
+            const resp = await fetch('/api/playlists/from-queue', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name.trim(),
+                    description: description.trim(),
+                    song_ids: songIds
+                })
+            });
+
+            if (resp.ok) {
+                const newPl = await resp.json();
+                await this.fetchPlaylists();
+                window.dispatchEvent(new CustomEvent('flexioke:playlists-updated'));
+                alert(`✓ Playlist "${newPl.name}" created with ${songIds.length} song(s)!`);
+            } else {
+                const err = await resp.json();
+                alert(`Failed to create playlist: ${err.detail || 'Unknown error'}`);
+            }
+        } catch (err) {
+            console.error("[PlaylistsManager] Error saving queue as playlist:", err);
+            alert("Network error while saving playlist from queue.");
+        }
     }
 
     openPlaylistDetail(playlistId) {

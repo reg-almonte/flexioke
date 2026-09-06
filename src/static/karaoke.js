@@ -407,7 +407,7 @@ class KaraokeStageManager {
 
     initKaraokeAccordions() {
         const ACCORDION_STORAGE_KEY = 'flexioke_karaoke_accordions';
-        const defaultAccordionState = { 'karaoke-queue': true, 'karaoke-library': true };
+        const defaultAccordionState = { 'karaoke-queue': true, 'karaoke-playlists': true, 'karaoke-library': true };
         let accordionState = { ...defaultAccordionState };
 
         try {
@@ -434,7 +434,7 @@ class KaraokeStageManager {
             }
         };
 
-        ['karaoke-queue', 'karaoke-library'].forEach(section => {
+        ['karaoke-queue', 'karaoke-playlists', 'karaoke-library'].forEach(section => {
             const header = document.getElementById(`accordion-header-${section}`);
             if (header) {
                 // Initial render from state

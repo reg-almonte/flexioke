@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0063: Karaoke Mode Playlists Accordion & 3-Way Queue Dispatch Engine
@@ -20,9 +20,9 @@ Implement Karaoke Mode playlist browsing and queue dispatching:
   3. `▶ Play Now (Replace)`: Stop current track, clear queue, play first track, and enqueue remainder.
 
 ## Acceptance Criteria
-- [ ] Sequential queueing appends all tracks in original playlist order.
-- [ ] Shuffled queueing appends tracks in randomized order.
-- [ ] Replace & Play Now starts playback of first track immediately.
+- [x] Sequential queueing appends all tracks in original playlist order.
+- [x] Shuffled queueing appends tracks in randomized order.
+- [x] Replace & Play Now starts playback of first track immediately.
 
 ## Blocked by
 - `docs/tickets/STORY-0027-backend-playlist-store-and-api.md`

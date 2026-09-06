@@ -15,5 +15,5 @@ Delivers Version 0.3.0 enhancements: a persistent, thread-safe backend Playlist 
 ## Stories
 - [x] STORY-0027: Backend Playlist Store & REST API Services
 - [x] STORY-0028: Built-in Favorites System & 1-Click Heart Toggles
-- [ ] STORY-0029: Stem Studio Playlists Management UI & Song Modal Assignment
-- [ ] STORY-0030: Karaoke Mode Playlist Ingestion, 3-Way Queue Dispatch & Queue Saving
+- [x] STORY-0029: Stem Studio Playlists Management UI & Song Modal Assignment
+- [x] STORY-0030: Karaoke Mode Playlist Ingestion, 3-Way Queue Dispatch & Queue Saving

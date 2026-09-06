@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0064: Save Active Playback Queue as Playlist Action
@@ -18,9 +18,9 @@ Implement the Queue-to-Playlist feature:
 - Refresh playlists across all active views and display a success notification.
 
 ## Acceptance Criteria
-- [ ] Button disabled or hidden when the active playback queue is empty.
-- [ ] Submitting creates the playlist with the exact songs currently in the queue.
-- [ ] Toast notification confirms creation and newly created playlist appears in directory.
+- [x] Button disabled or hidden when the active playback queue is empty.
+- [x] Submitting creates the playlist with the exact songs currently in the queue.
+- [x] Toast notification confirms creation and newly created playlist appears in directory.
 
 ## Blocked by
 - `docs/tickets/STORY-0027-backend-playlist-store-and-api.md`
