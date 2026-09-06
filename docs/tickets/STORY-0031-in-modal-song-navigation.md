@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # STORY-0031: In-Modal Song Navigation & Dirty Changes Guard
@@ -14,15 +14,15 @@ implementation: pending
 Allows users to seamlessly navigate between consecutive songs inside the Song Details & Lyrics editor modal using Previous (`◀`) and Next (`▶`) controls and hotkeys (`Alt + Left/Right`), while protecting unsaved metadata and lyric modifications with a confirmation guard.
 
 ## Acceptance Criteria
-- [ ] Users can click Previous and Next buttons in the modal header to navigate between songs in the current view's list.
-- [ ] Active track position badge (e.g., `Track 4 of 18`) accurately reflects current index in the active list context.
-- [ ] Previous button is disabled on the first song; Next button is disabled on the last song.
-- [ ] If user makes unsaved edits to Title, Artist, or Lyrics and attempts to navigate or close the modal, a confirmation prompt prevents accidental loss.
-- [ ] 100% automated test coverage with zero regressions.
+- [x] Users can click Previous and Next buttons in the modal header to navigate between songs in the current view's list.
+- [x] Active track position badge (e.g., `Track 4 of 18`) accurately reflects current index in the active list context.
+- [x] Previous button is disabled on the first song; Next button is disabled on the last song.
+- [x] If user makes unsaved edits to Title, Artist, or Lyrics and attempts to navigate or close the modal, a confirmation prompt prevents accidental loss.
+- [x] 100% automated test coverage with zero regressions.
 
 ## Tasks
-- [ ] TASK-0065: Modal Navigation Context & Track Position Counter
-- [ ] TASK-0066: Unsaved Edits Interceptor & Keyboard Shortcuts
+- [x] TASK-0065: Modal Navigation Context & Track Position Counter
+- [x] TASK-0066: Unsaved Edits Interceptor & Keyboard Shortcuts
 
 ## Blocked by
 - None (can start immediately)

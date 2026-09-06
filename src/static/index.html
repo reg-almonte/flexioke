@@ -630,12 +630,24 @@
     <!-- Lyrics Editor Modal -->
     <div id="lyrics-modal" class="hidden fixed inset-0 z-[10010] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
         <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-lg w-full p-5 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div class="truncate">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3 gap-2">
+                <div class="truncate max-w-[45%]">
                     <span class="text-[10px] uppercase font-bold text-brand-400 tracking-wider">Song Details & Lyrics</span>
                     <h3 id="lyrics-modal-title" class="text-sm font-semibold text-white truncate">Edit Song</h3>
                 </div>
-                <button id="close-lyrics-modal-btn" class="text-slate-400 hover:text-slate-200 p-1">✕</button>
+                <div class="flex items-center gap-2">
+                    <!-- In-Modal Song Navigation Controls -->
+                    <div class="flex items-center gap-1 bg-surface-950/80 border border-slate-800 rounded-lg p-0.5 text-xs">
+                        <button id="modal-nav-prev-btn" type="button" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 active:bg-slate-900 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 hover:text-white text-xs font-semibold transition" title="Previous Song (Alt+Left)">
+                            ◀
+                        </button>
+                        <span id="modal-nav-counter-badge" class="px-2 py-0.5 text-[11px] font-mono text-slate-300 select-none">Track 0 of 0</span>
+                        <button id="modal-nav-next-btn" type="button" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 active:bg-slate-900 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 hover:text-white text-xs font-semibold transition" title="Next Song (Alt+Right)">
+                            ▶
+                        </button>
+                    </div>
+                    <button id="close-lyrics-modal-btn" class="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-slate-800 transition" title="Close (Esc)">✕</button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">

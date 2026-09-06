@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0066: Unsaved Edits Interceptor & Keyboard Shortcuts
@@ -18,9 +18,9 @@ Implement dirty state tracking and keyboard navigation:
 - Clear dirty flag upon successful save.
 
 ## Acceptance Criteria
-- [ ] Confirmation prompt appears when attempting to navigate or close with unsaved edits.
-- [ ] Discarding proceeds with navigation/closure; cancelling remains on the active song.
-- [ ] Keyboard shortcuts trigger song navigation cleanly.
+- [x] Confirmation prompt appears when attempting to navigate or close with unsaved edits.
+- [x] Discarding proceeds with navigation/closure; cancelling remains on the active song.
+- [x] Keyboard shortcuts trigger song navigation cleanly.
 
 ## Blocked by
 - `docs/tickets/TASK-0065-modal-navigation-context-and-counter.md`

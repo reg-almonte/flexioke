@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0065: Modal Navigation Context & Track Position Counter
@@ -18,10 +18,10 @@ Implement in-modal list context tracking and navigation controls:
 - Manage button disabled states on boundary indices (`index === 0`, `index === list.length - 1`).
 
 ## Acceptance Criteria
-- [ ] Clicking Previous loads the preceding song in the current view order.
-- [ ] Clicking Next loads the succeeding song in the current view order.
-- [ ] Badge displays `Track X of Y` matching active position.
-- [ ] Boundary buttons disable appropriately.
+- [x] Clicking Previous loads the preceding song in the current view order.
+- [x] Clicking Next loads the succeeding song in the current view order.
+- [x] Badge displays `Track X of Y` matching active position.
+- [x] Boundary buttons disable appropriately.
 
 ## Blocked by
 - None (can start immediately)

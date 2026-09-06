@@ -32,6 +32,17 @@ class SongLibraryManager {
         this.lyricsCustomShiftBtn = document.getElementById('lyrics-custom-shift-btn');
         this.activeLyricsJobId = null;
 
+        // In-modal navigation elements & state
+        this.modalNavPrevBtn = document.getElementById('modal-nav-prev-btn');
+        this.modalNavNextBtn = document.getElementById('modal-nav-next-btn');
+        this.modalNavCounterBadge = document.getElementById('modal-nav-counter-badge');
+        this.modalContext = {
+            items: [],
+            activeIndex: -1,
+            isDirty: false,
+            baseline: { title: '', artist: '', lyrics: '' }
+        };
+
         // Play interruption confirmation modal
         this.playConfirmModal = document.getElementById('play-confirm-modal');
         this.confirmSongTitle = document.getElementById('confirm-song-title');
@@ -156,6 +167,54 @@ class SongLibraryManager {
         if (this.fetchLrclibBtn) {
             this.fetchLrclibBtn.addEventListener('click', () => this.handleFetchLrclib());
         }
+
+        // In-modal previous / next song navigation buttons
+        if (this.modalNavPrevBtn) {
+            this.modalNavPrevBtn.addEventListener('click', () => this.navigateToModalSong(-1));
+        }
+        if (this.modalNavNextBtn) {
+            this.modalNavNextBtn.addEventListener('click', () => this.navigateToModalSong(1));
+        }
+
+        // Real-time input tracking for dirty changes
+        const onModalFieldInput = () => {
+            this.modalContext.isDirty = this.isModalDirty();
+        };
+        if (this.lyricsEditTitle) {
+            this.lyricsEditTitle.addEventListener('input', onModalFieldInput);
+        }
+        if (this.lyricsEditArtist) {
+            this.lyricsEditArtist.addEventListener('input', onModalFieldInput);
+        }
+        if (this.lyricsTextarea) {
+            this.lyricsTextarea.addEventListener('input', onModalFieldInput);
+        }
+
+        // Keyboard navigation and shortcut listener
+        window.addEventListener('keydown', (e) => {
+            if (this.lyricsModal && !this.lyricsModal.classList.contains('hidden')) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.closeLyricsModal();
+                    return;
+                }
+                const activeTag = document.activeElement ? document.activeElement.tagName : '';
+                const isInputActive = ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag);
+                if (e.altKey && e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.navigateToModalSong(-1);
+                } else if (e.altKey && e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.navigateToModalSong(1);
+                } else if (!isInputActive && e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.navigateToModalSong(-1);
+                } else if (!isInputActive && e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.navigateToModalSong(1);
+                }
+            }
+        });
 
         // LRC Time-Shift calibration button listeners
         document.querySelectorAll('.lyrics-shift-btn').forEach(btn => {
@@ -354,7 +413,7 @@ class SongLibraryManager {
                 const lyricsBtn = card.querySelector('.lyrics-btn');
                 if (lyricsBtn) {
                     lyricsBtn.addEventListener('click', () => {
-                        this.openLyricsModal(job);
+                        this.openLyricsModal(job, this.jobs);
                     });
                 }
 
@@ -511,7 +570,7 @@ class SongLibraryManager {
             if (editBtn) {
                 editBtn.addEventListener('click', () => {
                     this.closeCatalogModal();
-                    this.openLyricsModal(job);
+                    this.openLyricsModal(job, filtered);
                 });
             }
 
@@ -526,16 +585,99 @@ class SongLibraryManager {
         });
     }
 
-    async openLyricsModal(job) {
-        this.activeLyricsJobId = job.job_id;
+    isModalDirty() {
+        const title = this.lyricsEditTitle ? this.lyricsEditTitle.value : '';
+        const artist = this.lyricsEditArtist ? this.lyricsEditArtist.value : '';
+        const lyrics = this.lyricsTextarea ? this.lyricsTextarea.value : '';
+        const baseline = this.modalContext.baseline || { title: '', artist: '', lyrics: '' };
+        return (
+            title !== (baseline.title || '') ||
+            artist !== (baseline.artist || '') ||
+            lyrics !== (baseline.lyrics || '')
+        );
+    }
+
+    hasUnsavedChanges() {
+        return this.isModalDirty();
+    }
+
+    checkUnsavedChanges() {
+        if (this.isModalDirty()) {
+            return window.confirm("You have unsaved changes. Discard and proceed?");
+        }
+        return true;
+    }
+
+    updateModalNavState() {
+        const items = this.modalContext.items || [];
+        const activeIndex = this.modalContext.activeIndex;
+        const total = items.length;
+
+        if (this.modalNavCounterBadge) {
+            if (total === 0 || activeIndex === -1) {
+                this.modalNavCounterBadge.textContent = "Track 0 of 0";
+            } else {
+                this.modalNavCounterBadge.textContent = `Track ${activeIndex + 1} of ${total}`;
+            }
+        }
+
+        if (this.modalNavPrevBtn) {
+            this.modalNavPrevBtn.disabled = activeIndex <= 0;
+        }
+
+        if (this.modalNavNextBtn) {
+            this.modalNavNextBtn.disabled = (activeIndex === -1 || activeIndex >= total - 1);
+        }
+    }
+
+    navigateToModalSong(delta) {
+        if (!this.checkUnsavedChanges()) {
+            return;
+        }
+
+        const items = this.modalContext.items || [];
+        const nextIndex = this.modalContext.activeIndex + delta;
+
+        if (nextIndex >= 0 && nextIndex < items.length) {
+            const targetSong = items[nextIndex];
+            this.openLyricsModal(targetSong, items);
+        }
+    }
+
+    async openLyricsModal(job, contextList = null) {
+        if (contextList && Array.isArray(contextList)) {
+            this.modalContext.items = [...contextList];
+        } else if (!this.modalContext.items || this.modalContext.items.length === 0) {
+            this.modalContext.items = this.jobs ? [...this.jobs] : [];
+        }
+
+        const targetId = job.job_id || job.id;
+        this.modalContext.activeIndex = this.modalContext.items.findIndex(
+            item => (item.job_id || item.id) === targetId
+        );
+        if (this.modalContext.activeIndex === -1 && this.modalContext.items.length > 0) {
+            this.modalContext.activeIndex = 0;
+        }
+
+        this.activeLyricsJobId = targetId;
+
+        const currentTitle = job.title || "";
+        const currentArtist = job.artist || "";
+        this.modalContext.baseline = {
+            title: currentTitle,
+            artist: currentArtist,
+            lyrics: ""
+        };
+        this.modalContext.isDirty = false;
+
         if (this.lyricsModalTitle) {
-            this.lyricsModalTitle.textContent = job.title || "Untitled Song";
+            this.lyricsModalTitle.textContent = currentTitle || "Untitled Song";
         }
         if (this.lyricsEditTitle) {
-            this.lyricsEditTitle.value = job.title || "";
+            this.lyricsEditTitle.value = currentTitle;
         }
         if (this.lyricsEditArtist) {
-            this.lyricsEditArtist.value = job.artist || "";
+            this.lyricsEditArtist.value = currentArtist;
         }
         if (this.lyricsTextarea) {
             this.lyricsTextarea.value = "Loading lyrics...";
@@ -554,26 +696,34 @@ class SongLibraryManager {
         if (this.lyricsCustomShiftInput) {
             this.lyricsCustomShiftInput.value = '';
         }
+
+        this.updateModalNavState();
+
         if (this.lyricsModal) {
             this.lyricsModal.classList.remove('hidden');
         }
 
         if (window.flexiokePlaylistsManager) {
-            window.flexiokePlaylistsManager.renderLyricsModalPlaylists(job.job_id);
+            window.flexiokePlaylistsManager.renderLyricsModalPlaylists(targetId);
         }
 
         try {
-            const resp = await fetch(`/api/jobs/${job.job_id}/lyrics`);
+            const resp = await fetch(`/api/jobs/${targetId}/lyrics`);
             if (resp.ok) {
                 const data = await resp.json();
-                if (this.lyricsTextarea) {
-                    this.lyricsTextarea.value = data.lyrics || "";
+                const fetchedLyrics = data.lyrics || "";
+                if (this.lyricsTextarea && this.activeLyricsJobId === targetId) {
+                    this.lyricsTextarea.value = fetchedLyrics;
+                    this.modalContext.baseline.lyrics = fetchedLyrics;
+                    this.modalContext.isDirty = false;
                 }
             }
         } catch (err) {
             console.error("Error loading lyrics:", err);
-            if (this.lyricsTextarea) {
+            if (this.lyricsTextarea && this.activeLyricsJobId === targetId) {
                 this.lyricsTextarea.value = "";
+                this.modalContext.baseline.lyrics = "";
+                this.modalContext.isDirty = false;
             }
         }
     }
@@ -696,8 +846,12 @@ class SongLibraryManager {
         }
     }
 
-    closeLyricsModal() {
+    closeLyricsModal(force = false) {
+        if (!force && !this.checkUnsavedChanges()) {
+            return;
+        }
         this.activeLyricsJobId = null;
+        this.modalContext.isDirty = false;
         if (this.lyricsModal) {
             this.lyricsModal.classList.add('hidden');
         }
@@ -747,6 +901,12 @@ class SongLibraryManager {
 
             if (resp.ok) {
                 const data = await resp.json();
+                this.modalContext.baseline = {
+                    title: newTitle,
+                    artist: newArtist,
+                    lyrics: text
+                };
+                this.modalContext.isDirty = false;
                 if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saved!";
                 window.dispatchEvent(new CustomEvent('flexioke:lyrics-updated', {
                     detail: {
@@ -757,7 +917,7 @@ class SongLibraryManager {
                         artist: newArtist
                     }
                 }));
-                setTimeout(() => this.closeLyricsModal(), 600);
+                setTimeout(() => this.closeLyricsModal(true), 600);
             } else {
                 if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Save failed";
             }
