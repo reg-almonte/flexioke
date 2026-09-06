@@ -193,14 +193,20 @@ class PlaylistsManager {
         }
 
         if (this.studioQueueAllBtn) {
-            this.studioQueueAllBtn.addEventListener('click', () => {
+            this.studioQueueAllBtn.addEventListener('click', async () => {
                 if (!this.activePlaylistDetail || !this.activePlaylistDetail.songs) return;
                 const songIds = this.activePlaylistDetail.songs.map(s => s.job_id);
                 if (songIds.length > 0 && window.flexiokeQueue) {
-                    songIds.forEach(id => window.flexiokeQueue.addToQueue(id));
+                    this.studioQueueAllBtn.disabled = true;
+                    for (const id of songIds) {
+                        await window.flexiokeQueue.addToQueue(id);
+                    }
                     this.studioQueueAllBtn.textContent = '✓ Queued All';
                     setTimeout(() => {
-                        if (this.studioQueueAllBtn) this.studioQueueAllBtn.textContent = '➕ Queue All';
+                        if (this.studioQueueAllBtn) {
+                            this.studioQueueAllBtn.textContent = '➕ Queue All';
+                            this.studioQueueAllBtn.disabled = false;
+                        }
                     }, 1200);
                 }
             });
@@ -675,3 +681,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.flexiokeFavoritesSet = window.flexiokeFavorites.favoritesSet;
     window.flexiokePlaylistsManager = new PlaylistsManager();
 });
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
