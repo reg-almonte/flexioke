@@ -1,6 +1,7 @@
 ---
-status: in-progress
+status: fixed
 filed_at: 2026-09-06
+verified_at: 2026-09-06
 ---
 
 # Bug Report: Native Fullscreen Display & Controller Auto-Hide in Cinema Stage
