@@ -115,7 +115,7 @@ class FavoritesManager {
 
     renderHeartButtonHtml(songId, extraClasses = '') {
         const isFav = this.isFavorite(songId);
-        const icon = isFav ? '♥' : '♡';
+        const icon = window.getIconHtml ? window.getIconHtml(isFav ? 'heart_filled' : 'heart_outline', 'w-4 h-4') : (isFav ? '♥' : '♡');
         const title = isFav ? 'Remove from Favorites' : 'Add to Favorites';
         const colorClass = isFav ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400';
         return `<button type="button" class="favorite-toggle-btn p-1 text-sm ${colorClass} hover:scale-110 active:scale-95 transition-all duration-150 ${extraClasses}" title="${title}" aria-label="${title}" data-job-id="${songId}" data-favorite="${isFav ? 'true' : 'false'}">${icon}</button>`;
@@ -128,7 +128,11 @@ class FavoritesManager {
             const title = isFav ? 'Remove from Favorites' : 'Add to Favorites';
             btn.setAttribute('title', title);
             btn.setAttribute('aria-label', title);
-            btn.textContent = isFav ? '♥' : '♡';
+            if (window.getIconHtml) {
+                btn.innerHTML = window.getIconHtml(isFav ? 'heart_filled' : 'heart_outline', 'w-4 h-4');
+            } else {
+                btn.textContent = isFav ? '♥' : '♡';
+            }
 
             if (isFav) {
                 btn.classList.remove('text-slate-500', 'hover:text-rose-400');
@@ -144,9 +148,23 @@ class FavoritesManager {
         const buttons = document.querySelectorAll('.favorite-toggle-btn[data-job-id]');
         buttons.forEach(btn => {
             const songId = btn.getAttribute('data-job-id');
-            if (songId) {
-                const isFav = this.isFavorite(songId);
-                this.updateHeartButtonsForSong(songId, isFav);
+            const isFav = this.isFavorite(songId);
+            btn.setAttribute('data-favorite', isFav ? 'true' : 'false');
+            const title = isFav ? 'Remove from Favorites' : 'Add to Favorites';
+            btn.setAttribute('title', title);
+            btn.setAttribute('aria-label', title);
+            if (window.getIconHtml) {
+                btn.innerHTML = window.getIconHtml(isFav ? 'heart_filled' : 'heart_outline', 'w-4 h-4');
+            } else {
+                btn.textContent = isFav ? '♥' : '♡';
+            }
+
+            if (isFav) {
+                btn.classList.remove('text-slate-500', 'hover:text-rose-400');
+                btn.classList.add('text-rose-500');
+            } else {
+                btn.classList.remove('text-rose-500');
+                btn.classList.add('text-slate-500', 'hover:text-rose-400');
             }
         });
     }
@@ -416,13 +434,13 @@ class PlaylistsManager {
                 <!-- 3-Way Dispatch Toolbar -->
                 <div class="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-800/60 text-[10px]">
                     <button class="karaoke-queue-order-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition flex items-center justify-center gap-1 ${isEmpty ? 'opacity-40 cursor-not-allowed' : ''}" title="Append all songs in order to queue" ${isEmpty ? 'disabled' : ''}>
-                        <span>➕</span> In Order
+                        <span>${window.getIconHtml ? window.getIconHtml('queue', 'w-3 h-3') : '➕'}</span> In Order
                     </button>
                     <button class="karaoke-queue-shuffle-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition flex items-center justify-center gap-1 ${isEmpty ? 'opacity-40 cursor-not-allowed' : ''}" title="Append all songs shuffled to queue" ${isEmpty ? 'disabled' : ''}>
-                        <span>🔀</span> Shuffle
+                        <span>${window.getIconHtml ? window.getIconHtml('refresh', 'w-3 h-3') : '🔀'}</span> Shuffle
                     </button>
                     <button class="karaoke-play-now-btn px-2 py-1 rounded-lg bg-brand-600/80 hover:bg-brand-500 text-white font-semibold transition flex items-center justify-center gap-1 ${isEmpty ? 'opacity-40 cursor-not-allowed' : ''}" title="Clear queue, play first track, and enqueue remainder" ${isEmpty ? 'disabled' : ''}>
-                        <span>▶</span> Play Now
+                        <span>${window.getIconHtml ? window.getIconHtml('play', 'w-3 h-3') : '▶'}</span> Play Now
                     </button>
                 </div>
             `;
@@ -618,17 +636,17 @@ class PlaylistsManager {
                     </div>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
-                    <button class="pl-play-btn p-1 text-[10px] rounded bg-brand-600/80 hover:bg-brand-500 text-white transition" title="Play Now" data-job-id="${song.job_id}">
-                        ▶
+                    <button class="pl-play-btn p-1 text-[10px] rounded bg-brand-600/80 hover:bg-brand-500 text-white transition flex items-center justify-center" title="Play Now" data-job-id="${song.job_id}">
+                        ${window.getIconHtml ? window.getIconHtml('play', 'w-3 h-3') : '▶'}
                     </button>
-                    <button class="pl-reorder-up-btn p-1 text-[10px] rounded hover:bg-slate-800 ${isFirst || query ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Up" ${isFirst || query ? 'disabled' : ''}>
-                        ▲
+                    <button class="pl-reorder-up-btn p-1 text-[10px] rounded hover:bg-slate-800 flex items-center justify-center ${isFirst || query ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Up" ${isFirst || query ? 'disabled' : ''}>
+                        ${window.getIconHtml ? window.getIconHtml('chevron_up', 'w-3 h-3') : '▲'}
                     </button>
-                    <button class="pl-reorder-down-btn p-1 text-[10px] rounded hover:bg-slate-800 ${isLast || query ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Down" ${isLast || query ? 'disabled' : ''}>
-                        ▼
+                    <button class="pl-reorder-down-btn p-1 text-[10px] rounded hover:bg-slate-800 flex items-center justify-center ${isLast || query ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-white transition'}" title="Move Down" ${isLast || query ? 'disabled' : ''}>
+                        ${window.getIconHtml ? window.getIconHtml('chevron_down', 'w-3 h-3') : '▼'}
                     </button>
-                    <button class="pl-remove-song-btn text-slate-500 hover:text-rose-400 p-1 text-xs transition" title="Remove from playlist" data-song-id="${song.job_id}">
-                        ✕
+                    <button class="pl-remove-song-btn text-slate-500 hover:text-rose-400 p-1 text-xs transition flex items-center justify-center" title="Remove from playlist" data-song-id="${song.job_id}">
+                        ${window.getIconHtml ? window.getIconHtml('close', 'w-3.5 h-3.5') : '✕'}
                     </button>
                 </div>
             `;

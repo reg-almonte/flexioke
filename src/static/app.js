@@ -454,7 +454,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         if (chevron) {
-            chevron.textContent = isExpanded ? '▾' : '▸';
+            if (window.getIconHtml) {
+                chevron.innerHTML = isExpanded ? window.getIconHtml('chevron_down', 'w-3.5 h-3.5 inline-block') : window.getIconHtml('chevron_right', 'w-3.5 h-3.5 inline-block');
+            } else {
+                chevron.textContent = isExpanded ? '▾' : '▸';
+            }
         }
     }
 

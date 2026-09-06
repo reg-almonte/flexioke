@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0068: UI Iconography Overhaul & Hotkey Tooltips
@@ -17,9 +17,9 @@ Integrate the SVG icon system across the UI:
 - Add rich tooltips with hotkey prompts (e.g. `Play / Pause (Space)`, `Restart (R)`, `Next (N)`, `Fullscreen (F)`).
 
 ## Acceptance Criteria
-- [ ] All interactive buttons utilize consistent SVG icons.
-- [ ] Tooltips include accurate hotkey cues.
-- [ ] Hover and active states remain smooth and visually responsive.
+- [x] All interactive buttons utilize consistent SVG icons.
+- [x] Tooltips include accurate hotkey cues.
+- [x] Hover and active states remain smooth and visually responsive.
 
 ## Blocked by
 - `docs/tickets/TASK-0067-svg-icon-dictionary-module.md`

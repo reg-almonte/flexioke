@@ -453,7 +453,11 @@ class FlexiokePlayer {
 
     updatePlayBtnUI() {
         if (!this.playBtn) return;
-        this.playBtn.innerHTML = this.isPlaying ? '⏸' : '▶';
+        if (window.getIconHtml) {
+            this.playBtn.innerHTML = this.isPlaying ? window.getIconHtml('pause', 'w-5 h-5') : window.getIconHtml('play', 'w-5 h-5');
+        } else {
+            this.playBtn.innerHTML = this.isPlaying ? '⏸' : '▶';
+        }
     }
 
     updateTimecode(current, total) {
