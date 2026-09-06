@@ -198,3 +198,24 @@ made while building the template itself.
 - artifact: docs/releases/v0.2.6.md
 - approved_by: reg
 - notes: Version 0.2.6 fully approved and released. Includes in-modal LRC timestamp calibration toolbar with instant DOM preview and boundary clamping (TASK-0054), collapsible Playback Queue and Song Library sidebar accordions in Karaoke Mode with localStorage persistence (TASK-0055), and smart idle stage play dispatch from queue with catalog modal fallback (TASK-0056).
+
+## 2026-09-06 — Approved Requirements: Version 0.3.0 Playlists Management & Favorites System
+- artifact: docs/requirements/version0.3.0.md
+- approved_by: reg
+- notes: Approved requirements for Version 0.3.0 covering backend playlist storage and CRUD API, immutable built-in Favorites system with 1-click heart toggles, song modal multi-playlist assignments, Stem Studio playlists management UI, 3-way Karaoke queue dispatch (In Order, Shuffle, Play Now Replace), queue-to-playlist conversion, and cascading deletion integrity.
+
+## 2026-09-06 — Approved Functional Spec: Version 0.3.0 Playlists Management & Favorites System
+- artifact: docs/specs/version0.3.0.md
+- approved_by: reg
+- notes: Functional specification approved detailing Playlist data models, REST endpoints, 1-click Favorites heart toggle state machine, multi-playlist modal assignment, Stem Studio playlist editor accordion, 3-way Karaoke queue dispatch (In Order, Shuffle, Play Now Replace), and cascading track pruning.
+
+## 2026-09-06 — Approved ADR-0010: File-Backed In-Memory Playlist Manager with REST API & Reactive Favorites State Machine
+- artifact: docs/design/ADR-0010-playlists-management-and-favorites.md
+- approved_by: reg
+- notes: Approved Option 1 delivering thread-safe singleton PlaylistManager backed by ./data/playlists.json with in-memory caching and atomic file replacement, immutable favorites system playlist, cascading deletion integrity, and event-driven reactive client state machine.
+
+## 2026-09-06 — Approved Ticket Breakdown: EPIC-0009 Playlists Management & Favorites System
+- artifact: docs/tickets/EPIC-0009-playlists-management-and-favorites.md
+- approved_by: reg
+- notes: Approved EPIC-0009 work breakdown comprising STORY-0027, STORY-0028, STORY-0029, and STORY-0030 across TASK-0057 to TASK-0064 covering backend playlist store & REST API, immutable Favorites system with 1-click heart toggles, Stem Studio playlists UI & modal assignment, and Karaoke Mode 3-way queue dispatch & queue saving. Previous tickets archived to docs/tickets/archive/v0.2.6/.
+
