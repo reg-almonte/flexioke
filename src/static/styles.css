@@ -56,7 +56,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 /* Fullscreen Cinema Karaoke Stage Mode */
 .stage-fullscreen,
-.karaoke-cinema-fullscreen {
+.karaoke-cinema-fullscreen,
+#karaoke-stage-card:fullscreen,
+#karaoke-stage-card:-webkit-full-screen {
     position: fixed !important;
     inset: 0 !important;
     z-index: 9999 !important;

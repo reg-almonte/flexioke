@@ -54,3 +54,124 @@ def test_karaoke_keyboard_shortcuts_and_tooltips():
 
     # Hotkey handler for 'f' / 'F'
     assert "key.toLowerCase() === 'f'" in js or "key === 'f'" in js or "key === 'F'" in js or "e.key === 'f'" in js or "e.code === 'KeyF'" in js
+
+def test_native_fullscreen_api_integration():
+    """Verify karaoke.js integrates HTML5 Fullscreen API with vendor prefixes and two-way sync."""
+    resp = client.get("/static/karaoke.js")
+    assert resp.status_code == 200
+    js = resp.text
+
+    assert "enterNativeFullscreen" in js
+    assert "exitNativeFullscreen" in js
+    assert "syncNativeFullscreenState" in js
+    assert "requestFullscreen" in js
+    assert "webkitRequestFullscreen" in js
+    assert "fullscreenchange" in js
+    assert "webkitfullscreenchange" in js
+
+def test_inactivity_timer_debouncing_and_autohide_in_node():
+    """Execute Node test verifying that 100ms interval ticks do not prevent 3s autohide timer from firing."""
+    node_script = """
+    class MockClassList {
+        constructor() { this.classes = new Set(); }
+        add(...cls) { cls.forEach(c => this.classes.add(c)); }
+        remove(...cls) { cls.forEach(c => this.classes.delete(c)); }
+        contains(c) { return this.classes.has(c); }
+    }
+
+    class MockElement {
+        constructor() {
+            this.classList = new MockClassList();
+        }
+    }
+
+    const mgr = {
+        isFullscreen: true,
+        isPlaying: true,
+        isChromeHidden: false,
+        inactivityDelay: 50, // 50ms for fast test
+        inactivityTimer: null,
+        _lastPlaybackState: null,
+        topHeaderEl: new MockElement(),
+        transportBarEl: new MockElement(),
+        stageCard: new MockElement(),
+
+        scheduleInactivityTimer() {
+            this.clearInactivityTimer();
+            if (!this.isFullscreen || !this.isPlaying) return;
+            this.inactivityTimer = setTimeout(() => {
+                this.hideChrome();
+            }, this.inactivityDelay);
+        },
+
+        clearInactivityTimer() {
+            if (this.inactivityTimer) {
+                clearTimeout(this.inactivityTimer);
+                this.inactivityTimer = null;
+            }
+        },
+
+        hideChrome() {
+            if (!this.isFullscreen || !this.isPlaying) return;
+            this.isChromeHidden = true;
+            this.topHeaderEl.classList.add('karaoke-chrome-hidden');
+            this.transportBarEl.classList.add('karaoke-chrome-hidden');
+            this.stageCard.classList.add('karaoke-cursor-hidden');
+        },
+
+        wakeChrome() {
+            if (!this.isChromeHidden) return;
+            this.isChromeHidden = false;
+            this.topHeaderEl.classList.remove('karaoke-chrome-hidden');
+            this.transportBarEl.classList.remove('karaoke-chrome-hidden');
+            this.stageCard.classList.remove('karaoke-cursor-hidden');
+        },
+
+        handlePlaybackStateChange(force = false) {
+            const playing = this.isPlaying;
+            if (!force && this._lastPlaybackState === playing) {
+                return;
+            }
+            this._lastPlaybackState = playing;
+            if (this.isFullscreen && playing) {
+                this.scheduleInactivityTimer();
+            } else {
+                this.wakeChrome();
+                this.clearInactivityTimer();
+            }
+        }
+    };
+
+    // 1. Enter fullscreen & start playing
+    mgr.handlePlaybackStateChange(true);
+    if (!mgr.inactivityTimer) throw new Error("Inactivity timer should be scheduled");
+
+    // 2. Simulate 10 frequent 5ms ticks (like 100ms interval during 3s timeout)
+    let tickCount = 0;
+    const interval = setInterval(() => {
+        mgr.handlePlaybackStateChange(false);
+        tickCount++;
+        if (tickCount >= 10) {
+            clearInterval(interval);
+        }
+    }, 5);
+
+    // 3. After 80ms (greater than 50ms delay), check that hideChrome fired
+    setTimeout(() => {
+        if (!mgr.isChromeHidden) throw new Error("Chrome should have been hidden after inactivity");
+        if (!mgr.topHeaderEl.classList.contains('karaoke-chrome-hidden')) throw new Error("Header should have karaoke-chrome-hidden class");
+        if (!mgr.transportBarEl.classList.contains('karaoke-chrome-hidden')) throw new Error("Transport bar should have karaoke-chrome-hidden class");
+        if (!mgr.stageCard.classList.contains('karaoke-cursor-hidden')) throw new Error("Stage card should have karaoke-cursor-hidden class");
+
+        // 4. Test waking chrome on user activity
+        mgr.wakeChrome();
+        if (mgr.isChromeHidden) throw new Error("Chrome should be awake");
+        if (mgr.topHeaderEl.classList.contains('karaoke-chrome-hidden')) throw new Error("Header should not be hidden after waking");
+
+        console.log("AUTOHIDE_TEST_SUCCESS");
+    }, 80);
+    """
+    proc = subprocess.run(["node", "-e", node_script], capture_output=True, text=True)
+    assert proc.returncode == 0, f"Node script error: {proc.stderr}"
+    assert "AUTOHIDE_TEST_SUCCESS" in proc.stdout
+

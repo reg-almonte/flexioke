@@ -132,6 +132,7 @@ class KaraokeStageManager {
         this.inactivityTimer = null;
         this.inactivityDelay = 3000;
         this.isChromeHidden = false;
+        this._lastPlaybackState = null;
 
         // Karaoke Transport Elements
         this.playBtn = document.getElementById('karaoke-play-btn');
@@ -640,6 +641,57 @@ class KaraokeStageManager {
         window.addEventListener('touchstart', handleActivity, { passive: true });
         window.addEventListener('keydown', handleActivity, { passive: true });
         window.addEventListener('wheel', handleActivity, { passive: true });
+
+        // Synchronize UI state when exiting/entering native browser fullscreen (e.g. Esc key)
+        document.addEventListener('fullscreenchange', () => this.syncNativeFullscreenState());
+        document.addEventListener('webkitfullscreenchange', () => this.syncNativeFullscreenState());
+        document.addEventListener('mozfullscreenchange', () => this.syncNativeFullscreenState());
+        document.addEventListener('MSFullscreenChange', () => this.syncNativeFullscreenState());
+    }
+
+    syncNativeFullscreenState() {
+        const isNative = Boolean(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+        if (isNative && !this.isFullscreen) {
+            this.enterFullscreen(false);
+        } else if (!isNative && this.isFullscreen) {
+            this.exitFullscreen(false);
+        }
+    }
+
+    async enterNativeFullscreen() {
+        const el = this.stageCard || document.documentElement;
+        try {
+            if (el.requestFullscreen) {
+                await el.requestFullscreen();
+            } else if (el.webkitRequestFullscreen) {
+                await el.webkitRequestFullscreen();
+            } else if (el.mozRequestFullScreen) {
+                await el.mozRequestFullScreen();
+            } else if (el.msRequestFullscreen) {
+                await el.msRequestFullscreen();
+            }
+        } catch (err) {
+            console.warn("[KaraokeStageManager] Native requestFullscreen failed (using CSS viewport fallback):", err);
+        }
+    }
+
+    async exitNativeFullscreen() {
+        try {
+            const isNative = Boolean(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            if (isNative) {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    await document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    await document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    await document.msExitFullscreen();
+                }
+            }
+        } catch (err) {
+            console.warn("[KaraokeStageManager] Native exitFullscreen failed:", err);
+        }
     }
 
     handleUserActivity(e) {
@@ -651,8 +703,14 @@ class KaraokeStageManager {
         this.scheduleInactivityTimer();
     }
 
-    handlePlaybackStateChange() {
-        if (this.isFullscreen && this.isPlaying) {
+    handlePlaybackStateChange(force = false) {
+        const playing = this.isPlaying;
+        if (!force && this._lastPlaybackState === playing) {
+            return;
+        }
+        this._lastPlaybackState = playing;
+
+        if (this.isFullscreen && playing) {
             this.scheduleInactivityTimer();
         } else {
             this.wakeChrome();
@@ -685,6 +743,7 @@ class KaraokeStageManager {
     }
 
     wakeChrome() {
+        if (!this.isChromeHidden) return;
         this.isChromeHidden = false;
         if (this.topHeaderEl) this.topHeaderEl.classList.remove('karaoke-chrome-hidden');
         if (this.transportBarEl) this.transportBarEl.classList.remove('karaoke-chrome-hidden');
@@ -693,13 +752,13 @@ class KaraokeStageManager {
 
     toggleFullscreen() {
         if (this.isFullscreen) {
-            this.exitFullscreen();
+            this.exitFullscreen(true);
         } else {
-            this.enterFullscreen();
+            this.enterFullscreen(true);
         }
     }
 
-    enterFullscreen() {
+    enterFullscreen(triggerNative = true) {
         this.isFullscreen = true;
         if (this.stageCard) {
             this.stageCard.classList.add('stage-fullscreen', 'karaoke-cinema-fullscreen');
@@ -715,13 +774,17 @@ class KaraokeStageManager {
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Exit Fullscreen Stage (Esc / F)";
         if (this.exitFullscreenBtn) this.exitFullscreenBtn.classList.remove('hidden');
 
+        if (triggerNative) {
+            this.enterNativeFullscreen();
+        }
+
         this.wakeChrome();
         this.updateStageHeader();
-        this.handlePlaybackStateChange();
+        this.handlePlaybackStateChange(true);
         setTimeout(() => this.updateStageHeader(), 350);
     }
 
-    exitFullscreen() {
+    exitFullscreen(triggerNative = true) {
         this.isFullscreen = false;
         if (this.stageCard) {
             this.stageCard.classList.remove('stage-fullscreen', 'karaoke-cinema-fullscreen');
@@ -736,6 +799,10 @@ class KaraokeStageManager {
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Expand';
         if (this.fullscreenBtn) this.fullscreenBtn.title = "Toggle Fullscreen Stage (F)";
         if (this.exitFullscreenBtn) this.exitFullscreenBtn.classList.add('hidden');
+
+        if (triggerNative) {
+            this.exitNativeFullscreen();
+        }
 
         this.wakeChrome();
         this.clearInactivityTimer();
