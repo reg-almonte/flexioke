@@ -229,4 +229,28 @@ made while building the template itself.
 - approved_by: reg
 - notes: Version 0.3.0 fully approved and released. Includes persistent thread-safe backend Playlist store with atomic persistence and orphan pruning (TASK-0057), 9 REST API endpoints with duplicate rejection and cascading song pruning (TASK-0058), reactive Favorites client state machine with optimistic updates (TASK-0059), 1-click Heart toggle buttons across Studio, Karaoke, and Catalog modals (TASK-0060), collapsible Stem Studio Playlists accordion with directory and editor views (TASK-0061), multi-playlist checkbox assignment in Song Details modal (TASK-0062), collapsible Karaoke Playlists accordion with 3-way queue dispatch (TASK-0063), and Save Active Queue as Playlist action with dynamic state binding (TASK-0064). All tickets archived to docs/tickets/archive/v0.3.0/.
 
+## 2026-09-06 — Approved Requirements: Version 0.3.1 UI & Stage Experience Enhancements
+- artifact: docs/requirements/version0.3.1.md
+- approved_by: reg
+- notes: Approved requirements for Version 0.3.1 covering in-modal song navigation with previous/next buttons and unsaved changes confirmation dialog, high-DPI modular SVG icon dictionary for all transport, stage, and channel buttons with shortcut tooltips, and immersive YouTube-style full-screen karaoke stage with 3-second auto-hiding floating chrome and cursor.
+
+## 2026-09-06 — Approved Functional Spec: Version 0.3.1 UI & Stage Experience Enhancements
+- artifact: docs/specs/version0.3.1.md
+- approved_by: reg
+- notes: Approved functional specification defining in-modal song navigation state and dirty changes guard, centralized modular SVG icon dictionary in src/static/icons.js with hotkey tooltips, and immersive YouTube-style full-screen cinema stage with 3-second auto-hiding floating chrome and cursor.
+
+## 2026-09-06 — Approved ADR-0011: In-Modal Song Navigation, Modular SVG Iconography & In-Place Cinema Fullscreen
+- artifact: docs/design/ADR-0011-ui-and-stage-experience-enhancements.md
+- approved_by: reg
+- notes: Approved Option 1 delivering unified client state coordinator in SongLibraryManager with dirty changes confirmation guard, centralized modular SVG icon dictionary in src/static/icons.js with hotkey tooltips, and in-place cinema fullscreen stage in KaraokeStageManager with 3-second auto-hiding floating chrome and cursor.
+
+## 2026-09-06 — Approved Ticket Breakdown: EPIC-0010 UI & Stage Experience Enhancements
+- artifact: docs/tickets/EPIC-0010-ui-and-stage-experience-enhancements.md
+- approved_by: reg
+- notes: Approved EPIC-0010 work breakdown comprising STORY-0031 to STORY-0033 across TASK-0065 to TASK-0070 covering in-modal song navigation with previous/next buttons and unsaved edits confirmation guard, centralized modular SVG icon dictionary in src/static/icons.js with hotkey tooltips, and immersive YouTube-style full-screen karaoke stage with 3-second auto-hiding floating chrome and cursor.
+
+
+
+
+
 
