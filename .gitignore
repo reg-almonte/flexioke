@@ -10,6 +10,8 @@ env/
 data/jobs/
 data/models/
 data/*.zip
+data/*.json
+data/*.tmp*
 data/archive/
 *.zip
 *.egg-info/

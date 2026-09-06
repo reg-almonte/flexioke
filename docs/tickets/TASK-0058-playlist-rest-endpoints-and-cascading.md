@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0058: Playlist REST Endpoints & Route Handlers
@@ -24,8 +24,14 @@ Implement the REST API route handlers for playlists under `/api/playlists` and w
 - Integrate `playlist_manager.prune_song_from_all_playlists(job_id)` inside `job_manager.delete_job()` in `routes.py`.
 
 ## Acceptance Criteria
-- [ ] All 9 REST endpoints handle request payloads and return appropriate HTTP status codes (200, 201, 400, 404, 409).
-- [ ] Integration tests verify route behavior, error handling, and cascading deletion.
+- [x] All 9 REST endpoints handle request payloads and return appropriate HTTP status codes (200, 201, 400, 404, 409).
+- [x] Integration tests verify route behavior, error handling, and cascading deletion.
 
 ## Blocked by
 - `docs/tickets/TASK-0057-playlist-models-store-and-manager.md`
+
+## Implementation
+- Branch: `story/STORY-0027-backend-playlist-store-and-api`
+- Implemented all 9 REST route handlers in `src/api/routes.py` with error code mapping (400, 404, 409).
+- Integrated cascading playlist song pruning in `delete_job` endpoint.
+- Added comprehensive integration tests in `tests/test_playlist_api.py` (9/9 tests passing).

@@ -70,4 +70,53 @@ class QueueReorderRequest(BaseModel):
 class AudioUrlRequest(BaseModel):
     url: str = Field(..., description="Direct HTTP or HTTPS URL to audio file")
 
+class Playlist(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = ""
+    is_system: bool = False
+    song_ids: List[str] = Field(default_factory=list)
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class PlaylistSummary(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = ""
+    is_system: bool = False
+    song_count: int = 0
+    total_duration_seconds: float = 0.0
+    created_at: str
+    updated_at: str
+
+class PlaylistDetail(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = ""
+    is_system: bool = False
+    song_count: int = 0
+    total_duration_seconds: float = 0.0
+    songs: List[JobRecord] = Field(default_factory=list)
+    created_at: str
+    updated_at: str
+
+class PlaylistCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = Field(default="", max_length=1000)
+
+class PlaylistUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=200)
+    description: Optional[str] = Field(default=None, max_length=1000)
+
+class PlaylistSongAdd(BaseModel):
+    song_id: str = Field(..., min_length=1)
+
+class PlaylistReorderRequest(BaseModel):
+    song_ids: List[str] = Field(..., description="Ordered list of song IDs")
+
+class PlaylistFromQueueRequest(BaseModel):
+    name: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = Field(default="", max_length=1000)
+    song_ids: List[str] = Field(default_factory=list)
+
 

@@ -15,6 +15,7 @@ from src.services.audio_downloader import validate_audio_url, download_audio_url
 from src.services.youtube_downloader import validate_youtube_url, download_youtube_audio
 from src.services.pipeline import run_separation_pipeline, VALID_STEM_TYPES
 from src.services.lrclib_client import lrclib_client
+from src.services.playlist_manager import playlist_manager
 from src.models import (
     JobRecord,
     JobListResponse,
@@ -27,6 +28,14 @@ from src.models import (
     AudioUrlRequest,
     SourceType,
     JobStatus,
+    Playlist,
+    PlaylistSummary,
+    PlaylistDetail,
+    PlaylistCreate,
+    PlaylistUpdate,
+    PlaylistSongAdd,
+    PlaylistReorderRequest,
+    PlaylistFromQueueRequest,
 )
 
 router = APIRouter(prefix="/api", tags=["api"])
@@ -352,7 +361,7 @@ def export_job_stems_zip(job_id: str):
 
 @router.delete("/jobs/{job_id}")
 def delete_job(job_id: str):
-    """Permanently deletes a song, its stems, archives, and removes it from playback queues."""
+    """Permanently deletes a song, its stems, archives, and removes it from playback queues and playlists."""
     job = job_manager.get_job(job_id)
     if not job:
         raise HTTPException(
@@ -362,6 +371,9 @@ def delete_job(job_id: str):
 
     # Purge from playback queue
     queue_manager.remove_jobs_from_queue(job_id)
+
+    # Prune from all playlists
+    playlist_manager.prune_song_from_all_playlists(job_id)
 
     # Delete storage and metadata
     job_manager.delete_job(job_id)
@@ -478,4 +490,111 @@ def reorder_queue(req: QueueReorderRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
+# --- Playlist Endpoints ---
+
+@router.get("/playlists", response_model=list[PlaylistSummary])
+def list_playlists():
+    """Returns summaries of all playlists with song counts and durations."""
+    return playlist_manager.get_all_playlists(job_mgr=job_manager)
+
+@router.post("/playlists", status_code=status.HTTP_201_CREATED, response_model=Playlist)
+def create_playlist(req: PlaylistCreate):
+    """Creates a new custom playlist."""
+    try:
+        return playlist_manager.create_playlist(name=req.name, description=req.description)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/playlists/{playlist_id}", response_model=PlaylistDetail)
+def get_playlist_detail(playlist_id: str):
+    """Retrieves playlist details and resolved track records (with orphan pruning)."""
+    detail = playlist_manager.get_playlist_detail(playlist_id, job_mgr=job_manager)
+    if not detail:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Playlist '{playlist_id}' not found."
+        )
+    return detail
+
+@router.put("/playlists/{playlist_id}", response_model=Playlist)
+def update_playlist(playlist_id: str, req: PlaylistUpdate):
+    """Updates playlist name or description. Rejects renaming favorites."""
+    try:
+        updated = playlist_manager.update_playlist(
+            playlist_id=playlist_id,
+            name=req.name,
+            description=req.description
+        )
+        if not updated:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Playlist '{playlist_id}' not found."
+            )
+        return updated
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.delete("/playlists/{playlist_id}")
+def delete_playlist(playlist_id: str):
+    """Deletes a custom playlist. Rejects deletion of favorites."""
+    try:
+        deleted = playlist_manager.delete_playlist(playlist_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Playlist '{playlist_id}' not found."
+            )
+        return {"status": "deleted", "playlist_id": playlist_id}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.post("/playlists/{playlist_id}/songs", response_model=PlaylistDetail)
+def add_song_to_playlist(playlist_id: str, req: PlaylistSongAdd):
+    """Adds a track to a playlist."""
+    try:
+        playlist_manager.add_song(playlist_id=playlist_id, song_id=req.song_id, job_mgr=job_manager)
+        return playlist_manager.get_playlist_detail(playlist_id, job_mgr=job_manager)
+    except KeyError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        # Conflict: already exists
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+
+@router.delete("/playlists/{playlist_id}/songs/{song_id}", response_model=PlaylistDetail)
+def remove_song_from_playlist(playlist_id: str, song_id: str):
+    """Removes a track from a playlist."""
+    try:
+        playlist_manager.remove_song(playlist_id=playlist_id, song_id=song_id)
+        return playlist_manager.get_playlist_detail(playlist_id, job_mgr=job_manager)
+    except KeyError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.put("/playlists/{playlist_id}/reorder", response_model=PlaylistDetail)
+def reorder_playlist_songs(playlist_id: str, req: PlaylistReorderRequest):
+    """Updates the ordering of songs in a playlist."""
+    try:
+        playlist_manager.reorder_songs(playlist_id=playlist_id, song_ids=req.song_ids)
+        return playlist_manager.get_playlist_detail(playlist_id, job_mgr=job_manager)
+    except KeyError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.post("/playlists/from-queue", status_code=status.HTTP_201_CREATED, response_model=PlaylistDetail)
+def create_playlist_from_queue(req: PlaylistFromQueueRequest):
+    """Creates a new custom playlist from active playback queue songs."""
+    try:
+        pl = playlist_manager.create_from_queue(
+            name=req.name,
+            song_ids=req.song_ids,
+            description=req.description,
+            job_mgr=job_manager
+        )
+        return playlist_manager.get_playlist_detail(pl.id, job_mgr=job_manager)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
 
