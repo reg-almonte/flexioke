@@ -257,7 +257,7 @@ made while building the template itself.
 ## 2026-09-06 — Approved Release v0.3.1: UI & Stage Experience Enhancements
 - artifact: docs/releases/v0.3.1.md
 - approved_by: reg
-- notes: Version 0.3.1 fully approved and released. Includes in-modal previous/next navigation toolbar with dynamic track counter badge (TASK-0065), unsaved edits dirty guard intercepting navigation, close, and Esc with keyboard shortcuts (TASK-0066), standalone centralized modular SVG icon dictionary module (TASK-0067), comprehensive iconography overhaul and hotkey tooltips (TASK-0068), in-place cinema fullscreen stage layout with floating glassmorphism overlays and explicit exit button (TASK-0069), and 3-second inactivity auto-hide engine with cursor suppression and stage shortcuts (TASK-0070). All tickets archived to docs/tickets/archive/v0.3.1/.
+- notes: Version 0.3.1 fully approved, verified, and released with 161/161 passing tests. Includes in-modal previous/next navigation toolbar with dynamic track counter badge (TASK-0065), unsaved edits dirty guard intercepting navigation, close, and Esc with keyboard shortcuts (TASK-0066), standalone centralized modular SVG icon dictionary module (TASK-0067), comprehensive iconography overhaul and hotkey tooltips (TASK-0068), in-place cinema fullscreen stage layout with floating glassmorphism overlays and explicit exit button (TASK-0069), 3-second inactivity auto-hide engine with cursor suppression and stage shortcuts (TASK-0070), startup separation queue auto-pruning, HTML5 native Fullscreen API integration and autohide timer loop fix (BUG-0006), 100% transparent floating lyrics display, and stage card click play/pause. All tickets archived to docs/tickets/archive/v0.3.1/.
 
 
 
