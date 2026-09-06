@@ -79,5 +79,5 @@ Adopt **Option 1: Directional Queue Reordering API with Reactive DOM Event Bus &
 
 ## Related
 - Functional spec: [`docs/specs/karaoke-ui-refinements.md`](../specs/karaoke-ui-refinements.md)
-- Requirement: [`docs/requirements/karaoke-ui-refinements.md`](../requirements/karaoke-ui-refinements.md)
+- Requirement: [`docs/requirements/version0.2.2.md`](../requirements/version0.2.2.md)
 - Supersedes / related ADRs: Extends [`docs/design/ADR-0004-karaoke-metadata-and-stage-enhancements.md`](ADR-0004-karaoke-metadata-and-stage-enhancements.md)

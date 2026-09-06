@@ -7,7 +7,7 @@ approved_at: 2026-08-28
 # Functional Specification: Version 0.2.1 — Karaoke Mode Enhancements & Metadata Separation
 
 ## Related Requirements
-- `docs/requirements/karaoke-mode-enhancements.md`
+- `docs/requirements/version0.2.1.md`
 
 ## Functional Flows
 

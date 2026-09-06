@@ -7,8 +7,8 @@ filed_at: 2026-08-27
 
 ## Related
 - Functional Spec: `docs/specs/stem-separation-player.md`
-- Requirements: `docs/requirements/stem-separation-player.md`
-- Stories: `docs/tickets/STORY-0003-song-library-playback-queue.md`, `docs/tickets/STORY-0004-multitrack-web-player-ui.md`
+- Requirements: `docs/requirements/version0.1.0.md`
+- Stories: `docs/tickets/archive/v0.1.0/STORY-0003-song-library-playback-queue.md`, `docs/tickets/archive/v0.1.0/STORY-0004-multitrack-web-player-ui.md`
 
 ## Summary
 Testing of the web player identified 3 related playback and queue automation defects:

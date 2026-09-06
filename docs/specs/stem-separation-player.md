@@ -7,7 +7,7 @@ approved_at: 2026-08-27
 # Flexioke: Audio Stem Separation & Multitrack Web Player — Functional Spec
 
 ## Related Requirements
-- `docs/requirements/stem-separation-player.md`
+- `docs/requirements/version0.1.0.md`
 
 ## Functional Flows
 

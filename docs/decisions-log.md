@@ -17,7 +17,7 @@ branch. See [TEMPLATE-CHANGELOG.md](../TEMPLATE-CHANGELOG.md) for decisions
 made while building the template itself.
 
 ## 2026-08-27 — Approved Requirements: Flexioke Audio Stem Separation & Multitrack Player
-- artifact: docs/requirements/stem-separation-player.md
+- artifact: docs/requirements/version0.1.0.md
 - approved_by: user
 - notes: Approved requirements covering 2-stage audio stem separation (Mel-Band RoFormer + UVR_MDXNET_KARA_2), dual ingestion (file upload + YouTube via yt-dlp), MP3 stems, and Wavesurfer multitrack web player.
 ## 2026-08-27 — Approved Functional Spec: Flexioke Audio Stem Separation & Multitrack Player
@@ -29,7 +29,7 @@ made while building the template itself.
 - approved_by: user
 - notes: Approved Option 1 (Modular FastAPI monolith with in-process async task pool, direct audio-separator and yt-dlp integrations, filesystem JSON store with in-memory library index, and Wavesurfer multitrack SPA) for zero external dependencies and local simplicity.
 ## 2026-08-27 — Approved Ticket Breakdown: EPIC-0001 Audio Stem Separation & Multitrack Web Player
-- artifact: docs/tickets/EPIC-0001-stem-separation-player.md
+- artifact: docs/tickets/archive/v0.1.0/EPIC-0001-stem-separation-player.md
 - approved_by: user
 - notes: Approved EPIC-0001 work breakdown comprising STORY-0001 to STORY-0004 and TASK-0001 to TASK-0012 covering backend foundation, 2-stage separation pipeline, song library & queue services, and Wavesurfer multitrack web player.
 ## 2026-08-27 — Approved Release: Release Manifest v0.1.0 (Flexioke MVP)
@@ -37,7 +37,7 @@ made while building the template itself.
 - approved_by: user
 - notes: Approved Release Manifest v0.1.0 covering full EPIC-0001 implementation (Stories 1 through 4), all 12 tasks, and verification of bugfixes with clean 33/33 test suite.
 ## 2026-08-27 — Approved Requirements & Functional Spec: Version 2 Synchronized Lyrics & Karaoke Mode
-- artifact: docs/requirements/karaoke-lyrics-mode.md, docs/specs/karaoke-lyrics-mode.md
+- artifact: docs/requirements/version0.2.0.md, docs/specs/karaoke-lyrics-mode.md
 - approved_by: user
 - notes: Approved Version 2 requirements and functional spec covering timestamped .lrc lyrics management, dedicated Karaoke Mode tab, real-time synchronized active line display, smart playback interruption guard, and quick vocal mute toggles.
 ## 2026-08-27 — Approved ADR-0002: Client-Side LRC Lyrics Synchronization & Dedicated Karaoke Mode Architecture
@@ -45,7 +45,7 @@ made while building the template itself.
 - approved_by: user
 - notes: Approved Option 1 (Client-side LRC parsing, DOM synchronizer bound to Wavesurfer timecode, atomic backend lyrics storage, top-level tab switcher, and smart play interruption guard).
 ## 2026-08-27 — Approved Ticket Breakdown: EPIC-0002 Synchronized Lyrics & Dedicated Karaoke Mode
-- artifact: docs/tickets/EPIC-0002-karaoke-lyrics-mode.md
+- artifact: docs/tickets/archive/v0.2.0/EPIC-0002-karaoke-lyrics-mode.md
 - approved_by: reg
 - notes: Approved EPIC-0002 work breakdown comprising STORY-0005 to STORY-0007 and TASK-0013 to TASK-0018 covering backend lyrics persistence, song library lyrics editor modal, top navigation tab switcher, real-time synchronized karaoke display, and smart play interruption guard.
 ## 2026-08-27 — Approved ADR-0003: Independent Page System for Stem Studio & Karaoke Mode with Lyrics Engine Overhaul
@@ -57,7 +57,7 @@ made while building the template itself.
 - approved_by: reg
 - notes: Version 2 fully approved and released. Includes independent page systems for Stem Studio and Karaoke Mode, synchronized LRC lyrics engine with glowing active-line auto-scroll, fullscreen expand mode, quick vocal mutes, and cue-stop controls.
 ## 2026-08-28 — Approved Requirements: Version 0.2.1 Karaoke Mode Enhancements & Metadata Separation
-- artifact: docs/requirements/karaoke-mode-enhancements.md
+- artifact: docs/requirements/version0.2.1.md
 - approved_by: reg
 - notes: Approved requirements covering structured artist/title separation with backwards-compatible migration, unified dual-field search, song & lyrics editor modal, configurable stage settings (transition interval, highlight color, font size), remaining time badge, and visual countdown intro/interlude cues.
 ## 2026-08-28 — Approved Functional Spec: Version 0.2.1 Karaoke Mode Enhancements & Metadata Separation
@@ -69,7 +69,7 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved Option 1 (Unified REST Model Extension with Client-Side Reactive Stage Coordinator & LocalStorage Preferences) for zero external dependencies, robust backwards-compatible job.json migration, and real-time client-side stage controls.
 ## 2026-08-28 — Approved Ticket Breakdown: EPIC-0003 Karaoke Mode Enhancements & Metadata Separation
-- artifact: docs/tickets/EPIC-0003-karaoke-metadata-and-stage-enhancements.md
+- artifact: docs/tickets/archive/v0.2.1/EPIC-0003-karaoke-metadata-and-stage-enhancements.md
 - approved_by: reg
 - notes: Approved ticket breakdown comprising STORY-0008 to STORY-0010 and TASK-0019 to TASK-0025 covering backend model/store/API metadata extensions, song & lyrics editor modal, dual-field library search, alternating stage header, visual countdown cues, and stage customization controls.
 ## 2026-08-29 — Approved Release v0.2.1: Karaoke Mode Enhancements & Metadata Separation
@@ -77,7 +77,7 @@ made while building the template itself.
 - approved_by: reg
 - notes: Version 0.2.1 fully approved and released. Includes Song Title and Artist metadata separation with backwards compatibility, unified song details & lyrics modal, dual-field search, auto-sort by song title, alternating stage banner ("Now Singing" ⟷ "Up Next"), timecode countdown badge, visual 3-beat countdown cues, and customizable stage settings modal.
 ## 2026-08-29 — Approved Requirements: Version 0.2.2 Karaoke UI Refinements & Stage Controls
-- artifact: docs/requirements/karaoke-ui-refinements.md
+- artifact: docs/requirements/version0.2.2.md
 - approved_by: reg
 - notes: Requirements approved for Version 0.2.2 covering simultaneous Now Singing & Up Next header, modernized transport bar with expanding volume slider and restart button, click-to-play on stage background, queue reordering (up/down) with top position in sidebar, and auto-hiding navbar.
 ## 2026-08-29 — Approved Functional Spec: Version 0.2.2 Karaoke UI Refinements & Stage Controls
@@ -89,7 +89,7 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved Option 1 (Directional Queue Reordering API with Reactive DOM Event Bus & CSS Marquee Engine) providing atomic thread-safe queue mutation, simultaneous dual stage header with marquee, modernized transport bar with expanding volume and restart, stage click-to-play, and auto-hiding navbar.
 ## 2026-08-29 — Approved Ticket Breakdown: EPIC-0004 Karaoke Stage Transport, Queue Reordering & Responsive UI Refinements
-- artifact: docs/tickets/EPIC-0004-karaoke-stage-transport-and-queue-refinements.md
+- artifact: docs/tickets/archive/v0.2.2/EPIC-0004-karaoke-stage-transport-and-queue-refinements.md
 - approved_by: reg
 - notes: Approved ticket breakdown comprising STORY-0011 to STORY-0013 and TASK-0026 to TASK-0032 covering simultaneous dual stage header with marquee, stage background click-to-play, modernized bottom transport bar with expanding volume and restart, backend queue reorder endpoint (POST /api/queue/reorder), sidebar reorganization with up/down controls, and auto-hiding navbar.
 
@@ -110,7 +110,7 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved Option 1 (Unified Client-Side State Machine & Reactive Song Catalog) delivering Title/Artist Intro Splash screen with configurable audio delay (0–5s), configurable countdown cue gap threshold (3–5s), stage restart lyrics scroll & highlight reset, dual highlight color properties, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), expanded song catalog modal, and keyboard shortcuts (R/Home/Esc).
 ## 2026-08-31 — Approved Ticket Breakdown: EPIC-0005 Karaoke Stage UX Refinements, Intro Delay Engine & Song Catalog Modal
-- artifact: docs/tickets/EPIC-0005-karaoke-stage-ux-and-song-catalog.md
+- artifact: docs/tickets/archive/v0.2.3/EPIC-0005-karaoke-stage-ux-and-song-catalog.md
 - approved_by: reg
 - notes: Approved EPIC-0005 work breakdown comprising STORY-0014 to STORY-0016 and TASK-0033 to TASK-0039 covering Title/Artist Intro Splash with delayed audio start (0–5s), configurable countdown cue gap threshold (3–5s), stage restart lyrics scroll & highlight reset, dual highlight color controls, fixed 3-song queue & compact library height, stem ready badge removal, mode-scoped edit button visibility (Stem Studio only), and expanded song catalog modal with search/sort and 1-click play/queue. Previous tickets archived to docs/tickets/archive/.
 
@@ -135,7 +135,7 @@ made while building the template itself.
 - notes: Approved Option 1 (In-Process Async FIFO Separation Worker, Streaming Zip Engine & Reactive Studio UI) delivering thread-safe sequential separation task worker, direct audio URL downloader (replacing YouTube scraper), smart Title & Artist filename parser, combined .zip stem & lyrics export, post-separation raw audio archiving to ./data/archive/, in-library track deletion, collapsible sidebar accordions, expanded Studio Song Catalog modal with editing, and persistent Stem Studio scratchpad notes modal.
 
 ## 2026-08-31 — Approved Ticket Breakdown: EPIC-0006 Stem Studio Upgrade & Separation Job Queue
-- artifact: docs/tickets/EPIC-0006-stem-studio-upgrade-and-job-queue.md
+- artifact: docs/tickets/archive/v0.2.4/EPIC-0006-stem-studio-upgrade-and-job-queue.md
 - approved_by: reg
 - notes: Approved EPIC-0006 work breakdown comprising STORY-0017 to STORY-0021 and TASK-0040 to TASK-0050 covering direct audio URL downloader, smart Title/Artist filename parser, multi-file drag-and-drop batch upload with FIFO sequential separation worker, collapsible sidebar accordions with localStorage state, persistent header notes scratchpad modal, expanded Studio Song Catalog modal, default recently-added sort order, combined .zip stem export, in-library track deletion, and post-separation audio archiving. Previous tickets archived to docs/tickets/archive/v0.2.3/.
 
@@ -160,7 +160,7 @@ made while building the template itself.
 - notes: Approved Option 1 (In-Process Python LRCLIB Client with Dual Pipeline Auto-Sync & Interactive REST Proxy) delivering lightweight HTTP LRCLIB client service (src/services/lrclib_client.py), automated background lyrics synchronization in separation pipeline (src/services/pipeline.py), REST proxy endpoints (GET /api/lyrics/lrclib/get and /search), and 1-click interactive auto-fetch inside the Song Details & Lyrics editor modal.
 
 ## 2026-09-01 — Approved Ticket Breakdown: EPIC-0007 Automated LRCLIB Synchronized Lyrics Integration
-- artifact: docs/tickets/EPIC-0007-lrclib-lyrics-integration.md
+- artifact: docs/tickets/archive/v0.2.5/EPIC-0007-lrclib-lyrics-integration.md
 - approved_by: reg
 - notes: Approved EPIC-0007 work breakdown comprising STORY-0022 and STORY-0023 across TASK-0051 to TASK-0053 covering in-process LRCLIB client module, proxy REST endpoints, automated pipeline ingestion lyrics synchronization, and interactive 1-click auto-fetch in Song Details & Lyrics modal. Previous tickets archived to docs/tickets/archive/v0.2.4/.
 
@@ -185,7 +185,7 @@ made while building the template itself.
 - notes: Approved Option 1 for Version 0.2.6 delivering client-side LRC timestamp shifting parser utility in library_queue.js with in-place DOM textarea recalculation, Karaoke Mode collapsible accordion sidebars with localStorage state caching, and empty stage smart play dispatch from queue with catalog modal fallback.
 
 ## 2026-09-05 — Approved Ticket Breakdown: EPIC-0008 Synchronized Lyrics Calibration & Karaoke UX Enhancements
-- artifact: docs/tickets/EPIC-0008-lyrics-calibration-and-karaoke-ux.md
+- artifact: docs/tickets/archive/v0.2.6/EPIC-0008-lyrics-calibration-and-karaoke-ux.md
 - approved_by: reg
 - notes: Approved EPIC-0008 work breakdown comprising STORY-0024, STORY-0025, and STORY-0026 across TASK-0054 to TASK-0056 covering client-side LRC timestamp calibration toolbar, Karaoke Mode collapsible sidebars, and empty stage smart play dispatch. Previous tickets archived to docs/tickets/archive/v0.2.5/.
 

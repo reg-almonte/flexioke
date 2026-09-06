@@ -65,5 +65,5 @@ We adopt **Option 1: Modular FastAPI Monolith with In-Process Async Task Pool & 
 
 ## Related
 - Functional spec: `docs/specs/stem-separation-player.md`
-- Requirement: `docs/requirements/stem-separation-player.md`
+- Requirement: `docs/requirements/version0.1.0.md`
 - Supersedes / related ADRs: None (Initial Architecture Decision)

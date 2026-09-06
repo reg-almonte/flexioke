@@ -9,8 +9,8 @@ approved_at:
 ## Related
 - Functional spec: `docs/specs/version0.2.5.md`
 - ADR: `docs/design/ADR-0008-lrclib-synchronized-lyrics-integration.md`
-- Epic: `docs/tickets/EPIC-0007-lrclib-lyrics-integration.md`
-- Stories: `docs/tickets/STORY-0022-lrclib-client-and-pipeline-auto-sync.md`, `docs/tickets/STORY-0023-lyrics-modal-auto-fetch-ui.md`
+- Epic: `docs/tickets/archive/v0.2.5/EPIC-0007-lrclib-lyrics-integration.md`
+- Stories: `docs/tickets/archive/v0.2.5/STORY-0022-lrclib-client-and-pipeline-auto-sync.md`, `docs/tickets/archive/v0.2.5/STORY-0023-lyrics-modal-auto-fetch-ui.md`
 
 ## Verification Items
 

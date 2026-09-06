@@ -11,7 +11,7 @@ approved_at:
 - Requirement: `docs/requirements/version0.2.4.md`
 - Functional Spec: `docs/specs/version0.2.4.md`
 - ADR: `docs/design/ADR-0007-stem-studio-upgrade-and-job-queue.md`
-- Epic: `docs/tickets/EPIC-0006-stem-studio-upgrade-and-job-queue.md`
+- Epic: `docs/tickets/archive/v0.2.4/EPIC-0006-stem-studio-upgrade-and-job-queue.md`
 
 **Local Server URL:** `http://localhost:8000`
 

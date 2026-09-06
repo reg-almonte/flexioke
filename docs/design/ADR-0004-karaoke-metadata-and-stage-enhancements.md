@@ -62,5 +62,5 @@ Adopt **Option 1: Unified REST Model Extension with Client-Side Reactive Stage C
 
 ## Related
 - Functional spec: `docs/specs/karaoke-mode-enhancements.md`
-- Requirement: `docs/requirements/karaoke-mode-enhancements.md`
+- Requirement: `docs/requirements/version0.2.1.md`
 - Supersedes / related ADRs: Related to `docs/design/ADR-0001-stem-separation-player-architecture.md`, `docs/design/ADR-0002-karaoke-lyrics-synchronization.md`, `docs/design/ADR-0003-independent-karaoke-page-and-lyrics-overhaul.md`

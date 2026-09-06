@@ -7,7 +7,7 @@ approved_at: 2026-08-29
 # Karaoke UI Refinements & Stage Controls — Functional Spec
 
 ## Related Requirements
-- `docs/requirements/karaoke-ui-refinements.md`
+- `docs/requirements/version0.2.2.md`
 
 ## Functional Flows
 

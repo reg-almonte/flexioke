@@ -9,9 +9,9 @@ approved_at: 2026-09-06
 ## Related
 - Functional spec: `docs/specs/version0.2.6.md`
 - ADR: `docs/design/ADR-0009-lyrics-calibration-and-karaoke-ux.md`
-- Epic: `docs/tickets/EPIC-0008-lyrics-calibration-and-karaoke-ux.md`
-- Stories: `docs/tickets/STORY-0024-lyrics-modal-timestamp-calibration.md`, `docs/tickets/STORY-0025-karaoke-sidebar-accordions.md`, `docs/tickets/STORY-0026-smart-idle-stage-play-dispatch.md`
-- Tasks: `docs/tickets/TASK-0054-lrc-timestamp-shift-parser-and-toolbar.md`, `docs/tickets/TASK-0055-karaoke-sidebar-accordions-and-persistence.md`, `docs/tickets/TASK-0056-empty-stage-play-dispatch-and-fallback.md`
+- Epic: `docs/tickets/archive/v0.2.6/EPIC-0008-lyrics-calibration-and-karaoke-ux.md`
+- Stories: `docs/tickets/archive/v0.2.6/STORY-0024-lyrics-modal-timestamp-calibration.md`, `docs/tickets/archive/v0.2.6/STORY-0025-karaoke-sidebar-accordions.md`, `docs/tickets/archive/v0.2.6/STORY-0026-smart-idle-stage-play-dispatch.md`
+- Tasks: `docs/tickets/archive/v0.2.6/TASK-0054-lrc-timestamp-shift-parser-and-toolbar.md`, `docs/tickets/archive/v0.2.6/TASK-0055-karaoke-sidebar-accordions-and-persistence.md`, `docs/tickets/archive/v0.2.6/TASK-0056-empty-stage-play-dispatch-and-fallback.md`
 
 ## Verification Items
 
