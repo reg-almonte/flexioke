@@ -430,7 +430,11 @@ class KaraokeStageManager {
                 }
             }
             if (chevron) {
-                chevron.textContent = isExpanded ? '▾' : '▸';
+                if (window.getIconHtml) {
+                    chevron.innerHTML = isExpanded ? window.getIconHtml('chevron_down', 'w-3.5 h-3.5 inline-block') : window.getIconHtml('chevron_right', 'w-3.5 h-3.5 inline-block');
+                } else {
+                    chevron.textContent = isExpanded ? '▾' : '▸';
+                }
             }
         };
 
@@ -594,11 +598,15 @@ class KaraokeStageManager {
         if (this.stageCard) {
             this.stageCard.classList.add('stage-fullscreen');
         }
-        // Fullscreen Active: button toggles to Collapse View
-        // NOTE: Customize collapse icon here (e.g. '⤡', '🗕', '↙', '✕', '⛶')
-        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '↙';
+        if (this.fullscreenIcon) {
+            if (window.getIconHtml) {
+                this.fullscreenIcon.innerHTML = window.getIconHtml('fullscreen_exit', 'w-4 h-4');
+            } else {
+                this.fullscreenIcon.textContent = '↙';
+            }
+        }
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Collapse';
-        if (this.fullscreenBtn) this.fullscreenBtn.title = "Exit Fullscreen Stage (Esc)";
+        if (this.fullscreenBtn) this.fullscreenBtn.title = "Exit Fullscreen Stage (Esc / F)";
         this.updateStageHeader();
         setTimeout(() => this.updateStageHeader(), 350);
     }
@@ -608,11 +616,15 @@ class KaraokeStageManager {
         if (this.stageCard) {
             this.stageCard.classList.remove('stage-fullscreen');
         }
-        // Default View: button toggles to Expand View
-        // NOTE: Customize expand icon here (e.g. '⛶', '⤢', '⤧', '↗')
-        if (this.fullscreenIcon) this.fullscreenIcon.textContent = '⛶';
+        if (this.fullscreenIcon) {
+            if (window.getIconHtml) {
+                this.fullscreenIcon.innerHTML = window.getIconHtml('fullscreen_enter', 'w-4 h-4');
+            } else {
+                this.fullscreenIcon.textContent = '⛶';
+            }
+        }
         if (this.fullscreenBtnText) this.fullscreenBtnText.textContent = 'Expand';
-        if (this.fullscreenBtn) this.fullscreenBtn.title = "Toggle Fullscreen Stage";
+        if (this.fullscreenBtn) this.fullscreenBtn.title = "Toggle Fullscreen Stage (F)";
         this.updateStageHeader();
         setTimeout(() => this.updateStageHeader(), 350);
     }
@@ -736,7 +748,11 @@ class KaraokeStageManager {
 
     updatePlayBtnUI() {
         if (!this.playBtn || !window.flexiokePlayer) return;
-        this.playBtn.innerHTML = window.flexiokePlayer.isPlaying ? '⏸' : '▶';
+        if (window.getIconHtml) {
+            this.playBtn.innerHTML = window.flexiokePlayer.isPlaying ? window.getIconHtml('pause', 'w-5 h-5') : window.getIconHtml('play', 'w-5 h-5');
+        } else {
+            this.playBtn.innerHTML = window.flexiokePlayer.isPlaying ? '⏸' : '▶';
+        }
     }
 
     async loadLyricsForJob(jobId) {

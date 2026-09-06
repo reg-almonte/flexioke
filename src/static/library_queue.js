@@ -349,25 +349,28 @@ class SongLibraryManager {
                 const durationSnippet = durationFmt ? `<span>${durationFmt}</span><span>•</span>` : '';
                 const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
                 const isFav = window.flexiokeFavorites ? window.flexiokeFavorites.isFavorite(job.job_id) : false;
-                const heartIcon = isFav ? '♥' : '♡';
+                const heartIcon = window.getIconHtml ? window.getIconHtml(isFav ? 'heart_filled' : 'heart_outline', 'w-4 h-4') : (isFav ? '♥' : '♡');
                 const heartTitle = isFav ? 'Remove from Favorites' : 'Add to Favorites';
                 const heartColor = isFav ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400';
+                const playIcon = window.getIconHtml ? window.getIconHtml('play', 'w-3 h-3') : '▶';
+                const queueIcon = window.getIconHtml ? window.getIconHtml('queue', 'w-3 h-3') : '+';
+                const editIcon = window.getIconHtml ? window.getIconHtml('edit', 'w-3 h-3') : '📝';
 
                 let buttonsHtml = `
                     <button type="button" class="favorite-toggle-btn p-1 text-sm ${heartColor} hover:scale-110 active:scale-95 transition-all duration-150" title="${heartTitle}" aria-label="${heartTitle}" data-job-id="${job.job_id}" data-favorite="${isFav ? 'true' : 'false'}">
                         ${heartIcon}
                     </button>
                     <button class="play-now-btn px-2.5 py-1 rounded-lg bg-brand-600/90 hover:bg-brand-500 text-white text-[10px] font-semibold transition flex items-center gap-1 shadow-sm" data-job-id="${job.job_id}">
-                        <span>▶</span> Play
+                        <span>${playIcon}</span> Play
                     </button>
-                    <button class="add-queue-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition" data-job-id="${job.job_id}">
-                        + Queue
+                    <button class="add-queue-btn px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-medium transition flex items-center gap-1" data-job-id="${job.job_id}">
+                        <span>${queueIcon}</span> Queue
                     </button>
                 `;
                 if (isStudio) {
                     buttonsHtml += `
-                        <button class="lyrics-btn edit-lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
-                            📝
+                        <button class="lyrics-btn edit-lyrics-btn px-2 py-1 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-400 hover:text-brand-300 text-[10px] font-medium transition flex items-center gap-1" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
+                            ${editIcon}
                         </button>
                     `;
                 }
@@ -502,9 +505,13 @@ class SongLibraryManager {
             const durationSnippet = durationFmt ? `<span>${durationFmt}</span><span>•</span>` : '';
             const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
             const isFav = window.flexiokeFavorites ? window.flexiokeFavorites.isFavorite(job.job_id) : false;
-            const heartIcon = isFav ? '♥' : '♡';
+            const heartIcon = window.getIconHtml ? window.getIconHtml(isFav ? 'heart_filled' : 'heart_outline', 'w-4 h-4') : (isFav ? '♥' : '♡');
             const heartTitle = isFav ? 'Remove from Favorites' : 'Add to Favorites';
             const heartColor = isFav ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400';
+            const playIcon = window.getIconHtml ? window.getIconHtml('play', 'w-3.5 h-3.5') : '▶';
+            const queueIcon = window.getIconHtml ? window.getIconHtml('queue', 'w-3.5 h-3.5') : '+';
+            const editIcon = window.getIconHtml ? window.getIconHtml('edit', 'w-3.5 h-3.5') : '📝';
+            const zipIcon = window.getIconHtml ? window.getIconHtml('zip_export', 'w-3.5 h-3.5') : '📦';
 
             row.innerHTML = `
                 <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -519,20 +526,20 @@ class SongLibraryManager {
                     </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <button type="button" class="favorite-toggle-btn p-1.5 text-base ${heartColor} hover:scale-110 active:scale-95 transition-all duration-150" title="${heartTitle}" aria-label="${heartTitle}" data-job-id="${job.job_id}" data-favorite="${isFav ? 'true' : 'false'}">
+                    <button type="button" class="favorite-toggle-btn p-1.5 text-base ${heartColor} hover:scale-110 active:scale-95 transition-all duration-150 flex items-center justify-center" title="${heartTitle}" aria-label="${heartTitle}" data-job-id="${job.job_id}" data-favorite="${isFav ? 'true' : 'false'}">
                         ${heartIcon}
                     </button>
                     <button class="catalog-play-btn px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-sm" data-job-id="${job.job_id}">
-                        <span>▶</span> Play Now
+                        <span>${playIcon}</span> Play Now
                     </button>
-                    <button class="catalog-queue-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-medium transition" data-job-id="${job.job_id}">
-                        + Add to Queue
+                    <button class="catalog-queue-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-medium transition flex items-center gap-1" data-job-id="${job.job_id}">
+                        <span>${queueIcon}</span> Add to Queue
                     </button>
                     <button class="catalog-edit-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-brand-300 text-xs font-medium transition flex items-center gap-1" title="Edit Song Details & Lyrics" data-job-id="${job.job_id}">
-                        <span>📝</span> Edit
+                        <span>${editIcon}</span> Edit
                     </button>
                     <button class="catalog-zip-btn px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition flex items-center gap-1" title="Export Stems .zip" data-job-id="${job.job_id}">
-                        <span>📦</span> .zip
+                        <span>${zipIcon}</span> .zip
                     </button>
                 </div>
             `;
