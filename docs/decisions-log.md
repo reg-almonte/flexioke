@@ -215,7 +215,18 @@ made while building the template itself.
 - notes: Approved Option 1 delivering thread-safe singleton PlaylistManager backed by ./data/playlists.json with in-memory caching and atomic file replacement, immutable favorites system playlist, cascading deletion integrity, and event-driven reactive client state machine.
 
 ## 2026-09-06 — Approved Ticket Breakdown: EPIC-0009 Playlists Management & Favorites System
-- artifact: docs/tickets/EPIC-0009-playlists-management-and-favorites.md
+- artifact: docs/tickets/archive/v0.3.0/EPIC-0009-playlists-management-and-favorites.md
 - approved_by: reg
 - notes: Approved EPIC-0009 work breakdown comprising STORY-0027, STORY-0028, STORY-0029, and STORY-0030 across TASK-0057 to TASK-0064 covering backend playlist store & REST API, immutable Favorites system with 1-click heart toggles, Stem Studio playlists UI & modal assignment, and Karaoke Mode 3-way queue dispatch & queue saving. Previous tickets archived to docs/tickets/archive/v0.2.6/.
+
+## 2026-09-06 — Approved Check Sheet: Version 0.3.0 Playlists Management & Favorites System
+- artifact: docs/checksheets/version0.3.0.md
+- approved_by: reg
+- notes: Approved Phase 5 Check Sheet with 100% test coverage (145/145 passing) and 0 gaps across backend playlist storage & durability, REST endpoints, Favorites client state machine & heart toggles, Stem Studio playlist editor UI, lyrics modal assignment, Karaoke 3-way queue dispatch (In Order, Shuffle, Play Now Replace), and Save Queue as Playlist.
+
+## 2026-09-06 — Approved Release v0.3.0: Playlists Management & Favorites System
+- artifact: docs/releases/v0.3.0.md
+- approved_by: reg
+- notes: Version 0.3.0 fully approved and released. Includes persistent thread-safe backend Playlist store with atomic persistence and orphan pruning (TASK-0057), 9 REST API endpoints with duplicate rejection and cascading song pruning (TASK-0058), reactive Favorites client state machine with optimistic updates (TASK-0059), 1-click Heart toggle buttons across Studio, Karaoke, and Catalog modals (TASK-0060), collapsible Stem Studio Playlists accordion with directory and editor views (TASK-0061), multi-playlist checkbox assignment in Song Details modal (TASK-0062), collapsible Karaoke Playlists accordion with 3-way queue dispatch (TASK-0063), and Save Active Queue as Playlist action with dynamic state binding (TASK-0064). All tickets archived to docs/tickets/archive/v0.3.0/.
+
 

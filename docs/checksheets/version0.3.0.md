@@ -1,7 +1,7 @@
 ---
-status: pending-approval
-approved_by:
-approved_at:
+status: approved
+approved_by: reg
+approved_at: 2026-09-06
 ---
 
 # Version 0.3.0: Playlists Management & Favorites System — Check Sheet
@@ -9,9 +9,9 @@ approved_at:
 ## Related
 - Functional spec: `docs/specs/version0.3.0.md`
 - ADR: `docs/design/ADR-0010-playlists-management-and-favorites.md`
-- Epic: `docs/tickets/EPIC-0009-playlists-management-and-favorites.md`
-- Stories: `docs/tickets/STORY-0027-backend-playlist-store-and-api.md`, `docs/tickets/STORY-0028-favorites-system-and-heart-toggles.md`, `docs/tickets/STORY-0029-studio-playlists-ui-and-modal-assignment.md`, `docs/tickets/STORY-0030-karaoke-playlist-dispatch-and-queue-save.md`
-- Tasks: `docs/tickets/TASK-0057-playlist-models-store-and-manager.md`, `docs/tickets/TASK-0058-playlist-rest-endpoints-and-cascading.md`, `docs/tickets/TASK-0059-favorites-client-state-machine.md`, `docs/tickets/TASK-0060-interactive-heart-buttons-ui.md`, `docs/tickets/TASK-0061-studio-playlists-accordion-and-editor.md`, `docs/tickets/TASK-0062-lyrics-modal-playlist-assignment.md`, `docs/tickets/TASK-0063-karaoke-playlist-accordion-and-dispatch.md`, `docs/tickets/TASK-0064-save-queue-as-playlist-action.md`
+- Epic: `docs/tickets/archive/v0.3.0/EPIC-0009-playlists-management-and-favorites.md`
+- Stories: `docs/tickets/archive/v0.3.0/STORY-0027-backend-playlist-store-and-api.md`, `docs/tickets/archive/v0.3.0/STORY-0028-favorites-system-and-heart-toggles.md`, `docs/tickets/archive/v0.3.0/STORY-0029-studio-playlists-ui-and-modal-assignment.md`, `docs/tickets/archive/v0.3.0/STORY-0030-karaoke-playlist-dispatch-and-queue-save.md`
+- Tasks: `docs/tickets/archive/v0.3.0/TASK-0057-playlist-models-store-and-manager.md`, `docs/tickets/archive/v0.3.0/TASK-0058-playlist-rest-endpoints-and-cascading.md`, `docs/tickets/archive/v0.3.0/TASK-0059-favorites-client-state-machine.md`, `docs/tickets/archive/v0.3.0/TASK-0060-interactive-heart-buttons-ui.md`, `docs/tickets/archive/v0.3.0/TASK-0061-studio-playlists-accordion-and-editor.md`, `docs/tickets/archive/v0.3.0/TASK-0062-lyrics-modal-playlist-assignment.md`, `docs/tickets/archive/v0.3.0/TASK-0063-karaoke-playlist-accordion-and-dispatch.md`, `docs/tickets/archive/v0.3.0/TASK-0064-save-queue-as-playlist-action.md`
 
 ## Verification Items
 
