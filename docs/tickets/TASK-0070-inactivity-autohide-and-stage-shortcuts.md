@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0070: Inactivity Auto-Hide Engine, Cursor Hiding & Stage Shortcuts
@@ -19,9 +19,9 @@ Implement the auto-hide inactivity controller and interaction shortcuts:
 - Attach double-click listener to `#karaoke-lyrics-stage` and bind `F` key to toggle fullscreen mode.
 
 ## Acceptance Criteria
-- [ ] Controls and mouse cursor auto-hide after 3 seconds of inactivity during fullscreen playback.
-- [ ] User movement or keypress immediately wakes floating controls and resets the timer.
-- [ ] Double-clicking the lyrics stage or pressing `F` toggles fullscreen mode.
+- [x] Controls and mouse cursor auto-hide after 3 seconds of inactivity during fullscreen playback.
+- [x] User movement or keypress immediately wakes floating controls and resets the timer.
+- [x] Double-clicking the lyrics stage or pressing `F` toggles fullscreen mode.
 
 ## Blocked by
 - `docs/tickets/TASK-0069-cinema-fullscreen-floating-chrome.md`

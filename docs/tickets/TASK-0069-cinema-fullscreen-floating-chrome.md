@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-06
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0069: In-Place Cinema Fullscreen & Floating Glassmorphism Chrome
@@ -18,9 +18,9 @@ Implement the full-screen cinema layout and floating glassmorphism overlays:
 - Add an explicit Exit Fullscreen button (`#karaoke-exit-fullscreen-btn`) in the floating header.
 
 ## Acceptance Criteria
-- [ ] Entering fullscreen positions top and bottom chrome as floating overlays over the lyrics stage.
-- [ ] Lyrics container expands to full viewport height behind the floating bars.
-- [ ] Exiting fullscreen cleanly restores original sidebar-adjacent layout.
+- [x] Entering fullscreen positions top and bottom chrome as floating overlays over the lyrics stage.
+- [x] Lyrics container expands to full viewport height behind the floating bars.
+- [x] Exiting fullscreen cleanly restores original sidebar-adjacent layout.
 
 ## Blocked by
 - `docs/tickets/TASK-0068-ui-iconography-overhaul-and-tooltips.md`
