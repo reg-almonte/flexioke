@@ -16,6 +16,6 @@ Delivers Version 0.3.1 improvements across three key areas:
 - `docs/design/ADR-0011-ui-and-stage-experience-enhancements.md`
 
 ## Stories
-- [ ] STORY-0031: In-Modal Song Navigation & Dirty Changes Guard
-- [ ] STORY-0032: Centralized Modular SVG Icon Dictionary
-- [ ] STORY-0033: Immersive YouTube-Style Fullscreen Karaoke Stage
+- [x] STORY-0031: In-Modal Song Navigation & Dirty Changes Guard
+- [x] STORY-0032: Centralized Modular SVG Icon Dictionary
+- [x] STORY-0033: Immersive YouTube-Style Fullscreen Karaoke Stage
