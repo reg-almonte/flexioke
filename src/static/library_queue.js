@@ -220,6 +220,18 @@ class SongLibraryManager {
             this.fetchLibrary();
         });
 
+        // Re-sync favorites state when loaded or toggled
+        window.addEventListener('flexioke:favorites-loaded', () => {
+            if (window.flexiokeFavorites) {
+                window.flexiokeFavorites.updateAllHeartButtons();
+            }
+        });
+        window.addEventListener('flexioke:favorites-toggled', () => {
+            if (window.flexiokeFavorites) {
+                window.flexiokeFavorites.updateAllHeartButtons();
+            }
+        });
+
         // Initial fetch
         this.fetchLibrary();
     }
@@ -277,8 +289,15 @@ class SongLibraryManager {
                 const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
                 const durationSnippet = durationFmt ? `<span>${durationFmt}</span><span>•</span>` : '';
                 const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
+                const isFav = window.flexiokeFavorites ? window.flexiokeFavorites.isFavorite(job.job_id) : false;
+                const heartIcon = isFav ? '♥' : '♡';
+                const heartTitle = isFav ? 'Remove from Favorites' : 'Add to Favorites';
+                const heartColor = isFav ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400';
 
                 let buttonsHtml = `
+                    <button type="button" class="favorite-toggle-btn p-1 text-sm ${heartColor} hover:scale-110 active:scale-95 transition-all duration-150" title="${heartTitle}" aria-label="${heartTitle}" data-job-id="${job.job_id}" data-favorite="${isFav ? 'true' : 'false'}">
+                        ${heartIcon}
+                    </button>
                     <button class="play-now-btn px-2.5 py-1 rounded-lg bg-brand-600/90 hover:bg-brand-500 text-white text-[10px] font-semibold transition flex items-center gap-1 shadow-sm" data-job-id="${job.job_id}">
                         <span>▶</span> Play
                     </button>
@@ -312,6 +331,16 @@ class SongLibraryManager {
                 `;
 
                 // Bind card actions
+                const favBtn = card.querySelector('.favorite-toggle-btn');
+                if (favBtn) {
+                    favBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (window.flexiokeFavorites) {
+                            window.flexiokeFavorites.toggleFavorite(job.job_id);
+                        }
+                    });
+                }
+
                 const playBtn = card.querySelector('.play-now-btn');
                 playBtn.addEventListener('click', () => this.handlePlay(job));
 
@@ -413,6 +442,10 @@ class SongLibraryManager {
             const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
             const durationSnippet = durationFmt ? `<span>${durationFmt}</span><span>•</span>` : '';
             const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
+            const isFav = window.flexiokeFavorites ? window.flexiokeFavorites.isFavorite(job.job_id) : false;
+            const heartIcon = isFav ? '♥' : '♡';
+            const heartTitle = isFav ? 'Remove from Favorites' : 'Add to Favorites';
+            const heartColor = isFav ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400';
 
             row.innerHTML = `
                 <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -427,6 +460,9 @@ class SongLibraryManager {
                     </div>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" class="favorite-toggle-btn p-1.5 text-base ${heartColor} hover:scale-110 active:scale-95 transition-all duration-150" title="${heartTitle}" aria-label="${heartTitle}" data-job-id="${job.job_id}" data-favorite="${isFav ? 'true' : 'false'}">
+                        ${heartIcon}
+                    </button>
                     <button class="catalog-play-btn px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-sm" data-job-id="${job.job_id}">
                         <span>▶</span> Play Now
                     </button>
@@ -441,6 +477,16 @@ class SongLibraryManager {
                     </button>
                 </div>
             `;
+
+            const favBtn = row.querySelector('.favorite-toggle-btn');
+            if (favBtn) {
+                favBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (window.flexiokeFavorites) {
+                        window.flexiokeFavorites.toggleFavorite(job.job_id);
+                    }
+                });
+            }
 
             const playBtn = row.querySelector('.catalog-play-btn');
             playBtn.addEventListener('click', () => {
