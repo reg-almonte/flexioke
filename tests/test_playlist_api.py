@@ -12,6 +12,9 @@ client = TestClient(app)
 
 @pytest.fixture(autouse=True)
 def setup_test_data(tmp_path):
+    orig_job_dir = job_manager.data_dir
+    orig_pl_file = playlist_manager.data_file
+
     # Reconfigure job_manager and playlist_manager data dirs
     jobs_dir = tmp_path / "jobs"
     jobs_dir.mkdir(parents=True, exist_ok=True)
@@ -31,6 +34,14 @@ def setup_test_data(tmp_path):
     job_manager.update_job(j2.job_id, status=JobStatus.COMPLETED, duration_seconds=180.0)
 
     yield {"job1_id": j1.job_id, "job2_id": j2.job_id}
+
+    # Teardown: restore original dirs
+    job_manager.data_dir = orig_job_dir
+    job_manager._cache.clear()
+    playlist_manager.data_file = orig_pl_file
+    playlist_manager._playlists.clear()
+    playlist_manager._load_playlists()
+
 
 def test_get_playlists_initial(setup_test_data):
     response = client.get("/api/playlists")

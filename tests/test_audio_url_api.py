@@ -24,8 +24,11 @@ def test_download_url_endpoint_success(monkeypatch, tmp_path):
         return MockUrlOpen()
 
     monkeypatch.setattr(urllib.request, "urlopen", mock_urlopen)
-    from src.services.job_manager import job_manager
-    monkeypatch.setattr(job_manager, "submit_task", lambda fn, *args, **kwargs: None)
+    from src.services.job_manager import JobManager
+    from src.api import routes
+    mgr = JobManager(data_dir=tmp_path / "jobs", max_workers=1)
+    monkeypatch.setattr(routes, "job_manager", mgr)
+    monkeypatch.setattr(mgr, "submit_task", lambda fn, *args, **kwargs: None)
 
     resp = client.post(
         "/api/jobs/download-url",
@@ -37,3 +40,4 @@ def test_download_url_endpoint_success(monkeypatch, tmp_path):
     assert data["title"] == "Bohemian Rhapsody"
     assert data["artist"] == "Queen"
     assert data["status"] == "queued"
+
