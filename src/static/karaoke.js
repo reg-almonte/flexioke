@@ -160,18 +160,34 @@ class KaraokeStageManager {
     init() {
         // Settings Modal Bindings
         if (this.settingsBtn) {
-            this.settingsBtn.addEventListener('click', () => this.openSettingsModal());
+            this.settingsBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
+                this.openSettingsModal();
+            });
         }
         if (this.closeSettingsModalBtn) {
-            this.closeSettingsModalBtn.addEventListener('click', () => this.closeSettingsModal());
+            this.closeSettingsModalBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
+                this.closeSettingsModal();
+            });
         }
         if (this.saveSettingsBtn) {
-            this.saveSettingsBtn.addEventListener('click', () => this.closeSettingsModal());
+            this.saveSettingsBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
+                this.closeSettingsModal();
+            });
         }
         if (this.resetSettingsBtn) {
-            this.resetSettingsBtn.addEventListener('click', () => {
+            this.resetSettingsBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
                 this.saveSettings(this.defaultConfig);
             });
+        }
+
+        // Settings Modal Container Event Isolation
+        if (this.settingsModal) {
+            this.settingsModal.addEventListener('click', (e) => e.stopPropagation());
+            this.settingsModal.addEventListener('dblclick', (e) => e.stopPropagation());
         }
 
         // Real-time Settings Input Handlers
@@ -223,6 +239,24 @@ class KaraokeStageManager {
         // Initialize Inactivity Auto-Hide Controller
         this.initInactivityController();
 
+        // Stage Overlays Event Isolation (Header, Transport Bar, Splash, Cue)
+        if (this.topHeaderEl) {
+            this.topHeaderEl.addEventListener('click', (e) => e.stopPropagation());
+            this.topHeaderEl.addEventListener('dblclick', (e) => e.stopPropagation());
+        }
+        if (this.transportBarEl) {
+            this.transportBarEl.addEventListener('click', (e) => e.stopPropagation());
+            this.transportBarEl.addEventListener('dblclick', (e) => e.stopPropagation());
+        }
+        if (this.introSplash) {
+            this.introSplash.addEventListener('click', (e) => e.stopPropagation());
+            this.introSplash.addEventListener('dblclick', (e) => e.stopPropagation());
+        }
+        if (this.countdownCue) {
+            this.countdownCue.addEventListener('click', (e) => e.stopPropagation());
+            this.countdownCue.addEventListener('dblclick', (e) => e.stopPropagation());
+        }
+
         // Whole Stage Card Click-to-Play/Pause & Double-Click Fullscreen
         const stageTarget = this.stageCard || this.stageContainer;
         if (stageTarget) {
@@ -233,8 +267,8 @@ class KaraokeStageManager {
                 this.wakeChrome();
                 this.scheduleInactivityTimer();
 
-                // Prevent toggling playback when clicking interactive controls or lyric lines
-                if (e.target.closest('button, input, textarea, a, select, .karaoke-line, #karaoke-top-header, #karaoke-transport-bar, #karaoke-settings-modal, #karaoke-intro-splash')) {
+                // Prevent toggling playback when clicking interactive controls, header/transport bars, or lyric lines
+                if (e.target.closest('button, input, textarea, a, select, label, .karaoke-line, #karaoke-top-header, #karaoke-transport-bar, #karaoke-settings-modal, #karaoke-intro-splash, #karaoke-countdown-cue')) {
                     return;
                 }
 
@@ -247,7 +281,7 @@ class KaraokeStageManager {
             });
 
             stageTarget.addEventListener('dblclick', (e) => {
-                if (e.target.closest('button, input, textarea, a, select, .karaoke-line, #karaoke-top-header, #karaoke-transport-bar, #karaoke-settings-modal')) {
+                if (e.target.closest('button, input, textarea, a, select, label, .karaoke-line, #karaoke-top-header, #karaoke-transport-bar, #karaoke-settings-modal, #karaoke-intro-splash, #karaoke-countdown-cue')) {
                     return;
                 }
                 if (clickDebounceTimer !== null) {
@@ -260,10 +294,16 @@ class KaraokeStageManager {
 
         // Fullscreen Toggle Buttons
         if (this.fullscreenBtn) {
-            this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+            this.fullscreenBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
+                this.toggleFullscreen();
+            });
         }
         if (this.exitFullscreenBtn) {
-            this.exitFullscreenBtn.addEventListener('click', () => this.exitFullscreen());
+            this.exitFullscreenBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
+                this.exitFullscreen();
+            });
         }
 
         document.addEventListener('keydown', (e) => {
@@ -305,19 +345,22 @@ class KaraokeStageManager {
 
         // Bind Karaoke Transport Controls
         if (this.playBtn) {
-            this.playBtn.addEventListener('click', () => {
+            this.playBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
                 this.togglePlayPause();
             });
         }
 
         if (this.restartBtn) {
-            this.restartBtn.addEventListener('click', () => {
+            this.restartBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
                 this.restartSong();
             });
         }
 
         if (this.skipBtn) {
-            this.skipBtn.addEventListener('click', () => {
+            this.skipBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
                 if (window.flexiokeQueue) {
                     window.flexiokeQueue.advanceNext(true);
                 }
@@ -325,7 +368,8 @@ class KaraokeStageManager {
         }
 
         if (this.stopBtn) {
-            this.stopBtn.addEventListener('click', () => {
+            this.stopBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
                 if (window.flexiokeQueue) {
                     window.flexiokeQueue.stopAndCueNext();
                 } else if (window.flexiokePlayer) {
@@ -341,7 +385,12 @@ class KaraokeStageManager {
                 window.flexiokePlayer.masterVolume = savedVol;
             }
 
+            this.volumeSlider.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
+            });
+
             this.volumeSlider.addEventListener('input', (e) => {
+                if (e) e.stopPropagation();
                 const val = parseFloat(e.target.value);
                 if (window.flexiokePlayer) {
                     window.flexiokePlayer.masterVolume = val;
@@ -357,14 +406,16 @@ class KaraokeStageManager {
 
         // Timecode Click-to-Toggle Mode
         if (this.timecodeEl) {
-            this.timecodeEl.addEventListener('click', () => {
+            this.timecodeEl.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
                 this.toggleTimecodeMode();
             });
         }
 
         // Quick Vocal Toggles
         if (this.toggleLeadBtn) {
-            this.toggleLeadBtn.addEventListener('click', () => {
+            this.toggleLeadBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
                 if (window.flexiokePlayer) {
                     window.flexiokePlayer.toggleMute('lead_vocals');
                     this.syncVocalButtons();
@@ -373,7 +424,8 @@ class KaraokeStageManager {
         }
 
         if (this.toggleBackingBtn) {
-            this.toggleBackingBtn.addEventListener('click', () => {
+            this.toggleBackingBtn.addEventListener('click', (e) => {
+                if (e) e.stopPropagation();
                 if (window.flexiokePlayer) {
                     window.flexiokePlayer.toggleMute('backing_vocals');
                     this.syncVocalButtons();

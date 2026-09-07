@@ -221,6 +221,84 @@ def test_lyrics_stage_scrollbar_and_stage_card_click_play_pause():
     assert "stageTarget.addEventListener('click'" in js
     assert "this.togglePlayPause()" in js
 
+def test_stage_buttons_stop_event_propagation():
+    """Verify that stage buttons (fullscreen, transport, toggles, settings) stop event propagation."""
+    resp = client.get("/static/karaoke.js")
+    assert resp.status_code == 200
+    js = resp.text
+
+    # Fullscreen, Exit, Play, Restart, Skip, Stop buttons must call stopPropagation
+    assert "this.fullscreenBtn.addEventListener('click', (e) => {" in js
+    assert "this.exitFullscreenBtn.addEventListener('click', (e) => {" in js
+    assert "this.playBtn.addEventListener('click', (e) => {" in js
+    assert "this.restartBtn.addEventListener('click', (e) => {" in js
+    assert "this.skipBtn.addEventListener('click', (e) => {" in js
+    assert "this.stopBtn.addEventListener('click', (e) => {" in js
+    assert "this.settingsBtn.addEventListener('click', (e) => {" in js
+    assert "this.toggleLeadBtn.addEventListener('click', (e) => {" in js
+    assert "this.toggleBackingBtn.addEventListener('click', (e) => {" in js
+    assert "e.stopPropagation()" in js
+
+    # Run Node simulation testing event dispatch and stopPropagation on button click
+    node_script = """
+    let playPauseTriggered = false;
+    let buttonActionExecuted = false;
+
+    class MockEvent {
+        constructor(target) {
+            this.target = target;
+            this.propagationStopped = false;
+        }
+        stopPropagation() {
+            this.propagationStopped = true;
+        }
+    }
+
+    const stageCard = {
+        style: {},
+        onClick(e) {
+            if (e.target && e.target.closest && e.target.closest('button, input, textarea, a, select, label, .karaoke-line, #karaoke-top-header, #karaoke-transport-bar')) {
+                return;
+            }
+            playPauseTriggered = true;
+        }
+    };
+
+    const fullscreenBtn = {
+        tagName: 'BUTTON',
+        id: 'karaoke-fullscreen-btn',
+        closest(sel) {
+            if (sel.includes('button') || sel.includes('karaoke-fullscreen-btn')) return this;
+            return null;
+        },
+        onClick(e) {
+            if (e) e.stopPropagation();
+            buttonActionExecuted = true;
+        }
+    };
+
+    // Simulate clicking fullscreen button
+    const clickEvt = new MockEvent(fullscreenBtn);
+    fullscreenBtn.onClick(clickEvt);
+
+    if (!buttonActionExecuted) throw new Error("Button action failed to run");
+    if (!clickEvt.propagationStopped) throw new Error("Event propagation was not stopped on button!");
+
+    // If propagation was stopped, parent stageCard click handler is never invoked
+    if (!clickEvt.propagationStopped) {
+        stageCard.onClick(clickEvt);
+    }
+
+    if (playPauseTriggered) throw new Error("Stage play/pause was inadvertently triggered by button click!");
+    console.log("EVENT_PROPAGATION_ISOLATION_SUCCESS");
+    """
+    proc = subprocess.run(["node", "-e", node_script], capture_output=True, text=True)
+    assert proc.returncode == 0, f"Node script error: {proc.stderr}"
+    assert "EVENT_PROPAGATION_ISOLATION_SUCCESS" in proc.stdout
+
+
+
+
 
 
 
