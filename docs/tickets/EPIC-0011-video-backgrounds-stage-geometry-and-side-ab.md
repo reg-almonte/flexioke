@@ -14,6 +14,6 @@ Delivers Version 0.4.0 capabilities comprising looping background video playback
 - `docs/design/ADR-0012-video-backgrounds-stage-geometry-and-side-ab.md`
 
 ## Stories
-- [ ] STORY-0034: Looping Video Background Engine & Stage Synchronization
+- [x] STORY-0034: Looping Video Background Engine & Stage Synchronization
 - [ ] STORY-0035: Fullscreen Stage Geometry Customization
 - [ ] STORY-0036: Direct Side A / Side B Dual-Track Ingestion & Vocal Hot-Swapping
