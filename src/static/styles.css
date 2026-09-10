@@ -315,3 +315,22 @@ body.karaoke-active #app-header.header-revealed {
     z-index: 0;
     pointer-events-none;
 }
+
+/* Intro Countdown Splash */
+#karaoke-intro-splash {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 35;
+    background-color: #030712;
+    border-radius: 1rem;
+}
+
+.stage-fullscreen #karaoke-intro-splash,
+.karaoke-cinema-fullscreen #karaoke-intro-splash,
+#karaoke-stage-card:fullscreen #karaoke-intro-splash,
+#karaoke-stage-card:-webkit-full-screen #karaoke-intro-splash {
+    border-radius: 0 !important;
+}
+

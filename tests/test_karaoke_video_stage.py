@@ -25,6 +25,7 @@ def test_video_stage_styles_in_css():
 
     assert "#karaoke-bg-video" in css
     assert "object-fit: cover" in css or "object-cover" in css
+    assert "#karaoke-intro-splash" in css
 
 def test_video_playback_and_sync_logic_in_karaoke_js():
     """Verify karaoke.js implements video source loading, offset calculation, and playback coordination."""
@@ -36,6 +37,7 @@ def test_video_playback_and_sync_logic_in_karaoke_js():
     assert "video_id" in js
     assert "video_offset_seconds" in js
     assert "bgVideo" in js
+    assert "unloadVideo" in js
 
 def test_lyrics_modal_video_controls_in_library_queue_js():
     """Verify library_queue.js populates video selector from /api/videos and handles metadata saves."""
@@ -59,9 +61,13 @@ def test_video_timecode_synchronization_in_node():
             this.paused = true;
             this.muted = true;
             this.loop = true;
+            this.classList = new Set(['hidden']);
+            this.style = { display: 'none' };
         }
         play() { this.paused = false; }
         pause() { this.paused = true; }
+        removeAttribute(attr) { if (attr === 'src') this.src = ''; }
+        load() {}
     }
 
     const stage = {
@@ -77,8 +83,21 @@ def test_video_timecode_synchronization_in_node():
             this.currentJob = job;
             const videoId = job.video_id || "bg001.mp4";
             this.videoOffset = typeof job.video_offset_seconds === 'number' ? job.video_offset_seconds : 0.0;
-            this.bgVideo.src = `/api/videos/${encodeURIComponent(videoId)}`;
-            this.bgVideo.currentTime = this.videoOffset;
+            if (this.bgVideo) {
+                this.bgVideo.classList.delete('hidden');
+                this.bgVideo.style.display = '';
+                this.bgVideo.src = `/api/videos/${encodeURIComponent(videoId)}`;
+                this.bgVideo.currentTime = this.videoOffset;
+            }
+        },
+
+        unloadVideo() {
+            if (!this.bgVideo) return;
+            this.bgVideo.pause();
+            this.bgVideo.removeAttribute('src');
+            this.bgVideo.load();
+            this.bgVideo.classList.add('hidden');
+            this.bgVideo.style.display = 'none';
         },
 
         syncVideoPlayback(audioTime, isAudioPlaying) {
@@ -111,10 +130,7 @@ def test_video_timecode_synchronization_in_node():
 
         resetToDefault() {
             this.currentJob = null;
-            if (this.bgVideo) {
-                this.bgVideo.pause();
-                this.bgVideo.currentTime = this.videoOffset || 0;
-            }
+            this.unloadVideo();
         }
     };
 
@@ -122,6 +138,7 @@ def test_video_timecode_synchronization_in_node():
     stage.onSongLoaded(stage.currentJob);
     if (stage.bgVideo.src !== "/api/videos/bg001.mp4") throw new Error("Incorrect video src");
     if (stage.bgVideo.currentTime !== 5.0) throw new Error("Initial offset time not set");
+    if (stage.bgVideo.classList.has('hidden')) throw new Error("Video should not be hidden after song load");
 
     // 2. Play Audio at 10s -> Expected video time: (10 + 5) % 40 = 15s
     stage.syncVideoPlayback(10.0, true);
@@ -136,11 +153,12 @@ def test_video_timecode_synchronization_in_node():
     stage.syncVideoPlayback(50.0, false);
     if (!stage.bgVideo.paused) throw new Error("Video should pause when audio is paused");
 
-    // 5. Reset to default (stop/queue end) -> Video should pause and reset time
+    // 5. Reset to default (stop/queue end) -> Video should pause, clear src, and hide (revert to solid black)
     stage.syncVideoPlayback(10.0, true); // Play again
     stage.resetToDefault();
     if (!stage.bgVideo.paused) throw new Error("Video should pause on reset");
-    if (stage.bgVideo.currentTime !== 5.0) throw new Error("Video should reset to offset time on reset");
+    if (stage.bgVideo.src !== "") throw new Error("Video src should be cleared on reset");
+    if (!stage.bgVideo.classList.has('hidden')) throw new Error("Video should be hidden on reset to show default black");
 
     console.log("VIDEO_SYNC_SUCCESS");
     """

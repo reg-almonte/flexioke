@@ -511,7 +511,7 @@
                 <!-- Center Stage Lyrics Card -->
                 <section id="karaoke-stage-card" class="bg-surface-900 border border-slate-800/90 rounded-2xl p-6 shadow-2xl space-y-4 min-h-[560px] flex flex-col justify-between relative overflow-hidden transition-all">
                     <!-- Karaoke Stage Background Video -->
-                    <video id="karaoke-bg-video" class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-40 transition-opacity duration-500" loop muted playsinline preload="auto"></video>
+                    <video id="karaoke-bg-video" class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-40 transition-opacity duration-500 hidden" loop muted playsinline preload="auto"></video>
                     
                     <!-- Karaoke Track Info Header -->
                     <div id="karaoke-top-header" class="relative z-10 karaoke-cinema-top-header flex items-center justify-between border-b border-slate-800 pb-3 gap-4">
@@ -538,7 +538,7 @@
                     </div>
 
                     <!-- Visual Countdown Cue Badge -->
-                    <div id="karaoke-countdown-cue" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5 bg-surface-950/90 border border-brand-500/60 px-4 py-1.5 rounded-full shadow-2xl backdrop-blur-md transition-all">
+                    <div id="karaoke-countdown-cue" class="hidden absolute top-16 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5 bg-surface-950 border border-brand-500/80 px-4 py-1.5 rounded-full shadow-2xl backdrop-blur-md transition-all">
                         <span class="text-[10px] uppercase font-bold tracking-wider text-brand-300">Ready</span>
                         <div id="countdown-dots" class="flex items-center gap-1.5 text-xs text-brand-400">
                             <span>●</span>
@@ -549,7 +549,7 @@
                     </div>
 
                     <!-- Song Title & Artist Intro Splash Overlay -->
-                    <div id="karaoke-intro-splash" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-surface-950/95 backdrop-blur-md p-6 text-center transition-all duration-300">
+                    <div id="karaoke-intro-splash" class="hidden absolute inset-0 z-35 flex flex-col items-center justify-center bg-surface-950 p-6 text-center transition-all duration-300 rounded-2xl">
                         <div class="space-y-3.5 max-w-lg">
                             <span class="inline-block text-[10px] uppercase font-extrabold tracking-widest text-brand-400 bg-brand-500/10 border border-brand-500/30 px-3.5 py-1 rounded-full shadow-inner">
                                 Get Ready to Sing

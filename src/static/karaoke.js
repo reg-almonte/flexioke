@@ -374,14 +374,13 @@ class KaraokeStageManager {
         if (this.stopBtn) {
             this.stopBtn.addEventListener('click', (e) => {
                 if (e) e.stopPropagation();
-                if (this.bgVideo) {
-                    this.bgVideo.pause();
-                    this.bgVideo.currentTime = this.videoOffset || 0;
-                }
-                if (window.flexiokeQueue) {
+                this.unloadVideo();
+                if (window.flexiokeQueue && window.flexiokeQueue.state && window.flexiokeQueue.state.queue && window.flexiokeQueue.state.queue.length > 0) {
                     window.flexiokeQueue.stopAndCueNext();
                 } else if (window.flexiokePlayer) {
                     window.flexiokePlayer.resetToDefault();
+                } else {
+                    this.renderDefaultState();
                 }
             });
         }
@@ -463,9 +462,7 @@ class KaraokeStageManager {
 
         // Listen for track ended
         window.addEventListener('flexioke:track-ended', () => {
-            if (this.bgVideo && !this.bgVideo.paused) {
-                this.bgVideo.pause();
-            }
+            this.unloadVideo();
         });
 
         // Listen for player reset (when queue finishes or stop clicked without queue)
@@ -476,16 +473,26 @@ class KaraokeStageManager {
             this.currentJobId = null;
             this.lyricsData = null;
             this.activeLineIndex = -1;
-            if (this.bgVideo) {
-                this.bgVideo.pause();
-                this.bgVideo.currentTime = this.videoOffset || 0;
-            }
+            this.unloadVideo();
             this.updateStageHeader();
             if (this.timecodeEl) {
                 this.timecodeEl.textContent = (this.timecodeMode === 'remaining') ? "-00:00 / 00:00" : "00:00 / 00:00";
             }
             this.renderDefaultState();
             this.updatePlayBtnUI();
+        });
+
+        // Listen for job deletion
+        window.addEventListener('flexioke:job-deleted', (e) => {
+            if (e.detail && e.detail.job_id === this.currentJobId) {
+                this.currentJob = null;
+                this.currentJobId = null;
+                this.lyricsData = null;
+                this.activeLineIndex = -1;
+                this.unloadVideo();
+                this.updateStageHeader();
+                this.renderDefaultState();
+            }
         });
 
         // Listen for song loaded event from FlexiokePlayer
@@ -527,6 +534,8 @@ class KaraokeStageManager {
                 const videoId = job.video_id || "bg001.mp4";
                 this.videoOffset = typeof job.video_offset_seconds === 'number' ? job.video_offset_seconds : (parseFloat(job.video_offset_seconds) || 0.0);
                 if (this.bgVideo) {
+                    this.bgVideo.classList.remove('hidden');
+                    this.bgVideo.style.display = '';
                     const expectedSrc = `/api/videos/${encodeURIComponent(videoId)}`;
                     if (!this.bgVideo.src.endsWith(expectedSrc)) {
                         this.bgVideo.src = expectedSrc;
@@ -921,13 +930,30 @@ class KaraokeStageManager {
         const videoId = job.video_id || "bg001.mp4";
         this.videoOffset = typeof job.video_offset_seconds === 'number' ? job.video_offset_seconds : (parseFloat(job.video_offset_seconds) || 0.0);
         if (this.bgVideo) {
-            this.bgVideo.src = `/api/videos/${encodeURIComponent(videoId)}`;
+            this.bgVideo.classList.remove('hidden');
+            this.bgVideo.style.display = '';
+            this.bgVideo.style.opacity = '';
+            const expectedSrc = `/api/videos/${encodeURIComponent(videoId)}`;
+            if (!this.bgVideo.src || !this.bgVideo.src.endsWith(expectedSrc)) {
+                this.bgVideo.src = expectedSrc;
+            }
             this.bgVideo.currentTime = this.videoOffset;
         }
 
         this.syncVocalButtons();
         this.loadLyricsForJob(job.job_id);
         this.triggerIntroSplash(job, autoPlay);
+    }
+
+    unloadVideo() {
+        if (!this.bgVideo) return;
+        try {
+            this.bgVideo.pause();
+            this.bgVideo.removeAttribute('src');
+            this.bgVideo.load();
+        } catch (e) {}
+        this.bgVideo.classList.add('hidden');
+        this.bgVideo.style.display = 'none';
     }
 
     syncVideoPlayback(audioTime, isAudioPlaying) {
@@ -1157,6 +1183,7 @@ class KaraokeStageManager {
     }
 
     renderDefaultState() {
+        this.unloadVideo();
         if (!this.stageContainer) return;
         this.stageContainer.innerHTML = `
             <div id="karaoke-empty-state" class="text-center py-20 text-slate-500 text-sm italic">
