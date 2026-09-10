@@ -45,6 +45,8 @@ class QueueItem(BaseModel):
     artist: Optional[str] = None
     duration_seconds: Optional[float] = None
     stems: Dict[str, str] = Field(default_factory=dict)
+    video_id: str = "bg001.mp4"
+    video_offset_seconds: float = 0.0
     added_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 class QueueResponse(BaseModel):

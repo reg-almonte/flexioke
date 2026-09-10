@@ -15,7 +15,9 @@ class QueueManager:
         title: str,
         artist: Optional[str] = None,
         duration_seconds: Optional[float] = None,
-        stems: Optional[Dict[str, str]] = None
+        stems: Optional[Dict[str, str]] = None,
+        video_id: str = "bg001.mp4",
+        video_offset_seconds: float = 0.0
     ) -> QueueItem:
         """Appends a song to the playback queue."""
         item = QueueItem(
@@ -24,7 +26,9 @@ class QueueManager:
             title=title,
             artist=artist,
             duration_seconds=duration_seconds,
-            stems=stems or {}
+            stems=stems or {},
+            video_id=video_id or "bg001.mp4",
+            video_offset_seconds=float(video_offset_seconds or 0.0)
         )
         with self._lock:
             self.queue.append(item)
@@ -36,7 +40,9 @@ class QueueManager:
         title: str,
         artist: Optional[str] = None,
         duration_seconds: Optional[float] = None,
-        stems: Optional[Dict[str, str]] = None
+        stems: Optional[Dict[str, str]] = None,
+        video_id: str = "bg001.mp4",
+        video_offset_seconds: float = 0.0
     ) -> QueueItem:
         """Sets a song as the currently playing track immediately."""
         item = QueueItem(
@@ -45,11 +51,43 @@ class QueueManager:
             title=title,
             artist=artist,
             duration_seconds=duration_seconds,
-            stems=stems or {}
+            stems=stems or {},
+            video_id=video_id or "bg001.mp4",
+            video_offset_seconds=float(video_offset_seconds or 0.0)
         )
         with self._lock:
             self.current_track = item
         return item
+
+    def update_job_metadata(
+        self,
+        job_id: str,
+        title: Optional[str] = None,
+        artist: Optional[str] = None,
+        video_id: Optional[str] = None,
+        video_offset_seconds: Optional[float] = None
+    ):
+        """Propagates updated song metadata to any queued tracks and the active track."""
+        with self._lock:
+            if self.current_track and self.current_track.job_id == job_id:
+                if title is not None:
+                    self.current_track.title = title
+                if artist is not None:
+                    self.current_track.artist = artist
+                if video_id is not None:
+                    self.current_track.video_id = video_id
+                if video_offset_seconds is not None:
+                    self.current_track.video_offset_seconds = float(video_offset_seconds)
+            for item in self.queue:
+                if item.job_id == job_id:
+                    if title is not None:
+                        item.title = title
+                    if artist is not None:
+                        item.artist = artist
+                    if video_id is not None:
+                        item.video_id = video_id
+                    if video_offset_seconds is not None:
+                        item.video_offset_seconds = float(video_offset_seconds)
 
     def advance_next(self) -> Optional[QueueItem]:
         """Dequeues the next item in the queue and sets it as current_track."""

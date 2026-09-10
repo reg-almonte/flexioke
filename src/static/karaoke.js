@@ -447,13 +447,7 @@ class KaraokeStageManager {
             }
         });
 
-        // Listen for metadata updates from editor
-        window.addEventListener('flexioke:metadata-updated', (e) => {
-            if (e.detail && this.currentJob && e.detail.job_id === this.currentJob.job_id) {
-                this.currentJob = e.detail;
-                this.updateStageHeader();
-            }
-        });
+
 
         // Listen for queue updates to dynamically update Up Next header
         window.addEventListener('flexioke:queue-updated', (e) => {
@@ -539,6 +533,18 @@ class KaraokeStageManager {
                     const expectedSrc = `/api/videos/${encodeURIComponent(videoId)}`;
                     if (!this.bgVideo.src.endsWith(expectedSrc)) {
                         this.bgVideo.src = expectedSrc;
+                    }
+                    if (this.bgVideo.duration && !isNaN(this.bgVideo.duration)) {
+                        let audioTime = 0;
+                        const firstReady = window.flexiokePlayer && window.flexiokePlayer.tracks ? Object.values(window.flexiokePlayer.tracks).find(t => t.ws && t.isReady) : null;
+                        if (firstReady) {
+                            audioTime = firstReady.ws.getCurrentTime() || 0;
+                        }
+                        this.bgVideo.currentTime = (audioTime + this.videoOffset) % this.bgVideo.duration;
+                    } else {
+                        try {
+                            this.bgVideo.currentTime = this.videoOffset;
+                        } catch (err) {}
                     }
                 }
                 this.updateStageHeader();
@@ -937,7 +943,20 @@ class KaraokeStageManager {
             if (!this.bgVideo.src || !this.bgVideo.src.endsWith(expectedSrc)) {
                 this.bgVideo.src = expectedSrc;
             }
-            this.bgVideo.currentTime = this.videoOffset;
+            try {
+                this.bgVideo.currentTime = this.videoOffset;
+            } catch (err) {}
+
+            const onLoadedMetadata = () => {
+                if (this.bgVideo && this.currentJobId === job.job_id) {
+                    if (this.bgVideo.duration && !isNaN(this.bgVideo.duration)) {
+                        this.bgVideo.currentTime = this.videoOffset % this.bgVideo.duration;
+                    } else {
+                        this.bgVideo.currentTime = this.videoOffset;
+                    }
+                }
+            };
+            this.bgVideo.addEventListener('loadedmetadata', onLoadedMetadata, { once: true });
         }
 
         this.syncVocalButtons();
@@ -963,6 +982,13 @@ class KaraokeStageManager {
         if (!isAudioPlaying || !this.currentJobId) {
             if (!this.bgVideo.paused) {
                 this.bgVideo.pause();
+            }
+            if (this.currentJobId && this.bgVideo.duration && !isNaN(this.bgVideo.duration)) {
+                const expectedVideoTime = (audioTime + this.videoOffset) % this.bgVideo.duration;
+                const diff = Math.abs(this.bgVideo.currentTime - expectedVideoTime);
+                if (diff > 0.4) {
+                    this.bgVideo.currentTime = expectedVideoTime;
+                }
             }
             return;
         }

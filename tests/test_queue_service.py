@@ -122,3 +122,31 @@ def test_queue_reorder_operations(mock_queue_environment):
     resp = client.post("/api/queue/reorder", json={"queue_id": id2, "direction": "sideways"})
     assert resp.status_code == 400
 
+def test_queue_video_metadata_propagation(mock_queue_environment):
+    job_mgr, queue_mgr, j1, j2 = mock_queue_environment
+
+    # Update j1 with custom video and offset
+    client.patch(f"/api/jobs/{j1.job_id}", json={"video_id": "neon_night.mp4", "video_offset_seconds": 12.5})
+
+    # Add to queue and play now
+    resp = client.post("/api/queue/add", json={"job_id": j1.job_id})
+    assert resp.status_code == 200
+    queued = resp.json()["queue"][0]
+    assert queued["video_id"] == "neon_night.mp4"
+    assert queued["video_offset_seconds"] == 12.5
+
+    # Play now
+    resp = client.post("/api/queue/play-now", json={"job_id": j1.job_id})
+    assert resp.status_code == 200
+    current = resp.json()["current_track"]
+    assert current["video_id"] == "neon_night.mp4"
+    assert current["video_offset_seconds"] == 12.5
+
+    # Live update while currently playing
+    resp = client.patch(f"/api/jobs/{j1.job_id}", json={"video_offset_seconds": 25.0})
+    assert resp.status_code == 200
+
+    q_resp = client.get("/api/queue").json()
+    assert q_resp["current_track"]["video_offset_seconds"] == 25.0
+
+

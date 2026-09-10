@@ -282,6 +282,13 @@ def update_job_metadata(job_id: str, req: JobUpdateMetadataRequest):
         updates["video_offset_seconds"] = max(0.0, float(req.video_offset_seconds))
 
     updated_job = job_manager.update_job(job_id, **updates)
+    queue_manager.update_job_metadata(
+        job_id,
+        title=updated_job.title,
+        artist=updated_job.artist,
+        video_id=updated_job.video_id,
+        video_offset_seconds=updated_job.video_offset_seconds
+    )
     return updated_job
 
 
@@ -444,7 +451,15 @@ def add_to_queue(req: QueueActionRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Job '{req.job_id}' is not ready for playback."
         )
-    queue_manager.add_to_queue(job.job_id, job.title, job.artist, job.duration_seconds, job.stems)
+    queue_manager.add_to_queue(
+        job.job_id,
+        job.title,
+        job.artist,
+        job.duration_seconds,
+        job.stems,
+        job.video_id,
+        job.video_offset_seconds
+    )
     return queue_manager.get_state()
 
 @router.post("/queue/play-now", response_model=QueueResponse)
@@ -456,7 +471,15 @@ def play_now(req: QueueActionRequest):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Job '{req.job_id}' is not ready for playback."
         )
-    queue_manager.play_now(job.job_id, job.title, job.artist, job.duration_seconds, job.stems)
+    queue_manager.play_now(
+        job.job_id,
+        job.title,
+        job.artist,
+        job.duration_seconds,
+        job.stems,
+        job.video_id,
+        job.video_offset_seconds
+    )
     return queue_manager.get_state()
 
 @router.post("/queue/next", response_model=QueueResponse)
