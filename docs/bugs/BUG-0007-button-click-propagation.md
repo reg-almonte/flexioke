@@ -1,7 +1,9 @@
 ---
-status: in-progress
+status: fixed
 filed_at: 2026-09-07
+verified_at: 2026-09-10
 ---
+
 
 # Bug Report: Button Click Event Propagation on Karaoke Stage
 
