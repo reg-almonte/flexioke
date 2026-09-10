@@ -82,7 +82,16 @@ def test_video_timecode_synchronization_in_node():
         },
 
         syncVideoPlayback(audioTime, isAudioPlaying) {
-            if (!this.bgVideo || !this.bgVideo.duration) return;
+            if (!this.bgVideo) return;
+
+            if (!isAudioPlaying || !this.currentJob) {
+                if (!this.bgVideo.paused) {
+                    this.bgVideo.pause();
+                }
+                return;
+            }
+
+            if (!this.bgVideo.duration) return;
 
             if (isAudioPlaying) {
                 if (this.bgVideo.paused) {
@@ -97,6 +106,14 @@ def test_video_timecode_synchronization_in_node():
                 if (!this.bgVideo.paused) {
                     this.bgVideo.pause();
                 }
+            }
+        },
+
+        resetToDefault() {
+            this.currentJob = null;
+            if (this.bgVideo) {
+                this.bgVideo.pause();
+                this.bgVideo.currentTime = this.videoOffset || 0;
             }
         }
     };
@@ -118,6 +135,12 @@ def test_video_timecode_synchronization_in_node():
     // 4. Pause Audio -> Video should pause
     stage.syncVideoPlayback(50.0, false);
     if (!stage.bgVideo.paused) throw new Error("Video should pause when audio is paused");
+
+    // 5. Reset to default (stop/queue end) -> Video should pause and reset time
+    stage.syncVideoPlayback(10.0, true); // Play again
+    stage.resetToDefault();
+    if (!stage.bgVideo.paused) throw new Error("Video should pause on reset");
+    if (stage.bgVideo.currentTime !== 5.0) throw new Error("Video should reset to offset time on reset");
 
     console.log("VIDEO_SYNC_SUCCESS");
     """

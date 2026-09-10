@@ -374,6 +374,10 @@ class KaraokeStageManager {
         if (this.stopBtn) {
             this.stopBtn.addEventListener('click', (e) => {
                 if (e) e.stopPropagation();
+                if (this.bgVideo) {
+                    this.bgVideo.pause();
+                    this.bgVideo.currentTime = this.videoOffset || 0;
+                }
                 if (window.flexiokeQueue) {
                     window.flexiokeQueue.stopAndCueNext();
                 } else if (window.flexiokePlayer) {
@@ -457,6 +461,13 @@ class KaraokeStageManager {
             this.updateStageHeader();
         });
 
+        // Listen for track ended
+        window.addEventListener('flexioke:track-ended', () => {
+            if (this.bgVideo && !this.bgVideo.paused) {
+                this.bgVideo.pause();
+            }
+        });
+
         // Listen for player reset (when queue finishes or stop clicked without queue)
         window.addEventListener('flexioke:player-reset', () => {
             this.clearIntroSplash();
@@ -465,6 +476,10 @@ class KaraokeStageManager {
             this.currentJobId = null;
             this.lyricsData = null;
             this.activeLineIndex = -1;
+            if (this.bgVideo) {
+                this.bgVideo.pause();
+                this.bgVideo.currentTime = this.videoOffset || 0;
+            }
             this.updateStageHeader();
             if (this.timecodeEl) {
                 this.timecodeEl.textContent = (this.timecodeMode === 'remaining') ? "-00:00 / 00:00" : "00:00 / 00:00";
@@ -916,30 +931,30 @@ class KaraokeStageManager {
     }
 
     syncVideoPlayback(audioTime, isAudioPlaying) {
-        if (!this.bgVideo || !this.bgVideo.duration || isNaN(this.bgVideo.duration)) {
-            if (this.bgVideo) {
-                if (isAudioPlaying && this.bgVideo.paused) {
-                    this.bgVideo.play().catch(() => {});
-                } else if (!isAudioPlaying && !this.bgVideo.paused) {
-                    this.bgVideo.pause();
-                }
+        if (!this.bgVideo) return;
+
+        // If audio is not playing or there is no active job, pause video immediately
+        if (!isAudioPlaying || !this.currentJobId) {
+            if (!this.bgVideo.paused) {
+                this.bgVideo.pause();
             }
             return;
         }
 
-        if (isAudioPlaying) {
+        if (!this.bgVideo.duration || isNaN(this.bgVideo.duration)) {
             if (this.bgVideo.paused) {
                 this.bgVideo.play().catch(() => {});
             }
-            const expectedVideoTime = (audioTime + this.videoOffset) % this.bgVideo.duration;
-            const diff = Math.abs(this.bgVideo.currentTime - expectedVideoTime);
-            if (diff > 0.4) {
-                this.bgVideo.currentTime = expectedVideoTime;
-            }
-        } else {
-            if (!this.bgVideo.paused) {
-                this.bgVideo.pause();
-            }
+            return;
+        }
+
+        if (this.bgVideo.paused) {
+            this.bgVideo.play().catch(() => {});
+        }
+        const expectedVideoTime = (audioTime + this.videoOffset) % this.bgVideo.duration;
+        const diff = Math.abs(this.bgVideo.currentTime - expectedVideoTime);
+        if (diff > 0.4) {
+            this.bgVideo.currentTime = expectedVideoTime;
         }
     }
 
@@ -1180,6 +1195,9 @@ class KaraokeStageManager {
             if (this.timecodeEl) {
                 this.timecodeEl.textContent = (this.timecodeMode === 'remaining') ? "-00:00 / 00:00" : "00:00 / 00:00";
             }
+            if (this.bgVideo && !this.bgVideo.paused) {
+                this.bgVideo.pause();
+            }
             return;
         }
 
@@ -1341,7 +1359,13 @@ class KaraokeStageManager {
         // 3. Clear and hide countdown cue
         this.hideCountdownCue();
 
-        // 4. Trigger Intro Splash if duration > 0, otherwise restart audio playback immediately
+        // 4. Pause and reset background video to start offset
+        if (this.bgVideo) {
+            this.bgVideo.pause();
+            this.bgVideo.currentTime = this.videoOffset || 0;
+        }
+
+        // 5. Trigger Intro Splash if duration > 0, otherwise restart audio playback immediately
         const duration = (typeof this.config.introSplashDuration !== 'undefined') ? parseInt(this.config.introSplashDuration, 10) : 3;
         if (duration > 0) {
             if (window.flexiokePlayer) {
