@@ -23,6 +23,8 @@ class JobRecord(BaseModel):
     source_name: str
     title: str
     artist: Optional[str] = None
+    video_id: Optional[str] = "bg001.mp4"
+    video_offset_seconds: float = 0.0
     status: JobStatus = JobStatus.QUEUED
     progress: int = Field(default=0, ge=0, le=100)
     current_stage: str = "Queued"
@@ -62,6 +64,19 @@ class LyricsResponse(BaseModel):
 class JobUpdateMetadataRequest(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=200)
     artist: Optional[str] = Field(default=None, max_length=200)
+    video_id: Optional[str] = Field(default=None, max_length=255)
+    video_offset_seconds: Optional[float] = Field(default=None, ge=0.0)
+
+class VideoInfo(BaseModel):
+    id: str
+    filename: str
+    size_bytes: int
+    url: str
+
+class VideoListResponse(BaseModel):
+    total: int
+    videos: List[VideoInfo]
+
 
 class QueueReorderRequest(BaseModel):
     queue_id: str

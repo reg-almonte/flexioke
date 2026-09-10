@@ -5,10 +5,11 @@ import urllib.parse
 from typing import Optional
 from pathlib import Path
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query, status
-from fastapi.responses import FileResponse, Response
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Request, status
+from fastapi.responses import FileResponse, Response, StreamingResponse
 
 from src.services.job_manager import job_manager
+from src.services.video_manager import video_manager
 from src.services.queue_manager import queue_manager
 from src.services.audio_validator import validate_audio_file, clean_song_title, parse_song_and_artist
 from src.services.audio_downloader import validate_audio_url, download_audio_url
@@ -36,6 +37,8 @@ from src.models import (
     PlaylistSongAdd,
     PlaylistReorderRequest,
     PlaylistFromQueueRequest,
+    VideoInfo,
+    VideoListResponse,
 )
 
 router = APIRouter(prefix="/api", tags=["api"])
@@ -273,9 +276,14 @@ def update_job_metadata(job_id: str, req: JobUpdateMetadataRequest):
         updates["title"] = req.title.strip()
     if req.artist is not None:
         updates["artist"] = req.artist.strip() if req.artist.strip() else None
+    if req.video_id is not None:
+        updates["video_id"] = req.video_id.strip() if req.video_id.strip() else "bg001.mp4"
+    if req.video_offset_seconds is not None:
+        updates["video_offset_seconds"] = max(0.0, float(req.video_offset_seconds))
 
     updated_job = job_manager.update_job(job_id, **updates)
     return updated_job
+
 
 
 @router.get("/jobs/{job_id}/stems/{stem_type}")
@@ -596,5 +604,87 @@ def create_playlist_from_queue(req: PlaylistFromQueueRequest):
         return playlist_manager.get_playlist_detail(pl.id, job_mgr=job_manager)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# Background Video Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/videos", response_model=VideoListResponse)
+def list_videos():
+    """Lists all available background video assets in /data/videos/."""
+    videos = video_manager.list_videos()
+    return VideoListResponse(total=len(videos), videos=videos)
+
+@router.post("/videos/upload", response_model=VideoInfo, status_code=status.HTTP_201_CREATED)
+async def upload_video(file: UploadFile = File(...)):
+    """Uploads a new background video asset."""
+    content = await file.read()
+    try:
+        info = video_manager.save_video(file.filename, content)
+        return info
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+@router.get("/videos/{filename}")
+def stream_video(filename: str, request: Request):
+    """Streams a background video file with HTTP Range (Partial Content) support."""
+    path = video_manager.get_video_path(filename)
+    if not path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Video '{filename}' not found."
+        )
+
+    file_size = path.stat().st_size
+    content_type = video_manager.get_content_type(filename)
+    range_header = request.headers.get("range")
+
+    if range_header:
+        # Range header format: bytes=START-END
+        match = re.search(r"bytes=(\d+)-(\d*)", range_header)
+        if match:
+            start = int(match.group(1))
+            end = int(match.group(2)) if match.group(2) else file_size - 1
+            end = min(end, file_size - 1)
+            if start > end or start >= file_size:
+                raise HTTPException(
+                    status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE,
+                    headers={"Content-Range": f"bytes */{file_size}"}
+                )
+            content_length = end - start + 1
+
+            def chunk_generator():
+                with open(path, "rb") as f:
+                    f.seek(start)
+                    remaining = content_length
+                    while remaining > 0:
+                        chunk_size = min(64 * 1024, remaining)
+                        data = f.read(chunk_size)
+                        if not data:
+                            break
+                        remaining -= len(data)
+                        yield data
+
+            return StreamingResponse(
+                chunk_generator(),
+                status_code=status.HTTP_206_PARTIAL_CONTENT,
+                headers={
+                    "Content-Range": f"bytes {start}-{end}/{file_size}",
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(content_length),
+                    "Content-Type": content_type,
+                }
+            )
+
+    return FileResponse(
+        path,
+        media_type=content_type,
+        headers={"Accept-Ranges": "bytes"}
+    )
+
 
 

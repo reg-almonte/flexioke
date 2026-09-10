@@ -259,6 +259,30 @@ made while building the template itself.
 - approved_by: reg
 - notes: Version 0.3.1 fully approved, verified, and released with 161/161 passing tests. Includes in-modal previous/next navigation toolbar with dynamic track counter badge (TASK-0065), unsaved edits dirty guard intercepting navigation, close, and Esc with keyboard shortcuts (TASK-0066), standalone centralized modular SVG icon dictionary module (TASK-0067), comprehensive iconography overhaul and hotkey tooltips (TASK-0068), in-place cinema fullscreen stage layout with floating glassmorphism overlays and explicit exit button (TASK-0069), 3-second inactivity auto-hide engine with cursor suppression and stage shortcuts (TASK-0070), startup separation queue auto-pruning, HTML5 native Fullscreen API integration and autohide timer loop fix (BUG-0006), 100% transparent floating lyrics display, and stage card click play/pause. All tickets archived to docs/tickets/archive/v0.3.1/.
 
+## 2026-09-10 — Approved Requirements: Version 0.4.0 Video Backgrounds, Stage Geometry Controls & Side A/B Uploads
+- artifact: docs/requirements/version0.4.0.md
+- approved_by: user
+- notes: Approved requirements covering looping background video engine on karaoke stage with directory auto-discovery (/data/videos/) and per-song offset configuration, fullscreen lyrics stage geometry controls (width, height, vertical offset), and direct Side A / Side B dual-track upload mode with seamless vocal hot-swapping.
+
+## 2026-09-10 — Approved Functional Spec: Version 0.4.0 Video Backgrounds, Stage Geometry Controls & Side A/B Uploads
+- artifact: docs/specs/version0.4.0.md
+- approved_by: user
+- notes: Approved functional specification defining video auto-discovery and streaming REST endpoints, per-song video offset synchronization, fullscreen CSS custom property geometry controls, and Side A / Side B dual-track zero-separation ingestion with vocal stream hot-swapping.
+
+## 2026-09-10 — Approved ADR-0012: Native Video Streaming Engine, CSS Geometry Scaling & Dual-Stream Side A/B Ingestion
+- artifact: docs/design/ADR-0012-video-backgrounds-stage-geometry-and-side-ab.md
+- approved_by: user
+- notes: Approved Option 1 delivering FastAPI video directory auto-discovery & HTTP Range streaming, layered HTML5 karaoke stage video renderer with timecode offset synchronization, CSS custom property fullscreen geometry controls, and Side A / Side B dual-track direct ingestion with WebAudio vocal stream hot-swapping.
+
+## 2026-09-10 — Approved Ticket Breakdown: EPIC-0011 Video Backgrounds, Stage Geometry Controls & Side A/B Uploads
+- artifact: docs/tickets/EPIC-0011-video-backgrounds-stage-geometry-and-side-ab.md
+- approved_by: user
+- notes: Approved EPIC-0011 work breakdown comprising STORY-0034 to STORY-0036 and TASK-0071 to TASK-0075 covering video management backend & streaming endpoints (TASK-0071), karaoke stage video renderer & timecode sync (TASK-0072), fullscreen stage geometry CSS variables & settings sliders (TASK-0073), Side A/B direct ingestion & model extension (TASK-0074), and dual-stream WebAudio vocal hot-swapping & button state adaptation (TASK-0075), with mandatory human browser verification gates at each story milestone.
+
+
+
+
+
 
 
 
