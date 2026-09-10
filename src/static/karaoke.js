@@ -145,6 +145,10 @@ class KaraokeStageManager {
         this.backingStatusText = document.getElementById('karaoke-backing-status-text');
         this.volumeSlider = document.getElementById('karaoke-volume-slider');
 
+        // Video Background element & state
+        this.bgVideo = document.getElementById('karaoke-bg-video');
+        this.videoOffset = 0.0;
+
         this.currentJob = null;
         this.currentJobId = null;
         this.lyricsData = null;
@@ -499,6 +503,23 @@ class KaraokeStageManager {
             });
             resizeObs.observe(this.stageCard);
         }
+
+        // Listen for metadata updates (title, artist, video background, offset)
+        window.addEventListener('flexioke:metadata-updated', (e) => {
+            const job = e.detail;
+            if (job && this.currentJobId === job.job_id) {
+                this.currentJob = job;
+                const videoId = job.video_id || "bg001.mp4";
+                this.videoOffset = typeof job.video_offset_seconds === 'number' ? job.video_offset_seconds : (parseFloat(job.video_offset_seconds) || 0.0);
+                if (this.bgVideo) {
+                    const expectedSrc = `/api/videos/${encodeURIComponent(videoId)}`;
+                    if (!this.bgVideo.src.endsWith(expectedSrc)) {
+                        this.bgVideo.src = expectedSrc;
+                    }
+                }
+                this.updateStageHeader();
+            }
+        });
 
         // Time & Transport state check
         setInterval(() => this.onTimeCheck(), 100);
@@ -880,9 +901,46 @@ class KaraokeStageManager {
         if (this.stageContainer) {
             this.stageContainer.scrollTop = 0;
         }
+
+        // Initialize and synchronize background video
+        const videoId = job.video_id || "bg001.mp4";
+        this.videoOffset = typeof job.video_offset_seconds === 'number' ? job.video_offset_seconds : (parseFloat(job.video_offset_seconds) || 0.0);
+        if (this.bgVideo) {
+            this.bgVideo.src = `/api/videos/${encodeURIComponent(videoId)}`;
+            this.bgVideo.currentTime = this.videoOffset;
+        }
+
         this.syncVocalButtons();
         this.loadLyricsForJob(job.job_id);
         this.triggerIntroSplash(job, autoPlay);
+    }
+
+    syncVideoPlayback(audioTime, isAudioPlaying) {
+        if (!this.bgVideo || !this.bgVideo.duration || isNaN(this.bgVideo.duration)) {
+            if (this.bgVideo) {
+                if (isAudioPlaying && this.bgVideo.paused) {
+                    this.bgVideo.play().catch(() => {});
+                } else if (!isAudioPlaying && !this.bgVideo.paused) {
+                    this.bgVideo.pause();
+                }
+            }
+            return;
+        }
+
+        if (isAudioPlaying) {
+            if (this.bgVideo.paused) {
+                this.bgVideo.play().catch(() => {});
+            }
+            const expectedVideoTime = (audioTime + this.videoOffset) % this.bgVideo.duration;
+            const diff = Math.abs(this.bgVideo.currentTime - expectedVideoTime);
+            if (diff > 0.4) {
+                this.bgVideo.currentTime = expectedVideoTime;
+            }
+        } else {
+            if (!this.bgVideo.paused) {
+                this.bgVideo.pause();
+            }
+        }
     }
 
     triggerIntroSplash(job, autoPlay = true) {
@@ -1145,6 +1203,9 @@ class KaraokeStageManager {
                 }
             }
         }
+
+        // Sync video playback with audio timecode and state
+        this.syncVideoPlayback(currentTime, this.isPlaying);
 
         if (!this.lyricsData || !this.lyricsData.hasTimestamps) {
             return;

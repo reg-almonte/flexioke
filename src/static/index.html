@@ -510,9 +510,11 @@
                 
                 <!-- Center Stage Lyrics Card -->
                 <section id="karaoke-stage-card" class="bg-surface-900 border border-slate-800/90 rounded-2xl p-6 shadow-2xl space-y-4 min-h-[560px] flex flex-col justify-between relative overflow-hidden transition-all">
+                    <!-- Karaoke Stage Background Video -->
+                    <video id="karaoke-bg-video" class="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-40 transition-opacity duration-500" loop muted playsinline preload="auto"></video>
                     
                     <!-- Karaoke Track Info Header -->
-                    <div id="karaoke-top-header" class="karaoke-cinema-top-header flex items-center justify-between border-b border-slate-800 pb-3 gap-4">
+                    <div id="karaoke-top-header" class="relative z-10 karaoke-cinema-top-header flex items-center justify-between border-b border-slate-800 pb-3 gap-4">
                         <!-- Left: Now Singing -->
                         <div id="karaoke-now-singing-container" class="min-w-0 max-w-[55%] flex items-center gap-2 overflow-hidden shrink">
                             <span class="text-[10px] uppercase font-bold tracking-widest text-brand-400 shrink-0">Now Singing:</span>
@@ -567,14 +569,14 @@
                     </div>
 
                     <!-- Center Stage Scrolling Lyrics Container -->
-                    <div id="karaoke-lyrics-stage" class="flex-1 overflow-y-auto px-3 sm:px-4 py-8 my-3 sm:my-4 max-h-[350px] bg-transparent border-0 shadow-none">
+                    <div id="karaoke-lyrics-stage" class="relative z-10 flex-1 overflow-y-auto px-3 sm:px-4 py-8 my-3 sm:my-4 max-h-[350px] bg-transparent border-0 shadow-none">
                         <div id="karaoke-empty-state" class="text-center py-20 text-slate-500 text-sm italic">
                             Select a song from the library to start karaoke!
                         </div>
                     </div>
 
                     <!-- Karaoke Quick Vocal Toggles & Transport Bar -->
-                    <div id="karaoke-transport-bar" class="karaoke-cinema-bottom-bar bg-surface-950 border border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-4">
+                    <div id="karaoke-transport-bar" class="relative z-10 karaoke-cinema-bottom-bar bg-surface-950 border border-slate-800/80 rounded-xl p-3 flex flex-wrap items-center justify-between gap-4">
                         
                         <!-- Left Cluster: Play/Pause, Expanding Volume, Timecode -->
                         <div class="flex items-center gap-3">
@@ -671,6 +673,26 @@
                 <div class="space-y-1">
                     <label for="lyrics-edit-artist" class="text-xs text-slate-300 font-medium">Artist Name</label>
                     <input type="text" id="lyrics-edit-artist" placeholder="e.g. Queen, Adele, etc." class="w-full bg-surface-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-brand-500 transition">
+                </div>
+            </div>
+
+            <!-- Video Background & Offset Settings -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-2.5 bg-surface-950/80 border border-slate-800/80 rounded-xl">
+                <div class="space-y-1">
+                    <label for="lyrics-modal-video-select" class="text-xs text-slate-300 font-medium flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-brand-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+                        Stage Video Background
+                    </label>
+                    <select id="lyrics-modal-video-select" class="w-full bg-surface-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-brand-500 transition">
+                        <option value="bg001.mp4">bg001.mp4 (Default)</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="lyrics-modal-video-offset" class="text-xs text-slate-300 font-medium flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Video Start Offset (sec)
+                    </label>
+                    <input type="number" id="lyrics-modal-video-offset" min="0" step="0.1" placeholder="0.0" class="w-full bg-surface-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 font-mono focus:outline-none focus:border-brand-500 transition">
                 </div>
             </div>
 

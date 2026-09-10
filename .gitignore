@@ -9,6 +9,7 @@ venv/
 env/
 data/jobs/
 data/models/
+data/videos/
 data/*.zip
 data/*.json
 data/*.tmp*

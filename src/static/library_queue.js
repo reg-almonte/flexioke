@@ -30,6 +30,9 @@ class SongLibraryManager {
         this.lyricsShiftAlert = document.getElementById('lyrics-shift-alert');
         this.lyricsCustomShiftInput = document.getElementById('lyrics-custom-shift-input');
         this.lyricsCustomShiftBtn = document.getElementById('lyrics-custom-shift-btn');
+        this.lyricsModalVideoSelect = document.getElementById('lyrics-modal-video-select');
+        this.lyricsModalVideoOffset = document.getElementById('lyrics-modal-video-offset');
+        this.availableVideos = [];
         this.activeLyricsJobId = null;
 
         // In-modal navigation elements & state
@@ -40,7 +43,7 @@ class SongLibraryManager {
             items: [],
             activeIndex: -1,
             isDirty: false,
-            baseline: { title: '', artist: '', lyrics: '' }
+            baseline: { title: '', artist: '', lyrics: '', video_id: 'bg001.mp4', video_offset_seconds: 0.0 }
         };
 
         // Play interruption confirmation modal
@@ -189,6 +192,15 @@ class SongLibraryManager {
         if (this.lyricsTextarea) {
             this.lyricsTextarea.addEventListener('input', onModalFieldInput);
         }
+        if (this.lyricsModalVideoSelect) {
+            this.lyricsModalVideoSelect.addEventListener('change', onModalFieldInput);
+        }
+        if (this.lyricsModalVideoOffset) {
+            this.lyricsModalVideoOffset.addEventListener('input', onModalFieldInput);
+        }
+
+        // Fetch available background videos for dropdown
+        this.fetchAvailableVideos();
 
         // Keyboard navigation and shortcut listener
         window.addEventListener('keydown', (e) => {
@@ -596,12 +608,64 @@ class SongLibraryManager {
         const title = this.lyricsEditTitle ? this.lyricsEditTitle.value : '';
         const artist = this.lyricsEditArtist ? this.lyricsEditArtist.value : '';
         const lyrics = this.lyricsTextarea ? this.lyricsTextarea.value : '';
-        const baseline = this.modalContext.baseline || { title: '', artist: '', lyrics: '' };
+        const videoId = this.lyricsModalVideoSelect ? this.lyricsModalVideoSelect.value : 'bg001.mp4';
+        const offset = this.lyricsModalVideoOffset ? (parseFloat(this.lyricsModalVideoOffset.value) || 0.0) : 0.0;
+
+        const baseline = this.modalContext.baseline || { title: '', artist: '', lyrics: '', video_id: 'bg001.mp4', video_offset_seconds: 0.0 };
+        const baseVideoId = baseline.video_id || 'bg001.mp4';
+        const baseOffset = (typeof baseline.video_offset_seconds === 'number') ? baseline.video_offset_seconds : (parseFloat(baseline.video_offset_seconds) || 0.0);
+
         return (
             title !== (baseline.title || '') ||
             artist !== (baseline.artist || '') ||
-            lyrics !== (baseline.lyrics || '')
+            lyrics !== (baseline.lyrics || '') ||
+            videoId !== baseVideoId ||
+            Math.abs(offset - baseOffset) > 0.001
         );
+    }
+
+    async fetchAvailableVideos() {
+        try {
+            const resp = await fetch('/api/videos');
+            if (resp.ok) {
+                const data = await resp.json();
+                this.availableVideos = data.videos || [];
+            }
+        } catch (err) {
+            console.error("Failed to fetch available videos:", err);
+        }
+    }
+
+    async populateVideoDropdown(selectedVideoId = "bg001.mp4") {
+        if (!this.lyricsModalVideoSelect) return;
+        if (!this.availableVideos || this.availableVideos.length === 0) {
+            await this.fetchAvailableVideos();
+        }
+
+        const videos = (this.availableVideos && this.availableVideos.length > 0)
+            ? this.availableVideos
+            : [{ filename: "bg001.mp4" }];
+
+        this.lyricsModalVideoSelect.innerHTML = "";
+        let found = false;
+        videos.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.filename;
+            opt.textContent = v.filename === "bg001.mp4" ? "bg001.mp4 (Default)" : v.filename;
+            if (v.filename === selectedVideoId) {
+                opt.selected = true;
+                found = true;
+            }
+            this.lyricsModalVideoSelect.appendChild(opt);
+        });
+
+        if (!found && selectedVideoId) {
+            const customOpt = document.createElement('option');
+            customOpt.value = selectedVideoId;
+            customOpt.textContent = selectedVideoId;
+            customOpt.selected = true;
+            this.lyricsModalVideoSelect.appendChild(customOpt);
+        }
     }
 
     hasUnsavedChanges() {
@@ -670,10 +734,15 @@ class SongLibraryManager {
 
         const currentTitle = job.title || "";
         const currentArtist = job.artist || "";
+        const currentVideoId = job.video_id || "bg001.mp4";
+        const currentOffset = (typeof job.video_offset_seconds === 'number') ? job.video_offset_seconds : (parseFloat(job.video_offset_seconds) || 0.0);
+
         this.modalContext.baseline = {
             title: currentTitle,
             artist: currentArtist,
-            lyrics: ""
+            lyrics: "",
+            video_id: currentVideoId,
+            video_offset_seconds: currentOffset
         };
         this.modalContext.isDirty = false;
 
@@ -686,6 +755,11 @@ class SongLibraryManager {
         if (this.lyricsEditArtist) {
             this.lyricsEditArtist.value = currentArtist;
         }
+        if (this.lyricsModalVideoOffset) {
+            this.lyricsModalVideoOffset.value = currentOffset;
+        }
+        await this.populateVideoDropdown(currentVideoId);
+
         if (this.lyricsTextarea) {
             this.lyricsTextarea.value = "Loading lyrics...";
         }
@@ -869,41 +943,46 @@ class SongLibraryManager {
         const text = this.lyricsTextarea.value;
         const newTitle = this.lyricsEditTitle ? this.lyricsEditTitle.value.trim() : "";
         const newArtist = this.lyricsEditArtist ? this.lyricsEditArtist.value.trim() : "";
+        const newVideoId = this.lyricsModalVideoSelect ? this.lyricsModalVideoSelect.value : "bg001.mp4";
+        const newOffset = this.lyricsModalVideoOffset ? (parseFloat(this.lyricsModalVideoOffset.value) || 0.0) : 0.0;
 
         if (this.saveLyricsBtn) this.saveLyricsBtn.disabled = true;
         if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saving...";
 
         try {
-            // Save metadata (title & artist) if title is provided
+            // Save metadata (title, artist, video_id, video_offset_seconds)
             let updatedJob = null;
+            const metaPayload = {
+                video_id: newVideoId,
+                video_offset_seconds: newOffset
+            };
             if (newTitle) {
-                const metaResp = await fetch(`/api/jobs/${this.activeLyricsJobId}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: newTitle,
-                        artist: newArtist || null
-                    })
-                });
-                if (metaResp.ok) {
-                    updatedJob = await metaResp.json();
-                    if (this.jobs && Array.isArray(this.jobs)) {
-                        const idx = this.jobs.findIndex(j => j.job_id === this.activeLyricsJobId);
-                        if (idx !== -1 && updatedJob) {
-                            this.jobs[idx] = updatedJob;
-                            this.render(this.jobs);
-                        }
+                metaPayload.title = newTitle;
+                metaPayload.artist = newArtist || null;
+            }
+            const metaResp = await fetch(`/api/jobs/${this.activeLyricsJobId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(metaPayload)
+            });
+            if (metaResp.ok) {
+                updatedJob = await metaResp.json();
+                if (this.jobs && Array.isArray(this.jobs)) {
+                    const idx = this.jobs.findIndex(j => j.job_id === this.activeLyricsJobId);
+                    if (idx !== -1 && updatedJob) {
+                        this.jobs[idx] = updatedJob;
+                        this.render(this.jobs);
                     }
-                    if (this.modalContext.items && Array.isArray(this.modalContext.items)) {
-                        const mIdx = this.modalContext.items.findIndex(j => (j.job_id || j.id) === this.activeLyricsJobId);
-                        if (mIdx !== -1 && updatedJob) {
-                            this.modalContext.items[mIdx] = updatedJob;
-                        }
-                    }
-                    window.dispatchEvent(new CustomEvent('flexioke:metadata-updated', {
-                        detail: updatedJob
-                    }));
                 }
+                if (this.modalContext.items && Array.isArray(this.modalContext.items)) {
+                    const mIdx = this.modalContext.items.findIndex(j => (j.job_id || j.id) === this.activeLyricsJobId);
+                    if (mIdx !== -1 && updatedJob) {
+                        this.modalContext.items[mIdx] = updatedJob;
+                    }
+                }
+                window.dispatchEvent(new CustomEvent('flexioke:metadata-updated', {
+                    detail: updatedJob
+                }));
             }
 
             const resp = await fetch(`/api/jobs/${this.activeLyricsJobId}/lyrics`, {
@@ -917,7 +996,9 @@ class SongLibraryManager {
                 this.modalContext.baseline = {
                     title: newTitle,
                     artist: newArtist,
-                    lyrics: text
+                    lyrics: text,
+                    video_id: newVideoId,
+                    video_offset_seconds: newOffset
                 };
                 this.modalContext.isDirty = false;
                 if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saved!";
@@ -927,7 +1008,9 @@ class SongLibraryManager {
                         lyrics: text,
                         has_timestamps: data.has_timestamps,
                         title: newTitle,
-                        artist: newArtist
+                        artist: newArtist,
+                        video_id: newVideoId,
+                        video_offset_seconds: newOffset
                     }
                 }));
                 setTimeout(() => this.closeLyricsModal(true), 600);

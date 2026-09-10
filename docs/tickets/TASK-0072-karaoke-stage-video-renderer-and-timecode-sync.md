@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-10
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0072: Karaoke Stage Video Renderer, Per-Song Offset & Modal Selector
@@ -18,10 +18,10 @@ Build the frontend video renderer and synchronization engine:
 - Add manual verification instructions for browser testing.
 
 ## Acceptance Criteria
-- [ ] Video renders smoothly behind floating lyrics on `#karaoke-stage-card`.
-- [ ] Video starts, pauses, seeks, and loops synchronously with song audio.
-- [ ] Video selection and start offset timestamp save and reload per song.
-- [ ] Manual test in browser verifies visual quality and looping playback.
+- [x] Video renders smoothly behind floating lyrics on `#karaoke-stage-card`.
+- [x] Video starts, pauses, seeks, and loops synchronously with song audio.
+- [x] Video selection and start offset timestamp save and reload per song.
+- [x] Manual test in browser verifies visual quality and looping playback.
 
 ## Blocked by
 - `TASK-0071`
