@@ -2,7 +2,7 @@
 status: approved
 approved_by: user
 approved_at: 2026-09-10
-implementation: in-review
+implementation: completed
 ---
 
 # TASK-0071: Video Manager Service, Auto-Discovery & Streaming Endpoints

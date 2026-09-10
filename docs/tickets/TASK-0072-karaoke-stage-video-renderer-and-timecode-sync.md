@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-10
-implementation: in-review
+implementation: completed
 ---
 
 # TASK-0072: Karaoke Stage Video Renderer, Per-Song Offset & Modal Selector

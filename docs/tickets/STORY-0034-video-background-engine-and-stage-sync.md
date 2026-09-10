@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-10
-implementation: in-review
+implementation: completed
 ---
 
 
@@ -20,7 +20,7 @@ Provides visual ambience for the karaoke stage by playing muted, looping backgro
 - [x] Video elements mount in `#karaoke-stage-card` behind floating lyrics with proper layering and opacity.
 - [x] Video plays, pauses, seeks, and seamlessly loops in lockstep with song audio playback.
 - [x] Song Details modal allows selecting video assets and configuring start offset timestamps.
-- [ ] **Mandatory Story Milestone Gate:** Requires explicit human manual verification in the browser before advancing to subsequent stories.
+- [x] **Mandatory Story Milestone Gate:** Requires explicit human manual verification in the browser before advancing to subsequent stories.
 
 ## Tasks
 - [x] TASK-0071: Video Manager Service, Auto-Discovery & Streaming Endpoints
