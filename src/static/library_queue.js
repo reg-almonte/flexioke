@@ -167,6 +167,16 @@ class SongLibraryManager {
                 }
             });
         }
+        // Lyrics clear button
+        if (this.lyricsClearBtn) {
+            this.lyricsClearBtn.addEventListener('click', () => {
+                if (this.lyricsTextarea) {
+                    this.lyricsTextarea.value = '';
+                    this.updateSaveButtonState();
+                }
+            });
+        }
+
         if (this.fetchLrclibBtn) {
             this.fetchLrclibBtn.addEventListener('click', () => this.handleFetchLrclib());
         }
@@ -181,7 +191,7 @@ class SongLibraryManager {
 
         // Real-time input tracking for dirty changes
         const onModalFieldInput = () => {
-            this.modalContext.isDirty = this.isModalDirty();
+            this.updateSaveButtonState();
         };
         if (this.lyricsEditTitle) {
             this.lyricsEditTitle.addEventListener('input', onModalFieldInput);
@@ -624,6 +634,14 @@ class SongLibraryManager {
         );
     }
 
+    updateSaveButtonState() {
+        const dirty = this.isModalDirty();
+        this.modalContext.isDirty = dirty;
+        if (this.saveLyricsBtn) {
+            this.saveLyricsBtn.disabled = !dirty;
+        }
+    }
+
     async fetchAvailableVideos() {
         try {
             const resp = await fetch('/api/videos');
@@ -745,6 +763,9 @@ class SongLibraryManager {
             video_offset_seconds: currentOffset
         };
         this.modalContext.isDirty = false;
+        if (this.saveLyricsBtn) {
+            this.saveLyricsBtn.disabled = true;
+        }
 
         if (this.lyricsModalTitle) {
             this.lyricsModalTitle.textContent = currentTitle || "Untitled Song";
@@ -796,7 +817,7 @@ class SongLibraryManager {
                 if (this.lyricsTextarea && this.activeLyricsJobId === targetId) {
                     this.lyricsTextarea.value = fetchedLyrics;
                     this.modalContext.baseline.lyrics = fetchedLyrics;
-                    this.modalContext.isDirty = this.isModalDirty();
+                    this.updateSaveButtonState();
                 }
             }
         } catch (err) {
@@ -804,7 +825,7 @@ class SongLibraryManager {
             if (this.lyricsTextarea && this.activeLyricsJobId === targetId) {
                 this.lyricsTextarea.value = "";
                 this.modalContext.baseline.lyrics = "";
-                this.modalContext.isDirty = this.isModalDirty();
+                this.updateSaveButtonState();
             }
         }
     }
@@ -844,6 +865,7 @@ class SongLibraryManager {
         this.lyricsTextarea.value = result.text;
         const sign = deltaSeconds >= 0 ? `+${deltaSeconds.toFixed(2)}` : `${deltaSeconds.toFixed(2)}`;
         this.showLyricsShiftAlert(`✓ Shifted timestamps by ${sign}s (${result.count} line${result.count === 1 ? '' : 's'} updated). Click "Save Changes" to apply.`, "success");
+        this.updateSaveButtonState();
     }
 
     showLyricsShiftAlert(message, type = "info") {
@@ -892,6 +914,7 @@ class SongLibraryManager {
                 if (data.found && data.lyrics) {
                     if (this.lyricsTextarea) {
                         this.lyricsTextarea.value = data.lyrics;
+                        this.updateSaveButtonState();
                     }
                     const typeMsg = data.has_timestamps ? "Synchronized (.lrc)" : "Plain";
                     this.showLrclibAlert(`✓ ${typeMsg} lyrics loaded from LRCLIB! Click "Save Changes" to apply.`, "success");
@@ -980,6 +1003,9 @@ class SongLibraryManager {
                         this.modalContext.items[mIdx] = updatedJob;
                     }
                 }
+                if (this.lyricsModalTitle) {
+                    this.lyricsModalTitle.textContent = updatedJob.title || newTitle || "Untitled Song";
+                }
                 window.dispatchEvent(new CustomEvent('flexioke:metadata-updated', {
                     detail: updatedJob
                 }));
@@ -994,14 +1020,21 @@ class SongLibraryManager {
             if (resp.ok) {
                 const data = await resp.json();
                 this.modalContext.baseline = {
-                    title: newTitle,
-                    artist: newArtist,
+                    title: this.lyricsEditTitle ? this.lyricsEditTitle.value : newTitle,
+                    artist: this.lyricsEditArtist ? this.lyricsEditArtist.value : newArtist,
                     lyrics: text,
                     video_id: newVideoId,
                     video_offset_seconds: newOffset
                 };
                 this.modalContext.isDirty = false;
-                if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Saved!";
+                if (this.lyricsSaveStatus) {
+                    this.lyricsSaveStatus.textContent = "✓ Saved!";
+                    setTimeout(() => {
+                        if (this.lyricsSaveStatus && this.lyricsSaveStatus.textContent === "✓ Saved!") {
+                            this.lyricsSaveStatus.textContent = "";
+                        }
+                    }, 3000);
+                }
                 window.dispatchEvent(new CustomEvent('flexioke:lyrics-updated', {
                     detail: {
                         job_id: this.activeLyricsJobId,
@@ -1013,15 +1046,18 @@ class SongLibraryManager {
                         video_offset_seconds: newOffset
                     }
                 }));
-                setTimeout(() => this.closeLyricsModal(true), 600);
+                // Do not close subwindow; disable Save Changes button
+                if (this.saveLyricsBtn) {
+                    this.saveLyricsBtn.disabled = true;
+                }
             } else {
                 if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Save failed";
+                this.updateSaveButtonState();
             }
         } catch (err) {
             console.error("Error saving lyrics:", err);
             if (this.lyricsSaveStatus) this.lyricsSaveStatus.textContent = "Error saving";
-        } finally {
-            if (this.saveLyricsBtn) this.saveLyricsBtn.disabled = false;
+            this.updateSaveButtonState();
         }
     }
 
