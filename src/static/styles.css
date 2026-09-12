@@ -1,3 +1,9 @@
+:root {
+    --karaoke-fullscreen-stage-width: 98%;
+    --karaoke-fullscreen-stage-max-height: 56vh;
+    --karaoke-fullscreen-stage-v-offset: 0%;
+}
+
 /* Custom Scrollbars */
 .custom-scrollbar::-webkit-scrollbar {
     width: 5px;
@@ -124,13 +130,13 @@ input[type="range"]::-webkit-slider-thumb:hover {
 #karaoke-stage-card:fullscreen #karaoke-lyrics-stage,
 #karaoke-stage-card:-webkit-full-screen #karaoke-lyrics-stage {
     position: absolute !important;
-    top: 50% !important;
+    top: calc(50% + var(--karaoke-fullscreen-stage-v-offset, 0%)) !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: 92% !important;
-    max-width: 64rem !important;
-    height: 56vh !important;
-    max-height: 540px !important;
+    width: var(--karaoke-fullscreen-stage-width, 98%) !important;
+    max-width: var(--karaoke-fullscreen-stage-width, 98%) !important;
+    height: var(--karaoke-fullscreen-stage-max-height, 56vh) !important;
+    max-height: var(--karaoke-fullscreen-stage-max-height, 56vh) !important;
     padding: 2.5rem 1.5rem !important;
     background: transparent !important;
     background-color: transparent !important;

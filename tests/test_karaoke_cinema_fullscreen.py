@@ -192,8 +192,8 @@ def test_lyrics_stage_margins_and_countdown_clearance():
     css = resp_css.text
 
     # Fullscreen lyrics stage centered box and maximized width
-    assert "top: 50%" in css and "translate(-50%, -50%)" in css
-    assert "max-width: 98%" in css
+    assert ("top: calc(50%" in css or "top: 50%" in css) and "translate(-50%, -50%)" in css
+    assert "max-width: var(--karaoke-fullscreen-stage-width" in css or "max-width: 98%" in css
     assert "56vh" in css or "max-height: 540px" in css
 
     resp_html = client.get("/")

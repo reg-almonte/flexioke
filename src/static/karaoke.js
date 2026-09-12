@@ -108,6 +108,14 @@ class KaraokeStageManager {
         this.settingCountdownThresholdInput = document.getElementById('settings-countdown-threshold');
         this.settingCountdownThresholdDisplay = document.getElementById('settings-countdown-threshold-display');
 
+        // Fullscreen Stage Geometry Setting Elements
+        this.settingFullscreenWidthInput = document.getElementById('settings-fullscreen-width');
+        this.settingFullscreenWidthDisplay = document.getElementById('settings-fullscreen-width-display');
+        this.settingFullscreenHeightInput = document.getElementById('settings-fullscreen-height');
+        this.settingFullscreenHeightDisplay = document.getElementById('settings-fullscreen-height-display');
+        this.settingFullscreenVOffsetInput = document.getElementById('settings-fullscreen-v-offset');
+        this.settingFullscreenVOffsetDisplay = document.getElementById('settings-fullscreen-v-offset-display');
+
         // Default Config & State
         this.defaultConfig = {
             introSplashDuration: 3,
@@ -115,7 +123,10 @@ class KaraokeStageManager {
             activeHighlightGlowColor: '#06b6d4',
             activeHighlightFillColor: '#0891b2',
             baseFontSizePx: 20,
-            activeFontSizePx: 24
+            activeFontSizePx: 24,
+            fullscreenStageWidth: 98,
+            fullscreenStageHeight: 56,
+            fullscreenStageVOffset: 0
         };
         this.config = { ...this.defaultConfig };
 
@@ -237,6 +248,30 @@ class KaraokeStageManager {
                 const safeVal = isNaN(val) ? 3 : Math.max(3, Math.min(5, val));
                 if (this.settingCountdownThresholdDisplay) this.settingCountdownThresholdDisplay.textContent = `${safeVal}s`;
                 this.saveSettings({ countdownThreshold: safeVal });
+            });
+        }
+        if (this.settingFullscreenWidthInput) {
+            this.settingFullscreenWidthInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                const safeVal = isNaN(val) ? 98 : Math.max(60, Math.min(100, val));
+                if (this.settingFullscreenWidthDisplay) this.settingFullscreenWidthDisplay.textContent = `${safeVal}%`;
+                this.saveSettings({ fullscreenStageWidth: safeVal });
+            });
+        }
+        if (this.settingFullscreenHeightInput) {
+            this.settingFullscreenHeightInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                const safeVal = isNaN(val) ? 56 : Math.max(30, Math.min(80, val));
+                if (this.settingFullscreenHeightDisplay) this.settingFullscreenHeightDisplay.textContent = `${safeVal}vh`;
+                this.saveSettings({ fullscreenStageHeight: safeVal });
+            });
+        }
+        if (this.settingFullscreenVOffsetInput) {
+            this.settingFullscreenVOffsetInput.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value, 10);
+                const safeVal = isNaN(val) ? 0 : Math.max(-20, Math.min(20, val));
+                if (this.settingFullscreenVOffsetDisplay) this.settingFullscreenVOffsetDisplay.textContent = `${safeVal}%`;
+                this.saveSettings({ fullscreenStageVOffset: safeVal });
             });
         }
 
@@ -651,6 +686,24 @@ class KaraokeStageManager {
         const countdownThresh = (typeof this.config.countdownThreshold !== 'undefined') ? parseInt(this.config.countdownThreshold, 10) : 3;
         if (this.settingCountdownThresholdInput) this.settingCountdownThresholdInput.value = countdownThresh;
         if (this.settingCountdownThresholdDisplay) this.settingCountdownThresholdDisplay.textContent = `${countdownThresh}s`;
+
+        const stageWidthPct = (typeof this.config.fullscreenStageWidth !== 'undefined') ? parseInt(this.config.fullscreenStageWidth, 10) : 98;
+        const safeWidthPct = isNaN(stageWidthPct) ? 98 : Math.max(60, Math.min(100, stageWidthPct));
+        const stageHeightVh = (typeof this.config.fullscreenStageHeight !== 'undefined') ? parseInt(this.config.fullscreenStageHeight, 10) : 56;
+        const safeHeightVh = isNaN(stageHeightVh) ? 56 : Math.max(30, Math.min(80, stageHeightVh));
+        const stageVOffsetPct = (typeof this.config.fullscreenStageVOffset !== 'undefined') ? parseInt(this.config.fullscreenStageVOffset, 10) : 0;
+        const safeVOffsetPct = isNaN(stageVOffsetPct) ? 0 : Math.max(-20, Math.min(20, stageVOffsetPct));
+
+        document.documentElement.style.setProperty('--karaoke-fullscreen-stage-width', `${safeWidthPct}%`);
+        document.documentElement.style.setProperty('--karaoke-fullscreen-stage-max-height', `${safeHeightVh}vh`);
+        document.documentElement.style.setProperty('--karaoke-fullscreen-stage-v-offset', `${safeVOffsetPct}%`);
+
+        if (this.settingFullscreenWidthInput) this.settingFullscreenWidthInput.value = safeWidthPct;
+        if (this.settingFullscreenWidthDisplay) this.settingFullscreenWidthDisplay.textContent = `${safeWidthPct}%`;
+        if (this.settingFullscreenHeightInput) this.settingFullscreenHeightInput.value = safeHeightVh;
+        if (this.settingFullscreenHeightDisplay) this.settingFullscreenHeightDisplay.textContent = `${safeHeightVh}vh`;
+        if (this.settingFullscreenVOffsetInput) this.settingFullscreenVOffsetInput.value = safeVOffsetPct;
+        if (this.settingFullscreenVOffsetDisplay) this.settingFullscreenVOffsetDisplay.textContent = `${safeVOffsetPct}%`;
 
         if (this.lineElements && this.lineElements.length > 0) {
             this.lineElements.forEach((el, idx) => {

@@ -861,7 +861,7 @@
 
     <!-- Karaoke Stage Settings Modal -->
     <div id="karaoke-settings-modal" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 hidden">
-        <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+        <div class="bg-surface-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-brand-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -931,6 +931,43 @@
                     </div>
                     <input type="range" id="settings-active-font-size" min="16" max="28" step="1" value="24" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
                     <p class="text-[10px] text-slate-500">Font size for the currently active/sung lyric line (16px - 28px).</p>
+                </div>
+
+                <!-- Fullscreen Stage Geometry (Width, Height, Vertical Offset) -->
+                <div class="pt-3 border-t border-slate-800 space-y-3">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>📐</span> Fullscreen Stage Geometry
+                    </div>
+
+                    <!-- Fullscreen Stage Width -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-slate-300">
+                            <label for="settings-fullscreen-width" class="font-medium">Stage Width</label>
+                            <span id="settings-fullscreen-width-display" class="font-mono text-brand-400 font-semibold">98%</span>
+                        </div>
+                        <input type="range" id="settings-fullscreen-width" min="60" max="100" step="1" value="98" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                        <p class="text-[10px] text-slate-500">Lyrics stage width scaling in fullscreen mode (60% – 100%).</p>
+                    </div>
+
+                    <!-- Fullscreen Stage Height -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-slate-300">
+                            <label for="settings-fullscreen-height" class="font-medium">Stage Height (Max Ceiling)</label>
+                            <span id="settings-fullscreen-height-display" class="font-mono text-brand-400 font-semibold">56vh</span>
+                        </div>
+                        <input type="range" id="settings-fullscreen-height" min="30" max="80" step="1" value="56" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                        <p class="text-[10px] text-slate-500">Maximum vertical height for lyrics container in fullscreen (30vh – 80vh).</p>
+                    </div>
+
+                    <!-- Fullscreen Vertical Offset -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-slate-300">
+                            <label for="settings-fullscreen-v-offset" class="font-medium">Vertical Center Offset</label>
+                            <span id="settings-fullscreen-v-offset-display" class="font-mono text-brand-400 font-semibold">0%</span>
+                        </div>
+                        <input type="range" id="settings-fullscreen-v-offset" min="-20" max="20" step="1" value="0" class="w-full accent-brand-500 bg-surface-950 rounded-lg cursor-pointer">
+                        <p class="text-[10px] text-slate-500">Adjust vertical center position up/down on external displays (-20% to +20%).</p>
+                    </div>
                 </div>
             </div>
 
