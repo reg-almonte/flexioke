@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-10
-implementation: in-review
+implementation: completed
 ---
 
 # TASK-0073: Fullscreen Geometry CSS Variables & Stage Settings Sliders
