@@ -20,7 +20,7 @@ Provides a direct dual-track upload flow for pre-separated studio audio files: S
 - [x] Lead Vocal button hot-swaps between Side A and Side B in lockstep with zero latency or desync.
 - [x] Single-sided tracks gracefully lock the Lead Vocal toggle (`Lead: OFF (Side B Only)` or `Lead: ON (Side A Only)`).
 - [x] Backing vocal toggle is locked to `Backing: N/A` for Side A/B songs.
-- [ ] **Mandatory Story Milestone Gate:** Requires explicit human manual verification in the browser before completing the epic.
+- [x] **Mandatory Story Milestone Gate:** Requires explicit human manual verification in the browser before completing the epic.
 
 ## Tasks
 - [x] TASK-0074: Side A/B Ingestion Endpoints & Job Model Extension
