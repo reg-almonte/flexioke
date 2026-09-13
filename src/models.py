@@ -16,6 +16,7 @@ class SourceType(str, Enum):
     UPLOAD = "upload"
     YOUTUBE = "youtube"
     URL = "url"
+    SIDE_AB = "side_ab"
 
 class JobRecord(BaseModel):
     job_id: str

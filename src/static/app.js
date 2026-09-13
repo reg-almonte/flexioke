@@ -125,20 +125,156 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentActiveJobId = null;
     const trackedJobIds = new Set();
 
-    // --- Tab Switching ---
-    if (tabUploadBtn && tabUrlBtn && tabUploadContent && tabUrlContent) {
-        tabUploadBtn.addEventListener('click', () => {
-            tabUploadBtn.className = "flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5";
-            tabUrlBtn.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5";
-            tabUploadContent.classList.remove('hidden');
-            tabUrlContent.classList.add('hidden');
-        });
+    const tabSideAbBtn = document.getElementById('tab-side-ab-btn');
+    const tabSideAbContent = document.getElementById('tab-side-ab-content');
 
-        tabUrlBtn.addEventListener('click', () => {
-            tabUrlBtn.className = "flex-1 py-2 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1.5";
-            tabUploadBtn.className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1.5";
-            tabUrlContent.classList.remove('hidden');
-            tabUploadContent.classList.add('hidden');
+    const sideBDropzone = document.getElementById('side-b-dropzone');
+    const sideBFileInput = document.getElementById('side-b-file-input');
+    const sideBBadge = document.getElementById('side-b-badge');
+    const sideADropzone = document.getElementById('side-a-dropzone');
+    const sideAFileInput = document.getElementById('side-a-file-input');
+    const sideABadge = document.getElementById('side-a-badge');
+    const sideAbTitleInput = document.getElementById('side-ab-title-input');
+    const sideAbArtistInput = document.getElementById('side-ab-artist-input');
+    const submitSideAbBtn = document.getElementById('submit-side-ab-btn');
+
+    let selectedSideBFile = null;
+    let selectedSideAFile = null;
+
+    // --- Tab Switching ---
+    const switchTab = (activeTab) => {
+        const tabs = [
+            { btn: tabUploadBtn, content: tabUploadContent, key: 'upload' },
+            { btn: tabSideAbBtn, content: tabSideAbContent, key: 'side_ab' },
+            { btn: tabUrlBtn, content: tabUrlContent, key: 'url' }
+        ];
+        tabs.forEach(t => {
+            if (!t.btn || !t.content) return;
+            if (t.key === activeTab) {
+                t.btn.className = "flex-1 py-1.5 rounded-lg bg-brand-600 text-white font-semibold transition shadow-sm flex items-center justify-center gap-1 text-[11px]";
+                t.content.classList.remove('hidden');
+            } else {
+                t.btn.className = "flex-1 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center justify-center gap-1 text-[11px]";
+                t.content.classList.add('hidden');
+            }
+        });
+    };
+
+    if (tabUploadBtn) tabUploadBtn.addEventListener('click', () => switchTab('upload'));
+    if (tabSideAbBtn) tabSideAbBtn.addEventListener('click', () => switchTab('side_ab'));
+    if (tabUrlBtn) tabUrlBtn.addEventListener('click', () => switchTab('url'));
+
+    // --- Side A/B Drag & Drop and Upload ---
+    if (sideBDropzone && sideBFileInput) {
+        sideBDropzone.addEventListener('click', () => sideBFileInput.click());
+        sideBDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            sideBDropzone.classList.add('border-brand-500', 'bg-brand-500/10');
+        });
+        sideBDropzone.addEventListener('dragleave', () => {
+            sideBDropzone.classList.remove('border-brand-500', 'bg-brand-500/10');
+        });
+        sideBDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            sideBDropzone.classList.remove('border-brand-500', 'bg-brand-500/10');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                selectedSideBFile = e.dataTransfer.files[0];
+                if (sideBBadge) sideBBadge.textContent = `🎵 ${selectedSideBFile.name} (${(selectedSideBFile.size / (1024 * 1024)).toFixed(1)} MB)`;
+            }
+        });
+        sideBFileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                selectedSideBFile = e.target.files[0];
+                if (sideBBadge) sideBBadge.textContent = `🎵 ${selectedSideBFile.name} (${(selectedSideBFile.size / (1024 * 1024)).toFixed(1)} MB)`;
+            }
+        });
+    }
+
+    if (sideADropzone && sideAFileInput) {
+        sideADropzone.addEventListener('click', () => sideAFileInput.click());
+        sideADropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            sideADropzone.classList.add('border-brand-500', 'bg-brand-500/10');
+        });
+        sideADropzone.addEventListener('dragleave', () => {
+            sideADropzone.classList.remove('border-brand-500', 'bg-brand-500/10');
+        });
+        sideADropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            sideADropzone.classList.remove('border-brand-500', 'bg-brand-500/10');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                selectedSideAFile = e.dataTransfer.files[0];
+                if (sideABadge) sideABadge.textContent = `🎤 ${selectedSideAFile.name} (${(selectedSideAFile.size / (1024 * 1024)).toFixed(1)} MB)`;
+            }
+        });
+        sideAFileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                selectedSideAFile = e.target.files[0];
+                if (sideABadge) sideABadge.textContent = `🎤 ${selectedSideAFile.name} (${(selectedSideAFile.size / (1024 * 1024)).toFixed(1)} MB)`;
+            }
+        });
+    }
+
+    if (submitSideAbBtn) {
+        submitSideAbBtn.addEventListener('click', async () => {
+            if (!selectedSideBFile) {
+                showError("Side B (Instrumental) track is required.");
+                return;
+            }
+
+            hideError();
+            submitSideAbBtn.disabled = true;
+            submitSideAbBtn.textContent = "Uploading & Ingesting...";
+
+            try {
+                const formData = new FormData();
+                formData.append('file_side_b', selectedSideBFile);
+                if (selectedSideAFile) {
+                    formData.append('file_side_a', selectedSideAFile);
+                }
+                if (sideAbTitleInput && sideAbTitleInput.value.trim()) {
+                    formData.append('title', sideAbTitleInput.value.trim());
+                }
+                if (sideAbArtistInput && sideAbArtistInput.value.trim()) {
+                    formData.append('artist', sideAbArtistInput.value.trim());
+                }
+
+                const resp = await fetch('/api/jobs/upload-side-ab', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({ detail: 'Upload failed' }));
+                    showError(err.detail || 'Failed to upload Side A/B tracks');
+                    submitSideAbBtn.disabled = false;
+                    submitSideAbBtn.innerHTML = `<span>⚡</span> Ingest Side A/B Track`;
+                    return;
+                }
+
+                const newJob = await resp.json();
+                selectedSideBFile = null;
+                selectedSideAFile = null;
+                if (sideBFileInput) sideBFileInput.value = '';
+                if (sideAFileInput) sideAFileInput.value = '';
+                if (sideBBadge) sideBBadge.textContent = '🎵 Choose Side B (Instrumental)';
+                if (sideABadge) sideABadge.textContent = '🎤 Choose Side A (Vocal / Original)';
+                if (sideAbTitleInput) sideAbTitleInput.value = '';
+                if (sideAbArtistInput) sideAbArtistInput.value = '';
+
+                submitSideAbBtn.disabled = false;
+                submitSideAbBtn.innerHTML = `<span>⚡</span> Ingest Side A/B Track`;
+
+                // Notify library & catalog to refresh
+                if (window.flexiokeLibrary && typeof window.flexiokeLibrary.loadLibrary === 'function') {
+                    window.flexiokeLibrary.loadLibrary();
+                }
+            } catch (err) {
+                console.error("Error submitting Side A/B:", err);
+                showError("Network error while uploading Side A/B tracks");
+                submitSideAbBtn.disabled = false;
+                submitSideAbBtn.innerHTML = `<span>⚡</span> Ingest Side A/B Track`;
+            }
         });
     }
 

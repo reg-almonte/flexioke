@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-10
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0075: Dual-Stream WebAudio Hot-Swapping & Dynamic Vocal Toggles
@@ -23,10 +23,10 @@ Build the audio playback coordination and dynamic vocal toggle state adapter for
 - Render `Side A/B` badges in Song Library, Playlists, and Song Catalog modal.
 
 ## Acceptance Criteria
-- [ ] Lead Vocal button hot-swaps between Side A and Side B with zero delay or drift.
-- [ ] Single-sided tracks disable the Lead Vocal button in the appropriate state.
-- [ ] Backing Vocal button is locked to disabled state for all Side A/B songs.
-- [ ] Automated frontend player and Node.js regression tests pass cleanly.
+- [x] Lead Vocal button hot-swaps between Side A and Side B with zero delay or drift.
+- [x] Single-sided tracks disable the Lead Vocal button in the appropriate state.
+- [x] Backing Vocal button is locked to disabled state for all Side A/B songs.
+- [x] Automated frontend player and Node.js regression tests pass cleanly.
 
 ## Blocked by
 - `TASK-0074`

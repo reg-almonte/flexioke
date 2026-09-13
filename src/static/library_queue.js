@@ -32,6 +32,10 @@ class SongLibraryManager {
         this.lyricsCustomShiftBtn = document.getElementById('lyrics-custom-shift-btn');
         this.lyricsModalVideoSelect = document.getElementById('lyrics-modal-video-select');
         this.lyricsModalVideoOffset = document.getElementById('lyrics-modal-video-offset');
+        this.lyricsModalSideASection = document.getElementById('lyrics-modal-side-a-section');
+        this.lyricsModalSideAFile = document.getElementById('lyrics-modal-side-a-file');
+        this.lyricsModalAttachSideABtn = document.getElementById('lyrics-modal-attach-side-a-btn');
+        this.lyricsModalSideAStatus = document.getElementById('lyrics-modal-side-a-status');
         this.availableVideos = [];
         this.activeLyricsJobId = null;
 
@@ -179,6 +183,9 @@ class SongLibraryManager {
 
         if (this.fetchLrclibBtn) {
             this.fetchLrclibBtn.addEventListener('click', () => this.handleFetchLrclib());
+        }
+        if (this.lyricsModalAttachSideABtn) {
+            this.lyricsModalAttachSideABtn.addEventListener('click', () => this.handleAttachSideA());
         }
 
         // In-modal previous / next song navigation buttons
@@ -366,7 +373,7 @@ class SongLibraryManager {
                 const card = document.createElement('div');
                 card.className = "p-3 bg-surface-950/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-3 group";
 
-                const sourceIcon = job.source_type === 'youtube' ? '▶️' : '📁';
+                const sourceIcon = job.source_type === 'youtube' ? '▶️' : (job.source_type === 'side_ab' ? '🔀' : '📁');
                 const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
                 const durationSnippet = durationFmt ? `<span>${durationFmt}</span><span>•</span>` : '';
                 const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
@@ -397,6 +404,8 @@ class SongLibraryManager {
                     `;
                 }
 
+                const sideAbBadge = job.source_type === 'side_ab' ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-violet-950/60 text-violet-400 border border-violet-800/60">Side A/B</span>' : '';
+
                 card.innerHTML = `
                     <div class="flex items-center gap-2.5 min-w-0 flex-1">
                         <span class="text-base">${sourceIcon}</span>
@@ -406,6 +415,7 @@ class SongLibraryManager {
                             <div class="flex items-center gap-2 text-[10px] text-slate-500">
                                 ${durationSnippet}
                                 <span class="truncate">${escapeHtml(job.source_name)}</span>
+                                ${sideAbBadge}
                             </div>
                         </div>
                     </div>
@@ -522,7 +532,7 @@ class SongLibraryManager {
             const row = document.createElement('div');
             row.className = "p-3 bg-surface-950/90 hover:bg-slate-800/80 border border-slate-800/90 hover:border-brand-500/40 rounded-xl transition flex items-center justify-between gap-3 group";
 
-            const sourceIcon = job.source_type === 'youtube' ? '▶️' : '📁';
+            const sourceIcon = job.source_type === 'youtube' ? '▶️' : (job.source_type === 'side_ab' ? '🔀' : '📁');
             const durationFmt = job.duration_seconds ? `${Math.floor(job.duration_seconds / 60)}:${String(Math.floor(job.duration_seconds % 60)).padStart(2, '0')}` : '';
             const durationSnippet = durationFmt ? `<span>${durationFmt}</span><span>•</span>` : '';
             const artistHtml = job.artist ? escapeHtml(job.artist) : '<span class="text-slate-500 italic">Unknown Artist</span>';
@@ -534,6 +544,7 @@ class SongLibraryManager {
             const queueIcon = window.getIconHtml ? window.getIconHtml('queue', 'w-3.5 h-3.5') : '+';
             const editIcon = window.getIconHtml ? window.getIconHtml('edit', 'w-3.5 h-3.5') : '📝';
             const zipIcon = window.getIconHtml ? window.getIconHtml('zip_export', 'w-3.5 h-3.5') : '📦';
+            const sideAbBadge = job.source_type === 'side_ab' ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-violet-950/60 text-violet-400 border border-violet-800/60">Side A/B</span>' : '';
 
             row.innerHTML = `
                 <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -544,6 +555,7 @@ class SongLibraryManager {
                         <div class="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
                             ${durationSnippet}
                             <span class="truncate">${escapeHtml(job.source_name)}</span>
+                            ${sideAbBadge}
                         </div>
                     </div>
                 </div>
@@ -809,6 +821,21 @@ class SongLibraryManager {
             window.flexiokePlaylistsManager.renderLyricsModalPlaylists(targetId);
         }
 
+        // Side A Attachment UI for Side A/B tracks without lead vocals attached
+        if (this.lyricsModalSideASection) {
+            const isSideABWithoutLead = (job.source_type === 'side_ab' && (!job.stems || !job.stems.lead_vocals));
+            if (isSideABWithoutLead) {
+                this.lyricsModalSideASection.classList.remove('hidden');
+                if (this.lyricsModalSideAFile) this.lyricsModalSideAFile.value = '';
+                if (this.lyricsModalSideAStatus) {
+                    this.lyricsModalSideAStatus.textContent = '';
+                    this.lyricsModalSideAStatus.className = 'text-[10px] text-brand-400 font-medium';
+                }
+            } else {
+                this.lyricsModalSideASection.classList.add('hidden');
+            }
+        }
+
         try {
             const resp = await fetch(`/api/jobs/${targetId}/lyrics`);
             if (resp.ok) {
@@ -827,6 +854,78 @@ class SongLibraryManager {
                 this.modalContext.baseline.lyrics = "";
                 this.updateSaveButtonState();
             }
+        }
+    }
+
+    async handleAttachSideA() {
+        if (!this.activeLyricsJobId || !this.lyricsModalSideAFile) return;
+        const file = this.lyricsModalSideAFile.files ? this.lyricsModalSideAFile.files[0] : null;
+        if (!file) {
+            if (this.lyricsModalSideAStatus) {
+                this.lyricsModalSideAStatus.textContent = "Please select an audio file first.";
+                this.lyricsModalSideAStatus.className = "text-[10px] text-amber-400 font-medium";
+            }
+            return;
+        }
+
+        if (this.lyricsModalAttachSideABtn) this.lyricsModalAttachSideABtn.disabled = true;
+        if (this.lyricsModalSideAStatus) {
+            this.lyricsModalSideAStatus.textContent = "Uploading Side A...";
+            this.lyricsModalSideAStatus.className = "text-[10px] text-brand-400 font-medium";
+        }
+
+        const formData = new FormData();
+        formData.append('file_side_a', file);
+
+        try {
+            const resp = await fetch(`/api/jobs/${this.activeLyricsJobId}/attach-side-a`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (resp.ok) {
+                const updatedJob = await resp.json();
+                if (this.lyricsModalSideAStatus) {
+                    this.lyricsModalSideAStatus.textContent = "✓ Side A attached successfully!";
+                    this.lyricsModalSideAStatus.className = "text-[10px] text-emerald-400 font-medium";
+                }
+                // Update local jobs cache
+                if (this.jobs && Array.isArray(this.jobs)) {
+                    const idx = this.jobs.findIndex(j => j.job_id === this.activeLyricsJobId);
+                    if (idx !== -1 && updatedJob) {
+                        this.jobs[idx] = updatedJob;
+                        this.render(this.jobs);
+                    }
+                }
+                if (this.modalContext.items && Array.isArray(this.modalContext.items)) {
+                    const mIdx = this.modalContext.items.findIndex(j => (j.job_id || j.id) === this.activeLyricsJobId);
+                    if (mIdx !== -1 && updatedJob) {
+                        this.modalContext.items[mIdx] = updatedJob;
+                    }
+                }
+                // Hide side A section after delay
+                setTimeout(() => {
+                    if (this.lyricsModalSideASection) {
+                        this.lyricsModalSideASection.classList.add('hidden');
+                    }
+                }, 1500);
+
+                window.dispatchEvent(new CustomEvent('flexioke:job-updated', { detail: updatedJob }));
+            } else {
+                const err = await resp.json();
+                if (this.lyricsModalSideAStatus) {
+                    this.lyricsModalSideAStatus.textContent = `Error: ${err.detail || 'Upload failed'}`;
+                    this.lyricsModalSideAStatus.className = "text-[10px] text-rose-400 font-medium";
+                }
+            }
+        } catch (err) {
+            console.error("Error attaching Side A:", err);
+            if (this.lyricsModalSideAStatus) {
+                this.lyricsModalSideAStatus.textContent = "Network error attaching Side A.";
+                this.lyricsModalSideAStatus.className = "text-[10px] text-rose-400 font-medium";
+            }
+        } finally {
+            if (this.lyricsModalAttachSideABtn) this.lyricsModalAttachSideABtn.disabled = false;
         }
     }
 

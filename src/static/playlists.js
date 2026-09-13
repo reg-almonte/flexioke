@@ -627,12 +627,17 @@ class PlaylistsManager {
             const isLast = idx === filtered.length - 1;
             const durationFmt = song.duration_seconds ? `${Math.floor(song.duration_seconds / 60)}:${String(Math.floor(song.duration_seconds % 60)).padStart(2, '0')}` : '';
 
+            const sideAbBadge = song.source_type === 'side_ab' ? '<span class="px-1.5 py-0.2 rounded text-[8px] font-bold bg-violet-950/60 text-violet-400 border border-violet-800/60">Side A/B</span>' : '';
+
             row.innerHTML = `
                 <div class="flex items-center gap-2 truncate min-w-0 flex-1">
                     <span class="text-[10px] text-slate-500 font-mono w-4 shrink-0 text-center">${idx + 1}</span>
                     <div class="truncate">
                         <p class="font-medium text-slate-200 truncate">${escapeHtml(song.title)}</p>
-                        <p class="text-[10px] text-slate-400 truncate">${escapeHtml(song.artist || 'Unknown Artist')} ${durationFmt ? '• ' + durationFmt : ''}</p>
+                        <p class="text-[10px] text-slate-400 truncate flex items-center gap-1.5">
+                            <span>${escapeHtml(song.artist || 'Unknown Artist')} ${durationFmt ? '• ' + durationFmt : ''}</span>
+                            ${sideAbBadge}
+                        </p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">

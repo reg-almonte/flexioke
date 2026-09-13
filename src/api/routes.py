@@ -5,7 +5,7 @@ import urllib.parse
 from typing import Optional
 from pathlib import Path
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Request, status
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Query, Request, status
 from fastapi.responses import FileResponse, Response, StreamingResponse
 
 from src.services.job_manager import job_manager
@@ -239,6 +239,115 @@ def submit_youtube(req: YouTubeRequest):
 
     return job
 
+@router.post("/jobs/upload-side-ab", response_model=JobRecord)
+async def upload_side_ab_audio(
+    file_side_b: UploadFile = File(...),
+    file_side_a: Optional[UploadFile] = File(None),
+    title: Optional[str] = Form(None),
+    artist: Optional[str] = Form(None)
+):
+    """Direct dual-track upload for Side B (Instrumental) and optional Side A (Vocal)."""
+    # 1. Validate Side B (Instrumental - Required)
+    b_filename = file_side_b.filename or "instrumental.mp3"
+    b_content = await file_side_b.read()
+    is_b_valid, b_err = validate_audio_file(b_filename, len(b_content))
+    if not is_b_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Side B (Instrumental) error: {b_err}"
+        )
+
+    # 2. Validate Side A (Vocal - Optional) if provided
+    a_content = None
+    if file_side_a is not None and file_side_a.filename:
+        a_filename = file_side_a.filename
+        a_content = await file_side_a.read()
+        if len(a_content) > 0:
+            is_a_valid, a_err = validate_audio_file(a_filename, len(a_content))
+            if not is_a_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Side A (Vocal) error: {a_err}"
+                )
+
+    # 3. Determine Title & Artist
+    parsed_title, parsed_artist = parse_song_and_artist(b_filename)
+    final_title = title.strip() if (title and title.strip()) else parsed_title
+    final_artist = artist.strip() if (artist and artist.strip()) else parsed_artist
+
+    # 4. Create JobRecord
+    job = job_manager.create_job(
+        source_type=SourceType.SIDE_AB,
+        source_name=b_filename,
+        title=final_title,
+        artist=final_artist
+    )
+
+    # 5. Write Files & Map Stems
+    job_dir = job_manager.get_job_dir(job.job_id)
+    (job_dir / "instrumental.mp3").write_bytes(b_content)
+    stems_map = {
+        "instrumental": f"/api/jobs/{job.job_id}/stems/instrumental"
+    }
+
+    if a_content and len(a_content) > 0:
+        (job_dir / "lead_vocals.mp3").write_bytes(a_content)
+        stems_map["lead_vocals"] = f"/api/jobs/{job.job_id}/stems/lead_vocals"
+
+    # 6. Auto-Fetch Synced Lyrics (LRCLIB Integration)
+    try:
+        lrc_match = lrclib_client.fetch_best_synced_lyrics(
+            track_name=final_title,
+            artist_name=final_artist or ""
+        )
+        if lrc_match and lrc_match.get("synced_lyrics"):
+            lyrics_text = lrc_match["synced_lyrics"]
+            job_manager.save_lyrics(job.job_id, lyrics_text)
+    except Exception as e:
+        print(f"[Side A/B Upload] LRCLIB auto-sync notice for {job.job_id}: {e}")
+
+    # 7. Complete Job Immediately (Bypassing Separation Pipeline)
+    updated_job = job_manager.update_job(
+        job.job_id,
+        status=JobStatus.COMPLETED,
+        progress=100,
+        current_stage="Direct Side A/B Ready",
+        stems=stems_map
+    )
+
+    return updated_job
+
+@router.post("/jobs/{job_id}/attach-side-a", response_model=JobRecord)
+async def attach_side_a(job_id: str, file: UploadFile = File(...)):
+    """Attaches a Side A (Lead Vocal) audio track to an existing completed Side A/B job."""
+    job = job_manager.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job '{job_id}' not found."
+        )
+
+    filename = file.filename or "lead_vocals.mp3"
+    content = await file.read()
+    is_valid, err_msg = validate_audio_file(filename, len(content))
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=err_msg
+        )
+
+    job_dir = job_manager.get_job_dir(job_id)
+    (job_dir / "lead_vocals.mp3").write_bytes(content)
+
+    updated_stems = dict(job.stems)
+    updated_stems["lead_vocals"] = f"/api/jobs/{job_id}/stems/lead_vocals"
+
+    updated_job = job_manager.update_job(
+        job_id,
+        stems=updated_stems
+    )
+    return updated_job
+
 @router.get("/jobs/{job_id}", response_model=JobRecord)
 def get_job_status(job_id: str):
     """Retrieve current processing status and metadata for a given job."""
@@ -341,26 +450,25 @@ def export_job_stems_zip(job_id: str):
         )
 
     job_dir = job_manager.get_job_dir(job_id)
-    stem_files = {
-        "instrumental.mp3": job_dir / "instrumental.mp3",
-        "lead_vocals.mp3": job_dir / "lead_vocals.mp3",
-        "backing_vocals.mp3": job_dir / "backing_vocals.mp3"
-    }
-
-    for name, path in stem_files.items():
-        if not path.exists():
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Stem '{name}' is missing on disk for job '{job_id}'."
-            )
+    stem_names = ["instrumental.mp3", "lead_vocals.mp3", "backing_vocals.mp3"]
+    found_any = False
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-        for name, path in stem_files.items():
-            zf.write(path, arcname=name)
+        for name in stem_names:
+            path = job_dir / name
+            if path.exists():
+                zf.write(path, arcname=name)
+                found_any = True
         lyrics_file = job_dir / "lyrics.lrc"
         if lyrics_file.exists() and lyrics_file.stat().st_size > 0:
             zf.write(lyrics_file, arcname="lyrics.lrc")
+
+    if not found_any:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No stems available on disk for job '{job_id}'."
+        )
 
     zip_buffer.seek(0)
     clean_title = re.sub(r'[^\w\-_.]', '_', job.title or "flexioke")

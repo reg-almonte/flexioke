@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-10
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0074: Side A/B Ingestion Endpoints & Job Model Extension
@@ -19,10 +19,10 @@ Build the backend Side A/B dual-track upload endpoints and data model extensions
 - Add UI upload option in Stem Studio to switch between "Standard AI Separation" and "Direct Side A/B (Instrumental & Vocal)".
 
 ## Acceptance Criteria
-- [ ] `POST /api/jobs/upload-side-ab` creates instant completed tracks with proper stems.
-- [ ] `POST /api/jobs/{id}/attach-side-a` attaches Side A and updates stem mapping.
-- [ ] Stem Studio provides an intuitive dual-file upload interface.
-- [ ] Automated API and model integration tests pass 100%.
+- [x] `POST /api/jobs/upload-side-ab` creates instant completed tracks with proper stems.
+- [x] `POST /api/jobs/{id}/attach-side-a` attaches Side A and updates stem mapping.
+- [x] Stem Studio provides an intuitive dual-file upload interface.
+- [x] Automated API and model integration tests pass 100%.
 
 ## Blocked by
 - None (can start immediately in parallel).

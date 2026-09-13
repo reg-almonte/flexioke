@@ -172,7 +172,8 @@ class FlexiokePlayer {
             if (!stemUrl) {
                 const container = document.querySelector(track.container);
                 if (container) {
-                    container.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-slate-600 text-[11px]">Stem not found</div>';
+                    const msg = (job.source_type === 'side_ab' && trackKey === 'backing_vocals') ? 'N/A (Side A/B)' : 'Stem not found';
+                    container.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-slate-600 text-[11px]">${msg}</div>`;
                 }
                 return;
             }
@@ -421,6 +422,49 @@ class FlexiokePlayer {
 
     applyGainMatrix() {
         const hasSolo = Object.values(this.tracks).some(t => t.soloed);
+        const isSideAB = this.currentJob && this.currentJob.source_type === 'side_ab';
+
+        if (isSideAB) {
+            const hasLead = Boolean(this.tracks.lead_vocals.ws && this.currentJob.stems && this.currentJob.stems.lead_vocals);
+            const hasInst = Boolean(this.tracks.instrumental.ws && this.currentJob.stems && this.currentJob.stems.instrumental);
+
+            if (hasLead && hasInst) {
+                // Mutually hot-swap between Side A (Lead Vocal) and Side B (Instrumental)
+                // When lead_vocals is NOT muted: Side A is ON, Side B is MUTED (gain = 0)
+                // When lead_vocals is MUTED: Side B is ON, Side A is MUTED (gain = 0)
+                const leadActive = !this.tracks.lead_vocals.muted;
+                if (leadActive) {
+                    try { this.tracks.lead_vocals.ws?.setVolume(this.tracks.lead_vocals.volume * this.masterVolume); } catch (e) {}
+                    try { this.tracks.instrumental.ws?.setVolume(0); } catch (e) {}
+                } else {
+                    try { this.tracks.lead_vocals.ws?.setVolume(0); } catch (e) {}
+                    try { this.tracks.instrumental.ws?.setVolume(this.tracks.instrumental.volume * this.masterVolume); } catch (e) {}
+                }
+            } else if (hasInst) {
+                // Only Side B present
+                try {
+                    const gain = this.tracks.instrumental.muted ? 0 : this.tracks.instrumental.volume * this.masterVolume;
+                    this.tracks.instrumental.ws?.setVolume(gain);
+                } catch (e) {}
+                if (this.tracks.lead_vocals.ws) {
+                    try { this.tracks.lead_vocals.ws.setVolume(0); } catch (e) {}
+                }
+            } else if (hasLead) {
+                // Only Side A present
+                try {
+                    const gain = this.tracks.lead_vocals.muted ? 0 : this.tracks.lead_vocals.volume * this.masterVolume;
+                    this.tracks.lead_vocals.ws?.setVolume(gain);
+                } catch (e) {}
+                if (this.tracks.instrumental.ws) {
+                    try { this.tracks.instrumental.ws.setVolume(0); } catch (e) {}
+                }
+            }
+
+            if (this.tracks.backing_vocals.ws) {
+                try { this.tracks.backing_vocals.ws.setVolume(0); } catch (e) {}
+            }
+            return;
+        }
 
         Object.values(this.tracks).forEach(track => {
             if (!track.ws) return;

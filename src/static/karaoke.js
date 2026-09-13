@@ -749,7 +749,8 @@ class KaraokeStageManager {
             if (this.currentJob) {
                 const title = this.currentJob.title || "Untitled Song";
                 const artist = this.currentJob.artist ? ` - ${this.currentJob.artist}` : "";
-                this.nowSingingTextEl.textContent = `${title}${artist}`;
+                const tag = this.currentJob.source_type === 'side_ab' ? ' [Side A/B]' : '';
+                this.nowSingingTextEl.textContent = `${title}${artist}${tag}`;
             } else {
                 this.nowSingingTextEl.textContent = "No Track Selected";
             }
@@ -1118,26 +1119,67 @@ class KaraokeStageManager {
         if (!window.flexiokePlayer) return;
         const leadTrack = window.flexiokePlayer.tracks.lead_vocals;
         const backingTrack = window.flexiokePlayer.tracks.backing_vocals;
+        const isSideAB = this.currentJob && this.currentJob.source_type === 'side_ab';
+
+        if (isSideAB) {
+            const hasLead = Boolean(this.currentJob.stems && this.currentJob.stems.lead_vocals);
+            const hasInst = Boolean(this.currentJob.stems && this.currentJob.stems.instrumental);
+
+            if (this.toggleLeadBtn && this.leadStatusText) {
+                if (hasLead && hasInst) {
+                    this.toggleLeadBtn.disabled = false;
+                    if (leadTrack && leadTrack.muted) {
+                        this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-rose-600/50 hover:text-white cursor-pointer";
+                        this.leadStatusText.textContent = "Lead Vocals: MUTED";
+                        this.toggleLeadBtn.title = "Lead Vocals: MUTED (Click to Unmute / Play Side A)";
+                    } else {
+                        this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-brand-600/50 hover:text-white cursor-pointer";
+                        this.leadStatusText.textContent = "Lead Vocals: ON";
+                        this.toggleLeadBtn.title = "Lead Vocals: ON (Click to Mute / Play Side B)";
+                    }
+                } else if (hasInst && !hasLead) {
+                    this.toggleLeadBtn.disabled = true;
+                    this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-slate-800/40 border border-slate-700/40 text-slate-500 text-sm font-semibold flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60";
+                    this.leadStatusText.textContent = "Lead: OFF (Side B Only)";
+                    this.toggleLeadBtn.title = "Side A vocal track not attached (Side B Instrumental only)";
+                } else if (hasLead && !hasInst) {
+                    this.toggleLeadBtn.disabled = true;
+                    this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-slate-800/40 border border-slate-700/40 text-slate-500 text-sm font-semibold flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60";
+                    this.leadStatusText.textContent = "Lead: ON (Side A Only)";
+                    this.toggleLeadBtn.title = "Side B instrumental track not present (Side A Vocal only)";
+                }
+            }
+
+            if (this.toggleBackingBtn && this.backingStatusText) {
+                this.toggleBackingBtn.disabled = true;
+                this.toggleBackingBtn.className = "karaoke-vocal-toggle rounded-xl bg-slate-800/40 border border-slate-700/40 text-slate-500 text-sm font-semibold flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60";
+                this.backingStatusText.textContent = "Backing: N/A (Side A/B)";
+                this.toggleBackingBtn.title = "Backing vocals track not applicable for Side A/B audio";
+            }
+            return;
+        }
 
         if (this.toggleLeadBtn && this.leadStatusText && leadTrack) {
+            this.toggleLeadBtn.disabled = false;
             if (leadTrack.muted) {
-                this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-rose-600/50 hover:text-white";
+                this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-rose-600/50 hover:text-white cursor-pointer";
                 this.leadStatusText.textContent = "Lead Vocals: MUTED";
                 this.toggleLeadBtn.title = "Lead Vocals: MUTED (Click to Unmute)";
             } else {
-                this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-brand-600/50 hover:text-white";
+                this.toggleLeadBtn.className = "karaoke-vocal-toggle rounded-xl bg-brand-600/30 border border-brand-500/50 text-brand-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-brand-600/50 hover:text-white cursor-pointer";
                 this.leadStatusText.textContent = "Lead Vocals: ON";
                 this.toggleLeadBtn.title = "Lead Vocals: ON (Click to Mute)";
             }
         }
 
         if (this.toggleBackingBtn && this.backingStatusText && backingTrack) {
+            this.toggleBackingBtn.disabled = false;
             if (backingTrack.muted) {
-                this.toggleBackingBtn.className = "karaoke-vocal-toggle rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-rose-600/50 hover:text-white";
+                this.toggleBackingBtn.className = "karaoke-vocal-toggle rounded-xl bg-rose-600/30 border border-rose-500/50 text-rose-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-rose-600/50 hover:text-white cursor-pointer";
                 this.backingStatusText.textContent = "Backing: MUTED";
                 this.toggleBackingBtn.title = "Backing Vocals: MUTED (Click to Unmute)";
             } else {
-                this.toggleBackingBtn.className = "karaoke-vocal-toggle rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-violet-600/50 hover:text-white";
+                this.toggleBackingBtn.className = "karaoke-vocal-toggle rounded-xl bg-violet-600/30 border border-violet-500/50 text-violet-300 text-sm font-semibold transition flex items-center justify-center gap-1.5 hover:bg-violet-600/50 hover:text-white cursor-pointer";
                 this.backingStatusText.textContent = "Backing: ON";
                 this.toggleBackingBtn.title = "Backing Vocals: ON (Click to Mute)";
             }
