@@ -627,7 +627,7 @@ class PlaylistsManager {
             const isLast = idx === filtered.length - 1;
             const durationFmt = song.duration_seconds ? `${Math.floor(song.duration_seconds / 60)}:${String(Math.floor(song.duration_seconds % 60)).padStart(2, '0')}` : '';
 
-            const sideAbBadge = song.source_type === 'side_ab' ? '<span class="px-1.5 py-0.2 rounded text-[8px] font-bold bg-violet-950/60 text-violet-400 border border-violet-800/60">Side A/B</span>' : '';
+            const sideAbBadge = song.source_type === 'side_ab' ? '<span class="px-1.5 py-0.5 rounded text-[8px] font-bold bg-violet-950/60 text-violet-400 border border-violet-800/60">Side A/B</span>' : '';
 
             row.innerHTML = `
                 <div class="flex items-center gap-2 truncate min-w-0 flex-1">

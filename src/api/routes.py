@@ -318,8 +318,19 @@ async def upload_side_ab_audio(
     return updated_job
 
 @router.post("/jobs/{job_id}/attach-side-a", response_model=JobRecord)
-async def attach_side_a(job_id: str, file: UploadFile = File(...)):
+async def attach_side_a(
+    job_id: str,
+    file: Optional[UploadFile] = File(None),
+    file_side_a: Optional[UploadFile] = File(None)
+):
     """Attaches a Side A (Lead Vocal) audio track to an existing completed Side A/B job."""
+    upload = file or file_side_a
+    if not upload:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Audio file for Side A is required (field 'file' or 'file_side_a')."
+        )
+
     job = job_manager.get_job(job_id)
     if not job:
         raise HTTPException(
@@ -327,8 +338,8 @@ async def attach_side_a(job_id: str, file: UploadFile = File(...)):
             detail=f"Job '{job_id}' not found."
         )
 
-    filename = file.filename or "lead_vocals.mp3"
-    content = await file.read()
+    filename = upload.filename or "lead_vocals.mp3"
+    content = await upload.read()
     is_valid, err_msg = validate_audio_file(filename, len(content))
     if not is_valid:
         raise HTTPException(

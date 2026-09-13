@@ -875,6 +875,7 @@ class SongLibraryManager {
         }
 
         const formData = new FormData();
+        formData.append('file', file);
         formData.append('file_side_a', file);
 
         try {
