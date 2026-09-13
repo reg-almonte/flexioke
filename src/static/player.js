@@ -145,9 +145,16 @@ class FlexiokePlayer {
         const expectedStems = Object.keys(this.tracks).filter(key => !!job.stems[key]);
         let readyCount = 0;
 
-        // Destroy prior wavesurfer instances
+        // Destroy prior wavesurfer instances and reset mute/solo states
         Object.keys(this.tracks).forEach((trackKey) => {
             const track = this.tracks[trackKey];
+            track.muted = false;
+            track.soloed = false;
+            const muteBtn = document.getElementById(`mute-btn-${trackKey}`);
+            if (muteBtn) muteBtn.classList.remove('btn-active-mute');
+            const soloBtn = document.getElementById(`solo-btn-${trackKey}`);
+            if (soloBtn) soloBtn.classList.remove('btn-active-solo');
+
             if (track.ws) {
                 try {
                     track.ws.unAll();
@@ -429,32 +436,69 @@ class FlexiokePlayer {
             const hasInst = Boolean(this.tracks.instrumental.ws && this.currentJob.stems && this.currentJob.stems.instrumental);
 
             if (hasLead && hasInst) {
-                // Mutually hot-swap between Side A (Lead Vocal) and Side B (Instrumental)
-                // When lead_vocals is NOT muted: Side A is ON, Side B is MUTED (gain = 0)
-                // When lead_vocals is MUTED: Side B is ON, Side A is MUTED (gain = 0)
-                const leadActive = !this.tracks.lead_vocals.muted;
-                if (leadActive) {
-                    try { this.tracks.lead_vocals.ws?.setVolume(this.tracks.lead_vocals.volume * this.masterVolume); } catch (e) {}
-                    try { this.tracks.instrumental.ws?.setVolume(0); } catch (e) {}
+                let leadGain = 0;
+                let instGain = 0;
+
+                const leadMuted = this.tracks.lead_vocals.muted;
+                const instMuted = this.tracks.instrumental.muted;
+
+                if (hasSolo) {
+                    const leadSolo = this.tracks.lead_vocals.soloed;
+                    const instSolo = this.tracks.instrumental.soloed;
+
+                    if (leadSolo && !instSolo) {
+                        leadGain = leadMuted ? 0 : this.tracks.lead_vocals.volume * this.masterVolume;
+                        instGain = 0;
+                    } else if (instSolo && !leadSolo) {
+                        instGain = instMuted ? 0 : this.tracks.instrumental.volume * this.masterVolume;
+                        leadGain = 0;
+                    } else {
+                        // Both soloed
+                        if (leadMuted && instMuted) {
+                            leadGain = 0;
+                            instGain = 0;
+                        } else if (leadMuted) {
+                            instGain = this.tracks.instrumental.volume * this.masterVolume;
+                            leadGain = 0;
+                        } else {
+                            leadGain = this.tracks.lead_vocals.volume * this.masterVolume;
+                            instGain = 0;
+                        }
+                    }
                 } else {
-                    try { this.tracks.lead_vocals.ws?.setVolume(0); } catch (e) {}
-                    try { this.tracks.instrumental.ws?.setVolume(this.tracks.instrumental.volume * this.masterVolume); } catch (e) {}
+                    // No solo active
+                    if (leadMuted && instMuted) {
+                        // Both muted -> TOTAL SILENCE (Bug #1 fix)
+                        leadGain = 0;
+                        instGain = 0;
+                    } else if (leadMuted && !instMuted) {
+                        // Lead muted (Vocal OFF) -> Side B Instrumental active
+                        leadGain = 0;
+                        instGain = this.tracks.instrumental.volume * this.masterVolume;
+                    } else if (!leadMuted && instMuted) {
+                        // Instrumental muted -> Side A Full Vocal active
+                        leadGain = this.tracks.lead_vocals.volume * this.masterVolume;
+                        instGain = 0;
+                    } else {
+                        // Default (neither muted, Vocal ON) -> Side A Full Vocal active, Side B muted
+                        leadGain = this.tracks.lead_vocals.volume * this.masterVolume;
+                        instGain = 0;
+                    }
                 }
+
+                try { this.tracks.lead_vocals.ws?.setVolume(leadGain); } catch (e) {}
+                try { this.tracks.instrumental.ws?.setVolume(instGain); } catch (e) {}
             } else if (hasInst) {
                 // Only Side B present
-                try {
-                    const gain = this.tracks.instrumental.muted ? 0 : this.tracks.instrumental.volume * this.masterVolume;
-                    this.tracks.instrumental.ws?.setVolume(gain);
-                } catch (e) {}
+                const instGain = this.tracks.instrumental.muted ? 0 : this.tracks.instrumental.volume * this.masterVolume;
+                try { this.tracks.instrumental.ws?.setVolume(instGain); } catch (e) {}
                 if (this.tracks.lead_vocals.ws) {
                     try { this.tracks.lead_vocals.ws.setVolume(0); } catch (e) {}
                 }
             } else if (hasLead) {
                 // Only Side A present
-                try {
-                    const gain = this.tracks.lead_vocals.muted ? 0 : this.tracks.lead_vocals.volume * this.masterVolume;
-                    this.tracks.lead_vocals.ws?.setVolume(gain);
-                } catch (e) {}
+                const leadGain = this.tracks.lead_vocals.muted ? 0 : this.tracks.lead_vocals.volume * this.masterVolume;
+                try { this.tracks.lead_vocals.ws?.setVolume(leadGain); } catch (e) {}
                 if (this.tracks.instrumental.ws) {
                     try { this.tracks.instrumental.ws.setVolume(0); } catch (e) {}
                 }

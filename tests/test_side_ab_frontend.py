@@ -104,14 +104,27 @@ def test_side_ab_webaudio_and_toggle_simulation():
                     const hasInst = Boolean(this.tracks.instrumental.ws && this.currentJob.stems && this.currentJob.stems.instrumental);
 
                     if (hasLead && hasInst) {
-                        const leadActive = !this.tracks.lead_vocals.muted;
-                        if (leadActive) {
-                            this.tracks.lead_vocals.ws.setVolume(this.tracks.lead_vocals.volume * this.masterVolume);
-                            this.tracks.instrumental.ws.setVolume(0);
+                        let leadGain = 0;
+                        let instGain = 0;
+                        const leadMuted = this.tracks.lead_vocals.muted;
+                        const instMuted = this.tracks.instrumental.muted;
+
+                        if (leadMuted && instMuted) {
+                            leadGain = 0;
+                            instGain = 0;
+                        } else if (leadMuted && !instMuted) {
+                            leadGain = 0;
+                            instGain = this.tracks.instrumental.volume * this.masterVolume;
+                        } else if (!leadMuted && instMuted) {
+                            leadGain = this.tracks.lead_vocals.volume * this.masterVolume;
+                            instGain = 0;
                         } else {
-                            this.tracks.lead_vocals.ws.setVolume(0);
-                            this.tracks.instrumental.ws.setVolume(this.tracks.instrumental.volume * this.masterVolume);
+                            leadGain = this.tracks.lead_vocals.volume * this.masterVolume;
+                            instGain = 0;
                         }
+
+                        this.tracks.lead_vocals.ws.setVolume(leadGain);
+                        this.tracks.instrumental.ws.setVolume(instGain);
                     } else if (hasInst) {
                         const gain = this.tracks.instrumental.muted ? 0 : this.tracks.instrumental.volume * this.masterVolume;
                         this.tracks.instrumental.ws.setVolume(gain);
@@ -160,13 +173,19 @@ def test_side_ab_webaudio_and_toggle_simulation():
     if (mockToggleBackingBtn.disabled !== true) throw new Error("Backing button disabled error");
     if (mockBackingStatusText.textContent !== "Backing: N/A (Side A/B)") throw new Error("Backing text error");
 
-    // Hot-swap
+    // Hot-swap in Karaoke (Lead Vocal to MUTED) -> Side B unmuted, Side A muted
     player1.tracks.lead_vocals.muted = true;
     player1.applyGainMatrix();
     syncVocalButtons(player1);
     if (player1.tracks.lead_vocals.ws.volume !== 0) throw new Error("Side A muted volume error");
     if (Math.abs(player1.tracks.instrumental.ws.volume - 0.8) > 0.001) throw new Error("Side B unmuted volume error");
     if (mockLeadStatusText.textContent !== "Lead Vocals: MUTED") throw new Error("Status MUTED error");
+
+    // Stem Studio test: Mute BOTH stems -> Total silence
+    player1.tracks.instrumental.muted = true;
+    player1.applyGainMatrix();
+    if (player1.tracks.lead_vocals.ws.volume !== 0) throw new Error("Side A should be 0 when both muted");
+    if (player1.tracks.instrumental.ws.volume !== 0) throw new Error("Side B should be 0 when both muted");
 
     // Scenario 2: Side B only
     const player2 = createMockPlayer("side_ab", { instrumental: "/audio/inst.mp3" });
