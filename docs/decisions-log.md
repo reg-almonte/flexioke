@@ -279,6 +279,12 @@ made while building the template itself.
 - approved_by: user
 - notes: Approved EPIC-0011 work breakdown comprising STORY-0034 to STORY-0036 and TASK-0071 to TASK-0075 covering video management backend & streaming endpoints (TASK-0071), karaoke stage video renderer & timecode sync (TASK-0072), fullscreen stage geometry CSS variables & settings sliders (TASK-0073), Side A/B direct ingestion & model extension (TASK-0074), and dual-stream WebAudio vocal hot-swapping & button state adaptation (TASK-0075), with mandatory human browser verification gates at each story milestone.
 
+## 2026-09-13 — Approved Check Sheet: Version 0.4.0 Video Backgrounds, Stage Geometry Controls & Side A/B Uploads
+- artifact: docs/checksheets/version0.4.0.md
+- approved_by: reg
+- notes: Approved Phase 5 Check Sheet with 100% test coverage (194/194 passing) and 0 gaps across video auto-discovery and streaming, synchronized karaoke stage video playback, fullscreen stage geometry sliders, Side A/B direct ingestion, and dual-stream WebAudio vocal hot-swapping.
+
+
 
 
 
