@@ -749,7 +749,8 @@ class KaraokeStageManager {
             if (this.currentJob) {
                 const title = this.currentJob.title || "Untitled Song";
                 const artist = this.currentJob.artist ? ` - ${this.currentJob.artist}` : "";
-                const tag = this.currentJob.source_type === 'side_ab' ? ' [Side A/B]' : '';
+                const isSideAB = this.currentJob.source_type === 'side_ab' || (!this.currentJob.stems?.backing_vocals && this.currentJob.stems?.lead_vocals && this.currentJob.stems?.instrumental);
+                const tag = isSideAB ? ' [Side A/B]' : '';
                 this.nowSingingTextEl.textContent = `${title}${artist}${tag}`;
             } else {
                 this.nowSingingTextEl.textContent = "No Track Selected";
@@ -1119,7 +1120,10 @@ class KaraokeStageManager {
         if (!window.flexiokePlayer) return;
         const leadTrack = window.flexiokePlayer.tracks.lead_vocals;
         const backingTrack = window.flexiokePlayer.tracks.backing_vocals;
-        const isSideAB = this.currentJob && this.currentJob.source_type === 'side_ab';
+        const isSideAB = this.currentJob && (
+            this.currentJob.source_type === 'side_ab' || 
+            (!this.currentJob.stems?.backing_vocals && this.currentJob.stems?.lead_vocals && this.currentJob.stems?.instrumental)
+        );
 
         if (isSideAB) {
             const hasLead = Boolean(this.currentJob.stems && this.currentJob.stems.lead_vocals);

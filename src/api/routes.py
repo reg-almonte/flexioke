@@ -577,7 +577,8 @@ def add_to_queue(req: QueueActionRequest):
         job.duration_seconds,
         job.stems,
         job.video_id,
-        job.video_offset_seconds
+        job.video_offset_seconds,
+        source_type=job.source_type
     )
     return queue_manager.get_state()
 
@@ -597,7 +598,8 @@ def play_now(req: QueueActionRequest):
         job.duration_seconds,
         job.stems,
         job.video_id,
-        job.video_offset_seconds
+        job.video_offset_seconds,
+        source_type=job.source_type
     )
     return queue_manager.get_state()
 

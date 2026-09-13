@@ -1,7 +1,7 @@
 import uuid
 import threading
 from typing import Dict, List, Optional
-from src.models import QueueItem, QueueResponse
+from src.models import QueueItem, QueueResponse, SourceType
 
 class QueueManager:
     def __init__(self):
@@ -17,12 +17,14 @@ class QueueManager:
         duration_seconds: Optional[float] = None,
         stems: Optional[Dict[str, str]] = None,
         video_id: str = "bg001.mp4",
-        video_offset_seconds: float = 0.0
+        video_offset_seconds: float = 0.0,
+        source_type: SourceType = SourceType.UPLOAD
     ) -> QueueItem:
         """Appends a song to the playback queue."""
         item = QueueItem(
             queue_id=str(uuid.uuid4()),
             job_id=job_id,
+            source_type=source_type,
             title=title,
             artist=artist,
             duration_seconds=duration_seconds,
@@ -42,12 +44,14 @@ class QueueManager:
         duration_seconds: Optional[float] = None,
         stems: Optional[Dict[str, str]] = None,
         video_id: str = "bg001.mp4",
-        video_offset_seconds: float = 0.0
+        video_offset_seconds: float = 0.0,
+        source_type: SourceType = SourceType.UPLOAD
     ) -> QueueItem:
         """Sets a song as the currently playing track immediately."""
         item = QueueItem(
             queue_id=str(uuid.uuid4()),
             job_id=job_id,
+            source_type=source_type,
             title=title,
             artist=artist,
             duration_seconds=duration_seconds,

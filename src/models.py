@@ -42,6 +42,7 @@ class JobListResponse(BaseModel):
 class QueueItem(BaseModel):
     queue_id: str
     job_id: str
+    source_type: SourceType = SourceType.UPLOAD
     title: str
     artist: Optional[str] = None
     duration_seconds: Optional[float] = None

@@ -98,7 +98,10 @@ def test_side_ab_webaudio_and_toggle_simulation():
                 }
             },
             applyGainMatrix: function() {
-                const isSideAB = this.currentJob && this.currentJob.source_type === "side_ab";
+                const isSideAB = this.currentJob && (
+                    this.currentJob.source_type === "side_ab" ||
+                    (!this.currentJob.stems?.backing_vocals && this.currentJob.stems?.lead_vocals && this.currentJob.stems?.instrumental)
+                );
                 if (isSideAB) {
                     const hasLead = Boolean(this.tracks.lead_vocals.ws && this.currentJob.stems && this.currentJob.stems.lead_vocals);
                     const hasInst = Boolean(this.tracks.instrumental.ws && this.currentJob.stems && this.currentJob.stems.instrumental);

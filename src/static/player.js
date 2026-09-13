@@ -335,6 +335,7 @@ class FlexiokePlayer {
         if (!this.currentJob) return;
         this.isPlaying = true;
         this.updatePlayBtnUI();
+        this.applyGainMatrix();
 
         // Primary sync anchor: instrumental preferred, or first ready stem
         const anchorTrack = (this.tracks.instrumental && this.tracks.instrumental.ws && this.tracks.instrumental.isReady) 
@@ -429,7 +430,10 @@ class FlexiokePlayer {
 
     applyGainMatrix() {
         const hasSolo = Object.values(this.tracks).some(t => t.soloed);
-        const isSideAB = this.currentJob && this.currentJob.source_type === 'side_ab';
+        const isSideAB = this.currentJob && (
+            this.currentJob.source_type === 'side_ab' || 
+            (!this.currentJob.stems?.backing_vocals && this.currentJob.stems?.lead_vocals && this.currentJob.stems?.instrumental)
+        );
 
         if (isSideAB) {
             const hasLead = Boolean(this.tracks.lead_vocals.ws && this.currentJob.stems && this.currentJob.stems.lead_vocals);

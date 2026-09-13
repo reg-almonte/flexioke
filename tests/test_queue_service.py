@@ -149,4 +149,30 @@ def test_queue_video_metadata_propagation(mock_queue_environment):
     q_resp = client.get("/api/queue").json()
     assert q_resp["current_track"]["video_offset_seconds"] == 25.0
 
+def test_queue_side_ab_source_type(mock_queue_environment):
+    job_mgr, queue_mgr, _, _ = mock_queue_environment
+
+    # Create completed Side A/B job
+    j_ab = job_mgr.create_job(SourceType.SIDE_AB, "instrumental.mp3", "Side AB Song", "Duo Artist")
+    job_mgr.update_job(
+        j_ab.job_id,
+        status=JobStatus.COMPLETED,
+        progress=100,
+        duration_seconds=120.0,
+        stems={"instrumental": "/api/jobs/123/stems/instrumental", "lead_vocals": "/api/jobs/123/stems/lead_vocals"}
+    )
+
+    # Add to queue
+    resp = client.post("/api/queue/add", json={"job_id": j_ab.job_id})
+    assert resp.status_code == 200
+    queued = resp.json()["queue"][-1]
+    assert queued["source_type"] == "side_ab"
+
+    # Play now
+    resp = client.post("/api/queue/play-now", json={"job_id": j_ab.job_id})
+    assert resp.status_code == 200
+    current = resp.json()["current_track"]
+    assert current["source_type"] == "side_ab"
+
+
 
