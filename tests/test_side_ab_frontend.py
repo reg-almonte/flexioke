@@ -35,6 +35,7 @@ def test_side_ab_js_logic_coverage():
     app_js = client.get("/static/app.js").text
     assert "/api/jobs/upload-side-ab" in app_js
     assert "tab-side-ab-btn" in app_js
+    assert "flexioke:job-completed" in app_js
 
     lib_js = client.get("/static/library_queue.js").text
     assert "lyricsModalSideASection" in lib_js

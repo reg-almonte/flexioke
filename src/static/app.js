@@ -263,11 +263,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (sideAbArtistInput) sideAbArtistInput.value = '';
 
                 submitSideAbBtn.disabled = false;
-                submitSideAbBtn.innerHTML = `<span>⚡</span> Ingest Side A/B Track`;
+                submitSideAbBtn.innerHTML = `<span>✓</span> Ingested Successfully!`;
+                setTimeout(() => {
+                    if (submitSideAbBtn) {
+                        submitSideAbBtn.innerHTML = `<span>⚡</span> Ingest Side A/B Track`;
+                    }
+                }, 2000);
 
-                // Notify library & catalog to refresh
-                if (window.flexiokeLibrary && typeof window.flexiokeLibrary.loadLibrary === 'function') {
-                    window.flexiokeLibrary.loadLibrary();
+                // Dispatch job-completed event so library, catalog, and player update immediately
+                window.dispatchEvent(new CustomEvent('flexioke:job-completed', { detail: newJob }));
+                if (window.flexiokeLibrary && typeof window.flexiokeLibrary.fetchLibrary === 'function') {
+                    window.flexiokeLibrary.fetchLibrary();
                 }
             } catch (err) {
                 console.error("Error submitting Side A/B:", err);
