@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-14
-implementation: pending
+implementation: in-review
 ---
 
 # STORY-0039: Architectural Refactoring Roadmap & Technical Debt Remediation Plan
@@ -14,12 +14,17 @@ implementation: pending
 Synthesizes the findings from the 7-dimensional assessment report into an actionable refactoring roadmap and design recommendations in `docs/design/` for subsequent implementation.
 
 ## Acceptance Criteria
-- [ ] Concrete refactoring initiatives prioritized by impact and severity.
-- [ ] Architectural proposals outlined for identified technical debt.
-- [ ] Migration guidelines ensure 100% backward compatibility with zero regressions.
+- [x] Concrete refactoring initiatives prioritized by impact and severity.
+- [x] Architectural proposals outlined for identified technical debt.
+- [x] Migration guidelines ensure 100% backward compatibility with zero regressions.
 
 ## Tasks
-- [ ] TASK-0080: Formulate Architectural Refactoring Decisions & Technical Debt Backlog
+- [x] TASK-0080: Formulate Architectural Refactoring Decisions & Technical Debt Backlog
 
 ## Blocked by
 - `STORY-0038`
+
+## Implementation
+- Branch: `story/STORY-0039-architectural-refactoring-roadmap`
+- Authored `docs/design/REFACTORING_ROADMAP.md` formulating phased architecture refactoring plan across backend API submodules, frontend component decomposition, and reactive event bus.
+
