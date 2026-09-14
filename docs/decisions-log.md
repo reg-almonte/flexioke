@@ -294,6 +294,12 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved requirements covering test suite directory restructuring under tests/ (api, services, frontend, integration), comprehensive 7-point source code quality and performance assessment with findings in tests/ASSESSMENT_REPORT.md, and refactoring plan in docs/design/.
 
+## 2026-09-14 — Approved Functional Spec: Version 0.4.1 Code Quality, Performance Assessment & Test Suite Reorganization
+- artifact: docs/specs/version0.4.1.md
+- approved_by: reg
+- notes: Approved functional specification defining modular 4-tier test directory reorganization, multi-dimensional code quality and performance evaluation matrix, report generation schema for tests/ASSESSMENT_REPORT.md, and design refactoring roadmap.
+
+
 
 
 
