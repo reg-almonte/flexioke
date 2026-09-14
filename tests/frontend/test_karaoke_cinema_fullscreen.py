@@ -35,7 +35,7 @@ def test_cinema_fullscreen_elements_in_html():
 
 def test_karaoke_fullscreen_and_autohide_logic_in_node():
     """Test KaraokeStageManager fullscreen and auto-hide state methods in Node.js environment."""
-    karaoke_js_path = Path(__file__).resolve().parent.parent / "src" / "static" / "karaoke.js"
+    karaoke_js_path = Path(__file__).resolve().parent.parent.parent / "src" / "static" / "karaoke.js"
     assert karaoke_js_path.exists()
 
     js_code = karaoke_js_path.read_text(encoding="utf-8")

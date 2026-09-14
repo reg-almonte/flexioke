@@ -2,7 +2,7 @@
 status: approved
 approved_by: reg
 approved_at: 2026-09-14
-implementation: pending
+implementation: in-review
 ---
 
 # TASK-0076: Migrate Test Files into Domain Subdirectories
@@ -18,8 +18,13 @@ Migrate flat test files from `tests/` into dedicated functional subdirectories:
 - `tests/integration/`: 2 cross-cutting regression milestone suites (`test_v026_features.py`, `test_v040_features.py`).
 
 ## Acceptance Criteria
-- [ ] All 42 test files are moved to their respective domain directories with `__init__.py` markers if appropriate.
-- [ ] Zero test files remain in the root of `tests/`.
+- [x] All 42 test files are moved to their respective domain directories with `__init__.py` markers if appropriate.
+- [x] Zero test files remain in the root of `tests/`.
 
 ## Blocked by
 - None (can start immediately).
+
+## Implementation
+- Branch: `story/STORY-0037-domain-tiered-test-suite-reorganization`
+- Migrated 42 test files into `tests/api/`, `tests/services/`, `tests/frontend/`, and `tests/integration/` with `__init__.py` package markers.
+
