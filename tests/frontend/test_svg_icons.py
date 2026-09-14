@@ -22,7 +22,7 @@ def test_icons_script_served_and_referenced_in_index():
 
 def test_svg_icons_dictionary_and_helper_in_node():
     """Execute icons.js in Node.js to verify dictionary keys, helper rendering, and fallback behavior."""
-    icons_path = Path(__file__).resolve().parent.parent / "src" / "static" / "icons.js"
+    icons_path = Path(__file__).resolve().parent.parent.parent / "src" / "static" / "icons.js"
     assert icons_path.exists(), "src/static/icons.js must exist"
 
     node_script = f"""
