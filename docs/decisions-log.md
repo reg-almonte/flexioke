@@ -289,6 +289,12 @@ made while building the template itself.
 - approved_by: reg
 - notes: Version 0.4.0 fully approved and released with 194/194 passing tests. Includes video store manager with auto-discovery and streaming endpoints (TASK-0071), layered HTML5 karaoke stage video renderer with timecode offset sync and clean unloading (TASK-0072), fullscreen stage geometry CSS variables and interactive settings sliders (TASK-0073), direct Side A / Side B dual-track upload and attachment bypassing AI separation workers (TASK-0074), and dual-stream WebAudio vocal hot-swapping with mutex muting and adaptive single-sided buttons (TASK-0075). All tickets archived to docs/tickets/archive/v0.4.0/.
 
+## 2026-09-14 — Approved Requirements: Version 0.4.1 Code Quality, Performance Assessment & Test Suite Reorganization
+- artifact: docs/requirements/version0.4.1.md
+- approved_by: reg
+- notes: Approved requirements covering test suite directory restructuring under tests/ (api, services, frontend, integration), comprehensive 7-point source code quality and performance assessment with findings in tests/ASSESSMENT_REPORT.md, and refactoring plan in docs/design/.
+
+
 
 
 
