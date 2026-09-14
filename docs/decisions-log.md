@@ -304,17 +304,8 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved Option 1 delivering domain-tiered test directory structure (tests/api, tests/services, tests/frontend, tests/integration) with root pytest discovery, 7-point comprehensive code quality, security, and performance assessment with findings in tests/ASSESSMENT_REPORT.md, and refactoring architecture roadmap.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+## 2026-09-14 — Approved Ticket Breakdown: EPIC-0012 Code Quality, Performance Assessment & Test Suite Reorganization
+- artifact: docs/tickets/EPIC-0012-code-quality-performance-and-test-suite-reorganization.md
+- approved_by: reg
+- notes: Approved EPIC-0012 work breakdown comprising STORY-0037 to STORY-0039 across TASK-0076 to TASK-0080 covering domain-tiered test directory reorganization (TASK-0076, TASK-0077), 7-point source code quality, security, and performance audit with tests/ASSESSMENT_REPORT.md (TASK-0078, TASK-0079), and architectural refactoring roadmap (TASK-0080).
 
