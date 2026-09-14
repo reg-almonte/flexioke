@@ -299,6 +299,12 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved functional specification defining modular 4-tier test directory reorganization, multi-dimensional code quality and performance evaluation matrix, report generation schema for tests/ASSESSMENT_REPORT.md, and design refactoring roadmap.
 
+## 2026-09-14 — Approved ADR-0013: Domain-Tiered Test Suite Architecture, Multi-Dimensional Quality Evaluation & Refactoring Strategy
+- artifact: docs/design/ADR-0013-code-quality-performance-and-test-suite-reorganization.md
+- approved_by: reg
+- notes: Approved Option 1 delivering domain-tiered test directory structure (tests/api, tests/services, tests/frontend, tests/integration) with root pytest discovery, 7-point comprehensive code quality, security, and performance assessment with findings in tests/ASSESSMENT_REPORT.md, and refactoring architecture roadmap.
+
+
 
 
 

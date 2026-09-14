@@ -1,7 +1,7 @@
 ---
-status: pending-approval
-approved_by:
-approved_at:
+status: approved
+approved_by: reg
+approved_at: 2026-09-14
 ---
 
 # ADR-0013: Domain-Tiered Test Suite Architecture, Multi-Dimensional Quality Evaluation & Refactoring Strategy
