@@ -284,6 +284,12 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved Phase 5 Check Sheet with 100% test coverage (194/194 passing) and 0 gaps across video auto-discovery and streaming, synchronized karaoke stage video playback, fullscreen stage geometry sliders, Side A/B direct ingestion, and dual-stream WebAudio vocal hot-swapping.
 
+## 2026-09-13 — Approved Release v0.4.0: Video Backgrounds, Stage Geometry Controls & Side A/B Uploads
+- artifact: docs/releases/v0.4.0.md
+- approved_by: reg
+- notes: Version 0.4.0 fully approved and released with 194/194 passing tests. Includes video store manager with auto-discovery and streaming endpoints (TASK-0071), layered HTML5 karaoke stage video renderer with timecode offset sync and clean unloading (TASK-0072), fullscreen stage geometry CSS variables and interactive settings sliders (TASK-0073), direct Side A / Side B dual-track upload and attachment bypassing AI separation workers (TASK-0074), and dual-stream WebAudio vocal hot-swapping with mutex muting and adaptive single-sided buttons (TASK-0075). All tickets archived to docs/tickets/archive/v0.4.0/.
+
+
 
 
 
