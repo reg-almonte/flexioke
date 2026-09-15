@@ -309,3 +309,9 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved EPIC-0012 work breakdown comprising STORY-0037 to STORY-0039 across TASK-0076 to TASK-0080 covering domain-tiered test directory reorganization (TASK-0076, TASK-0077), 7-point source code quality, security, and performance audit with tests/ASSESSMENT_REPORT.md (TASK-0078, TASK-0079), and architectural refactoring roadmap (TASK-0080).
 
+## 2026-09-15 — Approved Check Sheet: Version 0.4.1 Code Quality, Performance Assessment & Test Suite Reorganization
+- artifact: docs/checksheets/version0.4.1.md
+- approved_by: reg
+- notes: Approved Phase 5 Check Sheet with 100% test coverage (197/197 passing) and 0 gaps across domain-tiered test reorganization (tests/api, tests/services, tests/frontend, tests/integration), pytest root discovery invariance, 7-dimensional technical quality assessment (tests/ASSESSMENT_REPORT.md), and architectural refactoring roadmap (docs/design/REFACTORING_ROADMAP.md).
+
+
