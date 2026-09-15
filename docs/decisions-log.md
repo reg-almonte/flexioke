@@ -319,5 +319,17 @@ made while building the template itself.
 - approved_by: reg
 - notes: Version 0.4.1 fully approved and released with 197/197 passing tests. Includes domain-tiered test suite reorganization into tests/api/, tests/services/, tests/frontend/, and tests/integration/ with pytest root discovery invariance (TASK-0076, TASK-0077), comprehensive 7-dimensional code quality, security, and performance audit with findings published at tests/ASSESSMENT_REPORT.md (TASK-0078, TASK-0079), and architectural refactoring roadmap in docs/design/REFACTORING_ROADMAP.md (TASK-0080). All tickets archived to docs/tickets/archive/v0.4.1/.
 
+## 2026-09-16 — Approved Requirements: Version 0.4.2 VS Code-Style Resizable Sidebar & Enhanced Karaoke UI
+- artifact: docs/requirements/version0.4.2.md
+- approved_by: user
+- notes: Approved requirements covering VS Code-style slim Activity Bar with dynamic count badges, tabbed side panels for Queue/Playlists/Library, draggable split panel divider with double-click reset and Ctrl+B collapse, responsive stage header and adaptive transport bar with priority overflow handling, enlarged Fullscreen Cinema chrome (80-90% width with 24-28px icons), and universal Spacebar play/pause shortcut with form-field focus guarding.
+
+## 2026-09-16 — Approved Functional Spec: Version 0.4.2 VS Code-Style Resizable Sidebar & Enhanced Karaoke UI
+- artifact: docs/specs/version0.4.2.md
+- approved_by: user
+- notes: Functional specification approved detailing VS Code-style 48px Activity Bar with dynamic count badges, full-height tabbed content panel with double-click and Ctrl+B collapse, draggable pointer event splitter with localStorage persistence, responsive stage header and adaptive transport bar with prioritized overflow chips, enlarged Fullscreen Cinema transport bar (85% width, 26px high-DPI icons), and universal focus-guarded Spacebar play/pause shortcut.
+
+
+
 
 
