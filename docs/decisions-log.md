@@ -334,6 +334,12 @@ made while building the template itself.
 - approved_by: user
 - notes: Approved Option 1 delivering vanilla PointerEvent splitter controller with double-click reset and localStorage persistence, VS Code-style 48px Activity Bar tab manager with live count badges, ResizeObserver adaptive stage transport bar, enlarged Fullscreen Cinema chrome (85% width, 26px high-DPI icons), and universal focus-guarded Spacebar play/pause shortcut.
 
+## 2026-09-16 — Approved Ticket Breakdown: EPIC-0013 VS Code-Style Resizable Sidebar & Enhanced Karaoke UI
+- artifact: docs/tickets/EPIC-0013-resizable-sidebar-activity-bar-and-karaoke-ui.md
+- approved_by: user
+- notes: Approved EPIC-0013 work breakdown comprising STORY-0040 to STORY-0042 across TASK-0081 to TASK-0086 covering Activity Bar navigation & tab controller (TASK-0081), PointerEvent splitter & persistence (TASK-0082), ResizeObserver stage & marquee coordinator (TASK-0083), adaptive transport bar & priority controls (TASK-0084), scaled Fullscreen Cinema transport & icons (TASK-0085), and universal focus-guarded Spacebar shortcut (TASK-0086).
+
+
 
 
 
