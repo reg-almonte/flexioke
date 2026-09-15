@@ -329,6 +329,12 @@ made while building the template itself.
 - approved_by: user
 - notes: Functional specification approved detailing VS Code-style 48px Activity Bar with dynamic count badges, full-height tabbed content panel with double-click and Ctrl+B collapse, draggable pointer event splitter with localStorage persistence, responsive stage header and adaptive transport bar with prioritized overflow chips, enlarged Fullscreen Cinema transport bar (85% width, 26px high-DPI icons), and universal focus-guarded Spacebar play/pause shortcut.
 
+## 2026-09-16 — Approved ADR-0014: PointerEvent Splitter Controller, Activity Bar Tab Manager & Responsive Cinema Stage Architecture
+- artifact: docs/design/ADR-0014-resizable-sidebar-activity-bar-and-karaoke-ui.md
+- approved_by: user
+- notes: Approved Option 1 delivering vanilla PointerEvent splitter controller with double-click reset and localStorage persistence, VS Code-style 48px Activity Bar tab manager with live count badges, ResizeObserver adaptive stage transport bar, enlarged Fullscreen Cinema chrome (85% width, 26px high-DPI icons), and universal focus-guarded Spacebar play/pause shortcut.
+
+
 
 
 
