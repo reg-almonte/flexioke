@@ -314,4 +314,10 @@ made while building the template itself.
 - approved_by: reg
 - notes: Approved Phase 5 Check Sheet with 100% test coverage (197/197 passing) and 0 gaps across domain-tiered test reorganization (tests/api, tests/services, tests/frontend, tests/integration), pytest root discovery invariance, 7-dimensional technical quality assessment (tests/ASSESSMENT_REPORT.md), and architectural refactoring roadmap (docs/design/REFACTORING_ROADMAP.md).
 
+## 2026-09-15 — Approved Release v0.4.1: Code Quality, Performance Assessment & Test Suite Reorganization
+- artifact: docs/releases/v0.4.1.md
+- approved_by: reg
+- notes: Version 0.4.1 fully approved and released with 197/197 passing tests. Includes domain-tiered test suite reorganization into tests/api/, tests/services/, tests/frontend/, and tests/integration/ with pytest root discovery invariance (TASK-0076, TASK-0077), comprehensive 7-dimensional code quality, security, and performance audit with findings published at tests/ASSESSMENT_REPORT.md (TASK-0078, TASK-0079), and architectural refactoring roadmap in docs/design/REFACTORING_ROADMAP.md (TASK-0080). All tickets archived to docs/tickets/archive/v0.4.1/.
+
+
 
